@@ -23,11 +23,11 @@ Proper handling and grounding of HV components is critical.
 **Shift register:** SN74HC595N (SIPO)</br>
 **Driver IC:** K155ID1
 
-#### Substitutions
+### Substitutions
 Not all the hardware listed here must be used in order for this project to work.
 
 - Microcontroller</br>
-Any MCU that is comaptible with the arduino framework can be used.</br>
+Any MCU that is compatible with the arduino framework can be used.</br>
 The ESP32 was chosen due to its built-in wirless capabilities.
 
 - Shift registers</br>
