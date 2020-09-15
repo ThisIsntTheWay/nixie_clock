@@ -42,8 +42,8 @@ Keep in mind that the design of the PCB is based on the dimensions of the IN-16!
 The MCU will be driven using 5V, enough to power the shift registers and driver ICs.<br/>
 The tubes must be supplied with 180V due to their design.
 
-:information_source: The 180V comes from an external power supply.<br/>
-As such, no circuit diagramm for this power supply can be provided.
+:information_source: The 180V are sourced externally.<br/>
+No DC-DC conversion circuit diagrams are provided.
 
 ## Notes
 Circuit diagrams and gerber files are stored in EasyEDA and will be uploaded once ready for prototyping.<br/>
