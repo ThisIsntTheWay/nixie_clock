@@ -12,9 +12,9 @@ This project aims to implement the following features:
 **Caution is advised.**
 
 ## Hardware
-Microcontroller: ESP32
-Indicator tubes: 6x IN-16, 2x IN-3
-Shift register: SN74HC595N (SIPO)
+Microcontroller: ESP32</br>
+Indicator tubes: 6x IN-16, 2x IN-3</br>
+Shift register: SN74HC595N (SIPO)</br>
 Driver IC: K155ID1
 
 Theoretically, the indicator tubes may be substituted with any IN tube.<br/>
