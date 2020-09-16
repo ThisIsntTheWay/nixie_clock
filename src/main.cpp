@@ -9,7 +9,10 @@
 #include <Wire.h>
 #include <EEPROM.h>
 #include <time.h>
+<<<<<<< Updated upstream
 #include "web.h"
+=======
+>>>>>>> Stashed changes
 
 // Definitions
 #define srLatch = 2;
@@ -22,6 +25,10 @@ const char* ntpServer = "ch.pool.ntp.org";
 const long  gmtOffset_sec = 3600;       // Timezone
 const int   daylightOffset_sec = 3600;  // Daylight savings
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 // WiFi
 const char* wifiSSID = "TBD";
 const char* wifiPSK  = "TBD";
@@ -52,6 +59,7 @@ void taskInitConn() {
   vTaskDelete(NULL);
 }
 
+<<<<<<< Updated upstream
 void taskWebServer() {
   for (;;) {
      // Handle HTTP_GET
@@ -72,6 +80,8 @@ void taskWebServer() {
   } 
 }
 
+=======
+>>>>>>> Stashed changes
 // RTC manipulation
 void taskSetRTC(int manType) {
   // manType refers to manipulation type
@@ -113,6 +123,7 @@ void setup() {
   Serial.begin(115200);
   
   // Start WiFi connection
+<<<<<<< Updated upstream
   xTaskCreate(taskInitConn, "Initiate WiFi", 1000, NULL, 5, NULL);  
   
   // Start task for web server handling
@@ -124,9 +135,25 @@ void setup() {
     //RTC NOT set
     Serial.println("[i] RTC appears to have not been set yet.");
     xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, NTP, 4, NULL);
+=======
+  xTaskCreate(taskInitConn, "Initiate WiFi", 1000, NULL, 5, NULL);
+  
+  // Verify that RTC has been set already
+  int RTCstate = EEPROM.read(0);
+  
+  if (RTCstate == 0) {
+    //RTC NOT set
+    Serial.println("[i] RTC appears to have not been set yet.");
+    
+  xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, NTP, 4, NULL);
+>>>>>>> Stashed changes
   }
 }
 
 void loop() {
  
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes
