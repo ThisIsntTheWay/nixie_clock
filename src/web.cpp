@@ -94,21 +94,21 @@ const char htmlOTA[] PROGMEM = R"rawliteral(
 // ================================
 
 void handle_root(AsyncWebServerRequest *request) {
-  server.send(200, "text/html", htmlRoot);
+  request->send_P(200, "text/html", htmlRoot);
 }
 
 void handle_OTA(AsyncWebServerRequest *request) {
-  server.send(200, "text/html", htmlOTA);
+  request->send_P(200, "text/html", htmlOTA);
 }
 
 void handle_Settings(AsyncWebServerRequest *request) {
-  server.send(200, "text/html", htmlSettings);
+  request->send_P(200, "text/html", htmlSettings);
 }
 
 void handle_Power(AsyncWebServerRequest *request) {
-  server.send(200, "text/html", htmlPower);
+  request->send_P(200, "text/html", htmlPower);
 }
 
 void notFound(AsyncWebServerRequest *request) {
-  request->send(404, "text/plain", "404: Ressource not found.");
+  request->send(404, "text/plain", "404: Resource not found.");
 }
