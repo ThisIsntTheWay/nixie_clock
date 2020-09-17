@@ -4,9 +4,6 @@
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncTCP.h>
 
-// Declare server object and ini on TCP/80
-WebServer server(80);
-
 // ================================
 // === HTML pages
 // ================================
