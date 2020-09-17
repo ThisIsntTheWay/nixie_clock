@@ -11,6 +11,11 @@
 #include <time.h>
 <<<<<<< Updated upstream
 #include "web.h"
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncTCP.h>
+
+// Declare server object and ini on TCP/80
+AsyncWebServer server(80);
 =======
 >>>>>>> Stashed changes
 
