@@ -12,7 +12,9 @@ WebServer server(80);
 // ================================
 
 //String htmlRoot = "";
-const char index_html[] PROGMEM = R"rawliteral(
+
+// Load HTML structure into Progmem
+const char htmlRoot[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 	<head>
 		<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
@@ -43,16 +45,49 @@ const char index_html[] PROGMEM = R"rawliteral(
 				<li style="list-style-type:none">ESP32 management</li>
 					<ul>
 						<li><a href="/setPower">Power management</a></li>
-						<li><a href="/setAPI">API management</a></li>
-						<li><a href="/fwOTA">Firmware upgrade</a></li>
+						<--<li><a href="/setAPI">API management</a></li>--!>
+						<--<li><a href="/fwOTA">Firmware upgrade</a></li>--!>
 					</ul>
 			</ul>
 		</div>
 	</body>
 </html>)rawliteral";
 
-String htmlPower = "";
-String htmlSettings = "";
+const char htmlPower[] PROGMEM = R"rawliteral(
+<html>
+	<head>
+		<title>Nixie clock - Power management</title>
+	</head>
+	<body>
+		<center>
+			<h1>Under construction</h1>
+		</center>
+	</body>
+</html>)rawliteral";
+
+const char htmlSettings[] PROGMEM = R"rawliteral(
+<html>
+	<head>
+		<title>Nixie clock - Settings</title>
+	</head>
+	<body>
+		<center>
+			<h1>Under construction</h1>
+		</center>
+	</body>
+</html>)rawliteral";
+
+const char htmlOTA[] PROGMEM = R"rawliteral(
+<html>
+	<head>
+		<title>Nixie clock - Firmware management</title>
+	</head>
+	<body>
+		<center>
+			<h1>Under construction</h1>
+		</center>
+	</body>
+</html>)rawliteral";
 
 // ================================
 // === Web handlers
@@ -70,6 +105,10 @@ void handle_Settings(AsyncWebServerRequest *request) {
   server.send(200, "text/html", htmlSettings);
 }
 
+void handle_Power(AsyncWebServerRequest *request) {
+  server.send(200, "text/html", htmlPower);
+}
+
 void notFound(AsyncWebServerRequest *request) {
-  request->send(404, "text/plain", "Not found");
+  request->send(404, "text/plain", "404: Ressource not found.");
 }
