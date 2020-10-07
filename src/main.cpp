@@ -17,17 +17,15 @@
 AsyncWebServer server(80);
 
 // Definitions
-#define srLatch = 2;
-#define srClock = 2;
-#define srData = 2;
+#define srLatch = ?;
+#define srClock = ?;
+#define srData = ?;
 
 // RTC / time
 #define RTCaddr = 0x76;
 const char* ntpServer = "ch.pool.ntp.org";
 const long  gmtOffset_sec = 3600;       // Timezone
 const int   daylightOffset_sec = 3600;  // Daylight savings
-
-
 
 // WiFi
 const char* wifiSSID = "TBD";
@@ -59,7 +57,6 @@ void taskInitConn() {
   vTaskDelete(NULL);
 }
 
-
 void taskWebServer() {
   for (;;) {
      // Handle HTTP_GET
@@ -83,7 +80,7 @@ void taskWebServer() {
 // RTC manipulation
 void taskSetRTC(int manType) {
   // manType refers to manipulation type
-  // 0 = Set via serial, 1 = Set via serial
+  // 0 = Set via serial, 1 = Set via NTP
   
   if (manType == 1) {
     // Set RTC time using NTP
@@ -94,22 +91,28 @@ void taskSetRTC(int manType) {
     if(!getLocalTime(&timeinfo)){
       Serial.println("[X] Failed to obtain time.");
       Serial.println("  > NTP server is: " + ntpServer);
+	    
       return;
     } else {
       Serial.println("[i] NTP query successfull.");
       Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+	    
+	    //ToDo: Implement setting time on RTC
+	    
       return;
     }
-    
-    
   } else {
     
   }
   
 }
 
-void taskGetRTC() {
-  
+void taskGetRTC() { 
+}
+
+void writeToSR(int bcd) {
+	// Shift out BCD val to shift register using most significant bit first
+	shiftOut(srData, srClock, MSBFIRST, bcd)
 }
 
 // =======================
