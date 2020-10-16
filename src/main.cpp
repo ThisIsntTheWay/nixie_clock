@@ -17,9 +17,12 @@
 AsyncWebServer server(80);
 
 // Definitions
-#define srLatch = 22;
-#define srClock = 23;
-#define srData = 21;
+int srLatch = 22;
+int srClock = 23;
+int srData = 21;
+
+// To be changed later
+int manType = 1;
 
 // RTC / time
 #define RTCaddr = 0x76;
@@ -41,7 +44,7 @@ byte BCDtable[10] = {0000, 0001, 0010,
 // =======================
 
 // Init WiFi connection
-void taskInitConn() {
+void taskInitConn(void* pvParameters) {
   WiFi.begin(wifiSSID, wifiPSK);
   
   Serial.print("Attempting connection to: ");
@@ -58,7 +61,7 @@ void taskInitConn() {
   vTaskDelete(NULL);
 }
 
-void taskWebServer() {
+void taskWebServer(void* pvParameters) {
   for (;;) {
      // Handle HTTP_GET
      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -79,11 +82,11 @@ void taskWebServer() {
 }
 
 // RTC manipulation
-void taskSetRTC(int manType) {
+void taskSetRTC(void* parameter) {
   // manType refers to manipulation type
   // 0 = Set via serial, 1 = Set via NTP
-  
-  if (manType == 1) {
+
+  if (manType = 1) {
     // Set RTC time using NTP
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     
@@ -92,7 +95,7 @@ void taskSetRTC(int manType) {
     if(!getLocalTime(&timeinfo)){
       Serial.println("[X] Failed to obtain time.");
       Serial.print("  > NTP server is: ");
-        Serial.println(ntpServer):
+        Serial.println(ntpServer);
 	    
       return;
     } else {
@@ -109,7 +112,7 @@ void taskSetRTC(int manType) {
   
 }
 
-void taskGetRTC() { 
+void taskGetRTC(void* pvParameters) { 
 }
 
 void writeToSR(int bcd) {
@@ -135,7 +138,7 @@ void setup() {
 	if (RTCstate == 0) {
 		//RTC NOT set
 		Serial.println("[i] RTC appears to have not been set yet.");
-		xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, NTP, 4, NULL);
+		xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, ntpServer, 4, NULL);
 		xTaskCreate(taskInitConn, "Initiate WiFi", 1000, NULL, 5, NULL);
 		  
 		  // Verify that RTC has been set already
@@ -145,7 +148,7 @@ void setup() {
 			//RTC NOT set
 			Serial.println("[i] RTC appears to have not been set yet.");
 			
-			xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, NTP, 4, NULL);
+			xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, ntpServer, 4, NULL);
 		}
 	}
 }
