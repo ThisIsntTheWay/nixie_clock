@@ -1,6 +1,15 @@
 #ifndef WEB_H
 #define WEB_H
 
+#include <ESPAsyncWebServer.h>
+#include <AsyncTCP.h>
+
+extern const char htmlOTA[] PROGMEM;
+extern const char htmlRoot[] PROGMEM;
+extern const char htmlRTCControl[] PROGMEM;
+extern const char htmlTubeControl[] PROGMEM;
+extern const char htmlPowerControl[] PROGMEM;
+
 void handle_root(AsyncWebServerRequest *request);
 void handle_OTA(AsyncWebServerRequest *request);
 void handle_Settings(AsyncWebServerRequest *request);

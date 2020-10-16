@@ -11,15 +11,15 @@
 #include <time.h>
 #include "web.h"
 #include <ESPAsyncWebServer.h>
-#include <ESPAsyncTCP.h>
+#include <AsyncTCP.h>
 
 // Declare server object and ini on TCP/80
 AsyncWebServer server(80);
 
 // Definitions
-#define srLatch = ?;
-#define srClock = ?;
-#define srData = ?;
+#define srLatch = 22;
+#define srClock = 23;
+#define srData = 21;
 
 // RTC / time
 #define RTCaddr = 0x76;
@@ -34,7 +34,7 @@ const char* wifiPSK  = "TBD";
 byte BCDtable[10] = {0000, 0001, 0010,
                     0011, 0100, 0101,
                     0111, 1000, 1001,
-                    1010}
+                    1010};
 
 // =======================
 // === FUNCTONS
@@ -44,7 +44,8 @@ byte BCDtable[10] = {0000, 0001, 0010,
 void taskInitConn() {
   WiFi.begin(wifiSSID, wifiPSK);
   
-  Serial.println("Attempting connection to: " + wifiSSID);
+  Serial.print("Attempting connection to: ");
+    Serial.println(wifiSSID);
   
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -90,7 +91,8 @@ void taskSetRTC(int manType) {
     struct tm timeinfo;
     if(!getLocalTime(&timeinfo)){
       Serial.println("[X] Failed to obtain time.");
-      Serial.println("  > NTP server is: " + ntpServer);
+      Serial.print("  > NTP server is: ");
+        Serial.println(ntpServer):
 	    
       return;
     } else {
@@ -112,7 +114,7 @@ void taskGetRTC() {
 
 void writeToSR(int bcd) {
 	// Shift out BCD val to shift register using most significant bit first
-	shiftOut(srData, srClock, MSBFIRST, bcd)
+	shiftOut(srData, srClock, MSBFIRST, bcd);
 }
 
 // =======================

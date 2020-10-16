@@ -2,7 +2,7 @@
 
 #include "web.h"
 #include <ESPAsyncWebServer.h>
-#include <ESPAsyncTCP.h>
+#include <AsyncTCP.h>
 
 // ================================
 // === HTML pages
@@ -11,7 +11,7 @@
 //String htmlRoot = "";
 
 // Load HTML structure into Progmem
-const char htmlRoot[] PROGMEM = R"rawliteral(
+extern const char htmlRoot[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 	<head>
 		<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@ const char htmlRoot[] PROGMEM = R"rawliteral(
 	</body>
 </html>)rawliteral";
 
-const char htmlPower[] PROGMEM = R"rawliteral(
+extern const char htmlPower[] PROGMEM = R"rawliteral(
 <html>
 	<head>
 		<title>Nixie clock - Power management</title>
@@ -62,7 +62,7 @@ const char htmlPower[] PROGMEM = R"rawliteral(
 	</body>
 </html>)rawliteral";
 
-const char htmlSettings[] PROGMEM = R"rawliteral(
+extern const char htmlSettings[] PROGMEM = R"rawliteral(
 <html>
 	<head>
 		<title>Nixie clock - Settings</title>
@@ -74,7 +74,7 @@ const char htmlSettings[] PROGMEM = R"rawliteral(
 	</body>
 </html>)rawliteral";
 
-const char htmlOTA[] PROGMEM = R"rawliteral(
+extern const char htmlOTA[] PROGMEM = R"rawliteral(
 <html>
 	<head>
 		<title>Nixie clock - Firmware management</title>
