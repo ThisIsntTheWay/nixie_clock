@@ -8,8 +8,6 @@
 // === HTML pages
 // ================================
 
-//String htmlRoot = "";
-
 // Load HTML structure into Progmem
 extern const char htmlRoot[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
@@ -86,6 +84,42 @@ extern const char htmlOTA[] PROGMEM = R"rawliteral(
 	</body>
 </html>)rawliteral";
 
+extern const char htmlRTCControl[] PROGMEM = R"rawliteral(
+<html>
+	<head>
+		<title>Nixie clock - RTC control</title>
+	</head>
+	<body>
+		<center>
+			<h1>Under construction</h1>
+		</center>
+	</body>
+</html>)rawliteral";
+
+extern const char htmlTubeControl[] PROGMEM = R"rawliteral(
+<html>
+	<head>
+		<title>Nixie clock - Tube control</title>
+	</head>
+	<body>
+		<center>
+			<h1>Under construction</h1>
+		</center>
+	</body>
+</html>)rawliteral";
+
+extern const char htmlPowerControl[] PROGMEM = R"rawliteral(
+<html>
+	<head>
+		<title>Nixie clock - Power management</title>
+	</head>
+	<body>
+		<center>
+			<h1>Under construction</h1>
+		</center>
+	</body>
+</html>)rawliteral";
+
 // ================================
 // === Web handlers
 // ================================
@@ -104,6 +138,18 @@ void handle_Settings(AsyncWebServerRequest *request) {
 
 void handle_Power(AsyncWebServerRequest *request) {
   request->send_P(200, "text/html", htmlPower);
+}
+
+void handle_RTCControl(AsyncWebServerRequest *request) {
+  request->send_P(200, "text/html", htmlRTCControl);
+}
+
+void handle_TubeControl(AsyncWebServerRequest *request) {
+  request->send_P(200, "text/html", htmlTubeControl);
+}
+
+void handle_PowerControl(AsyncWebServerRequest *request) {
+  request->send_P(200, "text/html", htmlPowerControl);
 }
 
 void notFound(AsyncWebServerRequest *request) {

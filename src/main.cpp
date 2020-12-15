@@ -34,10 +34,10 @@ const int   daylightOffset_sec = 3600;  // Daylight savings
 const char* wifiSSID = "TBD";
 const char* wifiPSK  = "TBD";
 
-byte BCDtable[10] = {0000, 0001, 0010,
+/*byte BCDtable[10] = {0000, 0001, 0010,
                     0011, 0100, 0101,
-                    0111, 1000, 1001,
-                    1010};
+                    0111, 1000, 1001};
+                    //1010};*/
 
 // =======================
 // === FUNCTONS
@@ -138,7 +138,7 @@ void setup() {
 	if (RTCstate == 0) {
 		//RTC NOT set
 		Serial.println("[i] RTC appears to have not been set yet.");
-		xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, ntpServer, 4, NULL);
+		xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, NULL, 4, NULL);
 		xTaskCreate(taskInitConn, "Initiate WiFi", 1000, NULL, 5, NULL);
 		  
 		  // Verify that RTC has been set already
@@ -148,7 +148,7 @@ void setup() {
 			//RTC NOT set
 			Serial.println("[i] RTC appears to have not been set yet.");
 			
-			xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, ntpServer, 4, NULL);
+			xTaskCreate(taskSetRTC, "Set RTC via NTP", 1000, NULL, 4, NULL);
 		}
 	}
 }

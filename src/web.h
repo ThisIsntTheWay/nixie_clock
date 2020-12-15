@@ -4,6 +4,8 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
 
+// Define vars as used in web.ccp
+// 'extern' makes them available in all namespaces
 extern const char htmlOTA[] PROGMEM;
 extern const char htmlRoot[] PROGMEM;
 extern const char htmlRTCControl[] PROGMEM;
