@@ -1,0 +1,12 @@
+{
+	"OrderName": "REEF_USDT",
+	"OrderType": "Buy",
+	"1": {
+		"targetAsset": "REEF",
+		"quoteAsset": "USDT",
+		"type": "Market",
+		"sideMode": "QUOTE",
+		"quantity": "100",
+		"execution": "25.12.2020 21:14:14"
+	}
+}
