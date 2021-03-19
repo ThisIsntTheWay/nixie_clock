@@ -1,26 +1,16 @@
 #include "Arduino.h"
 #include "WiFi.h"
-#include "esp32-hal-cpu.h"
-#include <SPIFFS.h>
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+#include <EEPROM.h>
+#include <webServer.h>
 
 #define SSID    "Alter Eggstutz"
 #define PSK     "Fischer1"
 
-//  ---------------------
-//  FUNCTIONS
-//  ---------------------
-void toggleLED(void * parameter){
-  for(;;){
+// Time settings
+char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 3600;
+const int   daylightOffset_sec = 3600;
 
-    // Pause the task again for 500ms
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    
-    // Destroy task
-    vTaskDelete(NULL);
-  }
-}
 
 //  ---------------------
 //  MAIN
@@ -29,16 +19,12 @@ void toggleLED(void * parameter){
 void setup() {
 
     Serial.begin(115200);
-    
-    // Downgrade CPU clock
-    setCpuFrequencyMhz(160);
-    Serial.println(getCpuFrequencyMhz());
-    Serial.println(F("DONE BOOTUP"));
+    Serial.println(F("START BOOTUP"));
 
     // Connect to WiFi
     WiFi.mode(WIFI_STA);
     WiFi.begin(SSID, PSK);
-    Serial.println("Attempting to establish a  WiFi connection!");
+    Serial.println(F("Attempting to establish a  WiFi connection!"));
 
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print('.');
@@ -49,16 +35,26 @@ void setup() {
     Serial.print("IP: ");
         Serial.println(WiFi.localIP());
 
+    // Detect if RTC has been set for the first time already
+    // If not, set using NTP
+    if (EEPROM.read(0) != 1) {
+        
+
+        EEPROM.write(0, 1);
+    }
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    struct tm timeinfo;
+
     // FreeRTOS task creation
     xTaskCreate(
-        toggleLED,      // Function that should be called
-        "Toggle LED",   // Name of the task (for debugging)
-        1000,           // Stack size (bytes)
-        NULL,           // Parameter to pass
-        1,              // Task priority
-        NULL           // Task handle
-        //0               // CPU core
+        webServerRequestHandler,      // Function that should be called
+        "Web request handler",        // Name of the task (for debugging)
+        1000,                       // Stack size (bytes)
+        NULL,                       // Parameter to pass
+        1,                          // Task priority
+        NULL                        // Task handle
     );
+    
 }
 
 // Stays empty as we have built an RTOS infrastructure
