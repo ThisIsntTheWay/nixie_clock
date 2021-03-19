@@ -1,0 +1,50 @@
+<html>
+	<head>
+		<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+			<style>
+				body { font-family: 'Roboto', sans-serif; }
+				h4 { padding-bottom: 0%; }
+				div { padding-left: 10%; }
+			</style>
+		<title>Nixie clock - RTC control</title>
+		<script type="text/javascript">
+			function showHideConfig() {
+				var chkNTP = document.getElementById("ntp_control");
+				var chMAN = document.getElementById("manual_control");
+				var dvNTP = document.getElementById("ntp_config");
+				var dvMAN = document.getElementById("manual_config");
+				
+				dvNTP.style.display = chkNTP.checked ? "block" : "none";
+				dvMAN.style.display = chMAN.checked ? "block" : "none";
+			}
+			
+			function submit() {
+				
+			}
+		</script>
+	</head>
+	<body>
+		<center>
+			<h1>RTC control</h1>
+		</center>
+		<div>
+			<h3>Change RTC settings</h3>
+			Current time: <b>%RTC_TIME%</b><br>
+			(As of page load)<p>
+			
+			Set time source:<br>			
+			<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>
+			<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual<br>
+			<br>
+			<span id="ntp_config">
+				Set NTP source:
+				<input type="numeric" size="16" name="ntp_source" value=""/>
+			</span>
+			<span id="manual_config">
+				Set manual time:
+				<input type="numeric" size="16" name="manual_time" value=""/>
+			</span>
+			<input type="submit" value="Apply" onclick="submit()"></input>
+		</div>
+	</body>
+</html>

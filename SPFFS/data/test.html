@@ -1,0 +1,22 @@
+<script type="text/javascript">
+	function ShowHideDiv() {
+		var chkYes = document.getElementById("chkYes");
+		var dvtext = document.getElementById("dvtext");
+		dvtext.style.display = chkYes.checked ? "block" : "none";
+		dvtext.style.display = chkYes.checked ? "block" : "none";
+	}
+</script>
+<center>
+<label for="chkYes">
+    <input type="radio" id="chkYes" name="chk" onclick="ShowHideDiv()" />
+    Yes
+</label>
+<label for="chkNo">
+    <input type="radio" id="chkNo" name="chk" onclick="ShowHideDiv()" />
+    No
+</label>
+<div id="dvtext" style="display: none">
+    Text Box:
+    <input type="text" id="txtBox" />
+</div>
+</center>
