@@ -1,5 +1,5 @@
 # Overview
-Nixie clock using IN-16 tubes, based on an ESP32 and programmed with the arduino framework.
+Nixie clock using IN-14 tubes, based on an ESP32 and programmed with the arduino framework.
 Also an attempt to utilize FreeRTOS.
 
 This project aims to implement the following basic features:
@@ -18,11 +18,12 @@ Proper handling and grounding of HV components is critical for personal safety.
 ## Software libraries
 This project uses the following third-party libraries:<br/>
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br/>
-- [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
+- [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)<br/>
+- SPFFS<br/>
 
 ## Hardware
 **Microcontroller:** ESP32</br>
-**Indicator tubes:** 6x IN-16, 2x IN-3</br>
+**Indicator tubes:** 4x IN-14, 1x IN-3</br>
 **Shift register:** SN74HC595N (SIPO)</br>
 **Driver IC:** K155ID1
 
