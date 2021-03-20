@@ -4,6 +4,8 @@
 #ifndef sysInit
 #define sysInit
 
+bool SPIFFSready = false;
+
 void taskWiFi(void* parameter) {
     const char* SSID = "Alter Eggstutz";
     const char* PSK  = "Fischer1";
@@ -33,8 +35,11 @@ void taskFSMount(void* parameter) {
 
 	if (SPIFFS.begin()) {
 		Serial.println("[T] SPFFS: Mounted.");
+        SPIFFSready = true;
 	} else {
 		Serial.println("[X] SPFFS: Mount failure.");
+		Serial.println("[X] SPFFS: Rebooting ESP.");
+        ESP.restart();
 	}
 
     // List contents
