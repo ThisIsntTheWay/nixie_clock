@@ -4,7 +4,6 @@
 #ifndef sysInit
 #define sysInit
 
-
 void taskWiFi(void* parameter) {
     const char* SSID = "Alter Eggstutz";
     const char* PSK  = "Fischer1";
@@ -29,6 +28,7 @@ void taskWiFi(void* parameter) {
 }
 
 void taskFSMount(void* parameter) {
+
     Serial.println(F("[T] SPFFS: Mounting..."));
 
 	if (SPIFFS.begin()) {
@@ -37,12 +37,17 @@ void taskFSMount(void* parameter) {
 		Serial.println("[X] SPFFS: Mount failure.");
 	}
 
-    // Verify contents
-    if (!(SPIFFS.open("/htmlRoot.html"))) {
-		Serial.println("[X] SPFFS: Content mismatch.");
-	} else {
-		Serial.println("[i] SPFFS: Content verified.");
-    }
+    // List contents
+    File root = SPIFFS.open("/");
+    File file = root.openNextFile();
+
+    Serial.println("[i] SPFFS: Listing files...");    
+    while(file) {
+      Serial.print("[>] SPFFS: File found: ");
+      Serial.println(file.name());
+ 
+      file = root.openNextFile();
+    }   
 
     vTaskDelete(NULL);
 }

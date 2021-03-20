@@ -56,7 +56,7 @@ void setup() {
         1,
         NULL
     );
-    Serial.println(F("[i] Done with setup"));
+    Serial.println(F("[i] Done with setup()."));
 }
 
 // Stays empty as we have built an RTOS infrastructure
