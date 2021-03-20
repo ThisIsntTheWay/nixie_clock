@@ -1,10 +1,7 @@
 #include "Arduino.h"
-#include "WiFi.h"
 #include <EEPROM.h>
 #include <webServer.h>
-
-#define SSID    "Alter Eggstutz"
-#define PSK     "Fischer1"
+#include <sysInit.h>
 
 // Time settings
 char* ntpServer = "pool.ntp.org";
@@ -19,42 +16,47 @@ const int   daylightOffset_sec = 3600;
 void setup() {
 
     Serial.begin(115200);
-    Serial.println(F("START BOOTUP"));
+    Serial.println(F("[i] START BOOTUP"));
 
-    // Connect to WiFi
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(SSID, PSK);
-    Serial.println(F("Attempting to establish a  WiFi connection!"));
 
-    while (WiFi.status() != WL_CONNECTED) {
-        Serial.print('.');
-        delay(500);
-    }
-
-    Serial.println(F("Connected successfully."));
-    Serial.print("IP: ");
-        Serial.println(WiFi.localIP());
 
     // Detect if RTC has been set for the first time already
     // If not, set using NTP
-    if (EEPROM.read(0) != 1) {
-        
+    Serial.print(F("[i] Trying to read EEPROM: "));
+    Serial.print(EEPROM.read(0));
+    Serial.println(EEPROM.read(1));
+    /*if (EEPROM.read(0) != 1) {
+        Serial.println(F(" > [!] Wrote to EEPROM."));
 
         EEPROM.write(0, 1);
-    }
+    }*/
+    Serial.println(F("[i] configTime set."));
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    struct tm timeinfo;
+    //struct tm timeinfo;
+
+    // Start webserver
+    webServerRequestHandler();
 
     // FreeRTOS task creation
+    Serial.println(F("[i] Spawning tasks..."));
     xTaskCreate(
-        webServerRequestHandler,      // Function that should be called
-        "Web request handler",        // Name of the task (for debugging)
-        1000,                       // Stack size (bytes)
+        taskWiFi,      // Function that should be called
+        "WiFi initiator",           // Name of the task (for debugging)
+        2048,                       // Stack size (bytes)
         NULL,                       // Parameter to pass
         1,                          // Task priority
         NULL                        // Task handle
     );
     
+    xTaskCreate(
+        taskFSMount,
+        "FS Mount",
+        2000,
+        NULL,
+        1,
+        NULL
+    );
+    Serial.println(F("[i] Done with setup"));
 }
 
 // Stays empty as we have built an RTOS infrastructure

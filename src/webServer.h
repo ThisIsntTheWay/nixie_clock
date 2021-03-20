@@ -9,8 +9,8 @@
 // Request handling
 AsyncWebServer server(80);
 
-void webServerRequestHandler(void * parameter){
-  for(;;){
+void webServerRequestHandler(){
+  Serial.println(F("[T] webServerRequestHandler start"));
     // Root / Index
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(SPIFFS, "/htmlRoot.htm");
@@ -31,9 +31,7 @@ void webServerRequestHandler(void * parameter){
         request->send(SPIFFS, "/htmlHUE.htm");
     });
 
-    // Destroy task
-    //vTaskDelete(NULL);
-  }
+    server.begin();
 }
 
 #endif
