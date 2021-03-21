@@ -16,6 +16,7 @@
 #define sysInit_h
 
 bool FlashFSready = false;
+bool WiFiReady = false;
 
 //  ---------------------
 //  FUNCTIONS
@@ -38,7 +39,7 @@ void listFilesInDir(File dir, int numTabs) {
             Serial.println("/");
             listFilesInDir(entry, numTabs + 1);
         } else {
-            // display zise for file, nothing for directory
+            // display size for file, nothing for directory
             Serial.print("\t\t");
             Serial.println(entry.size(), DEC);
         }
@@ -62,22 +63,23 @@ void taskWiFi(void* parameter) {
 
     int i = 0;
     while (WiFi.status() != WL_CONNECTED) {
-        if (i > 30) {
+        if (i > 15) {
             Serial.println("[X] WiFi: Retry timeout.");
-            ESP.restart();
+            vTaskDelete(NULL);
         }
 
         vTaskDelay(1000);
-        Serial.println("[T] WiFi: Not connected yet!");
 
+        Serial.println("[T] WiFi: Not connected yet!");
         i++;
-    }    
+    }
+
     Serial.println(F("[T] WiFi: Connected successfully."));
+
+    WiFiReady = true;
     Serial.print("[T] WiFi: IP: ");
         Serial.println(WiFi.localIP());
 
-
-    Serial.println("[i] WiFi: Destroying task...");  
     vTaskDelete(NULL);
 }
 
@@ -103,11 +105,11 @@ void taskFSMount(void* parameter) {
 
     Serial.print("Total space:      ");
     Serial.print(totalBytes);
-    Serial.println("byte");
+    Serial.println(" bytes");
 
     Serial.print("Total space used: ");
     Serial.print(usedBytes);
-    Serial.println("byte");
+    Serial.println(" bytes");
 
     Serial.println();
 
@@ -116,7 +118,7 @@ void taskFSMount(void* parameter) {
     // List file at root
     listFilesInDir(dir, 1);
 
-    Serial.println("[i] FS: Destroying task...");  
+    Serial.println("[i] FS: Destroying task...");
     vTaskDelete(NULL);
 }
 

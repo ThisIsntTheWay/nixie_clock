@@ -9,10 +9,9 @@
 #ifdef USE_LittleFS
   #define SPIFFS LITTLEFS
   #include <LITTLEFS.h> 
-  //#define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
 #else
   #include <SPIFFS.h>
-#endif
+#endif 
 
 #ifndef webServer_h
 #define webServer_h
@@ -25,13 +24,16 @@ AsyncWebServer server(80);
 //  ---------------------
 
 // Replace placeholders in HTML files
-String webServerVarHandler(const String& var) {
+String processor(const String& var) {
+  Serial.print("PROCESSOR: ");
+    Serial.println(var);
 
   // Unfortunately, var can only be handled with if conditions in this scenario.
   // A switch..case statement cannot be used with datatype "string".
   if (var == "TIME") {
     // System time
-    return getTime();
+    //return getTime();
+    return F("HAHA");
 
   } else if (var == "RTC_TIME") {
     // Current RTC time
@@ -88,7 +90,7 @@ void serveWebRequest(char &fs, String& path, AsyncWebServerRequest *request) {
 //  TASKS
 //  ---------------------
 
-void taskWebServerStartup(void *parameter) {
+void webServerStartup() {
 
   // Wait for FlashFS
   while (!FlashFSready) { vTaskDelay(500); }
@@ -104,7 +106,8 @@ void taskWebServerStartup(void *parameter) {
       String f = "/html/index.html";
 
       if(LITTLEFS.exists(f)) {
-        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, "/html/index.html", String(), false, processor);
+        //request->send(LITTLEFS, f);
       } else {
         Serial.println("[X] WebServer: GET / - No local ressource.");
       }
@@ -117,7 +120,7 @@ void taskWebServerStartup(void *parameter) {
       String f = "/html/cfgTUBE.html";
 
       if(LITTLEFS.exists(f)) {
-        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, f, String(), false, processor);
       } else {
         Serial.println("[X] WebServer: GET /tube - No local ressource.");
       }
@@ -130,7 +133,7 @@ void taskWebServerStartup(void *parameter) {
       String f = "/html/cfgRTC.html";
 
       if(LITTLEFS.exists(f)) {
-        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, f, String(), false, processor);
       } else {
         Serial.println("[X] WebServer: GET /rtc - No local ressource.");
       }      
@@ -143,7 +146,7 @@ void taskWebServerStartup(void *parameter) {
       String f = "/html/cfgHUE.html";
 
       if(LITTLEFS.exists(f)) {
-        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, f, String(), false, processor);
       } else {
         Serial.println("[X] WebServer: GET /hue - No local ressource.");
       }
@@ -167,7 +170,7 @@ void taskWebServerStartup(void *parameter) {
   server.begin();
   Serial.println(F("[T] WebServer: Start."));
 
-  vTaskDelete(NULL);
+  //vTaskDelete(NULL);
 }
 
 #endif
