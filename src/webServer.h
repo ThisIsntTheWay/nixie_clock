@@ -31,13 +31,7 @@ String processor(const String& var) {
 
   // Unfortunately, var can only be handled with if conditions in this scenario.
   // A switch..case statement cannot be used with datatype "string".
-  if (var == "TIME") {
-    // System time
-    //return getTime();
-    return F("HAHA");
-
-  } else if (var == "RTC_TIME") {
-    // Current RTC time
+  if (var == "TIME" || var == "RTC_TIME") {
     return getTime();
 
   } else if (var == "NTP_SOURCE") {
@@ -153,13 +147,18 @@ void webServerStartup() {
       }
   });
 
+  // Serve favicon
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(LITTLEFS, "/html/favicon.png", "image/png");
+  });
+
   // ----------------------------
   // Plaintext content
 
   // Error pages
   server.onNotFound([](AsyncWebServerRequest *request){
     Serial.println(F("[T] WebServer: GET - 404."));
-    request->send(404, "text/plain", "Content not found.");
+    request->send(404, "text/html", "<center><h1>Content not found.");
   });
   
   // Test
