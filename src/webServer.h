@@ -158,11 +158,8 @@ void webServerStartup() {
   AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
-    if (json.is<JsonArray>()) {
-      data = json.as<JsonArray>();
-    } else if (json.is<JsonObject>()) {
-      data = json.as<JsonObject>();
-    }
+    if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
+    else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
     
     // Save JSON response as variables
     const char* responseM = data["mode"];
@@ -196,6 +193,58 @@ void webServerStartup() {
 
       // Write rtcConfig.cfg
       File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
+      if (!(serializeJson(tmpJSON, rtcConfig))) {
+        Serial.println(F("[X] WebServer: Config write failure."));
+        request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
+      } else {
+        request->send(200, "text/html", "<p style='color: green;'>OK</p>");
+      }
+    }
+
+    rtcConfig.close();
+
+    Serial.println(response);
+  });
+  server.addHandler(handler);
+
+  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    // Construct JSON
+    StaticJsonDocument<200> data;
+    if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
+    else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
+    
+    // Save JSON response as variables
+    const char* responseM = data["mode"];
+    const char* responseV = data["value"];
+
+    // Serialize JSON
+    String response;
+    serializeJson(data, response);
+
+    // Read file
+    StaticJsonDocument<200> tmpJSON;
+    File rtcConfig = LITTLEFS.open(F("/config/hueConfig.json"), "r");
+
+    DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
+    if (error) {
+        Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+        request->send(400, "text/html", "<p style='color: red;'>Cannot deserialize JSON.</p>");
+    } else {
+      rtcConfig.close();
+
+      // Write to file based on request body
+      tmpJSON["Mode"] = responseM;
+
+      if (data["mode"] == "ntp") {
+        tmpJSON["NTP"] = responseV;
+      } 
+      else if (data["mode"] == "manual") {
+        tmpJSON["manualTime"] = responseV;
+        rtc.adjust(responseV);
+      }
+
+      // Write rtcConfig.cfg
+      File rtcConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
       if (!(serializeJson(tmpJSON, rtcConfig))) {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
