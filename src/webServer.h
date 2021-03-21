@@ -149,13 +149,13 @@ void webServerStartup() {
   });
 
   // Serve favicon
-  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(LITTLEFS, "/html/favicon.png", "image/png");
   });
 
   // ----------------------------
   // Endpoints
-  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+  AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
@@ -205,9 +205,9 @@ void webServerStartup() {
 
     Serial.println(response);
   });
-  server.addHandler(handler);
+  server.addHandler(rtchandler);
 
-  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+  AsyncCallbackJsonWebHandler *huehandler = new AsyncCallbackJsonWebHandler("/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
@@ -233,15 +233,6 @@ void webServerStartup() {
       rtcConfig.close();
 
       // Write to file based on request body
-      tmpJSON["Mode"] = responseM;
-
-      if (data["mode"] == "ntp") {
-        tmpJSON["NTP"] = responseV;
-      } 
-      else if (data["mode"] == "manual") {
-        tmpJSON["manualTime"] = responseV;
-        rtc.adjust(responseV);
-      }
 
       // Write rtcConfig.cfg
       File rtcConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
@@ -257,7 +248,7 @@ void webServerStartup() {
 
     Serial.println(response);
   });
-  server.addHandler(handler);
+  server.addHandler(huehandler);
 
   // ----------------------------
   // Plaintext content
