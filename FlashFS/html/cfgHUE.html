@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-		<link rel="icon" type="image/png" href="/favicon.ico"/>
+		<link rel="icon" type="image/png" href="/favicon.png"/>
 		
 			<style>
 				body { font-family: 'Roboto', sans-serif; }
@@ -11,6 +11,44 @@
 				.green { color: green; }
 			</style>
 		<title>Nixie clock - Philips HUE control</title>
+		<script type="text/javascript">
+			var message = null;			
+			function submit() {
+				// Form POST request
+				var responseText = document.getElementById('response');
+				var xhr = new XMLHttpRequest();
+				
+				var bridgeip = document.getElementById('bridge_ip').value;
+				var hue_ontime = document.getElementById('turnON').value;
+				var hue_offtime = document.getElementById('turnOFF').value;
+				
+				// Handle empty text boxes
+				if (bridgeip == null && hue_ontime == null && hue_offtime == null) { return; }
+				if (bridgeip == null) { bridgeip = "NOCHANGE"; } 
+				else if (hue_ontime == null) { hue_ontime = "NOCHANGE"; }
+				else if (hue_offtime == null) { hue_offtime = "NOCHANGE"; }
+				
+				xhr.open("POST", "/HUEendpoint", true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
+				
+				// Display server response at HTML element with ID 'response'
+				xhr.onload = (res) => {
+					console.log(res['target']['response']);
+					message = res['target']['response'];
+					responseText.innerHTML = message;
+
+				};
+				
+				// Dispatch POST request
+				xhr.send(JSON.stringify({
+					"bridgeip": bridgeip,
+					"ontime": hue_ontime,
+					"offtime": hue_offtime,
+				}));
+				
+				//location.reload();
+			}
+		</script>
 	</head>
 	<body>
 		<center>
@@ -19,7 +57,7 @@
 			<h3>Philips HUE management</h3>
 			HUE bridge IP: <b>%HUE_BRIDGE%</b><br>
 			Change to: 
-			<input type="numeric" size="16" name="bridge_ip" value="" maxlength="16" /><br>
+			<input type="numeric" size="16" id="bridge_ip" value="" maxlength="16" /><br>
 			<br>
 			
 			<b>Time control</b><br>
@@ -32,7 +70,8 @@
 			
 			Change turn <span class="red">off</span> time:
 			<input type="numeric" size="6" id="turnOFF" maxlength="6" /></p>
-			<input type="submit" value="Apply"></input>
+			<input type="submit" value="Apply" onclick="submit()" />
+			<p id="response"></p>
 		</div>
 		</center>
 	</body>
