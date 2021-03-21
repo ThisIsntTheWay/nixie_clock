@@ -1,5 +1,6 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include "AsyncJson.h"
 #include <rtc.h>
 #include <philipsHue.h>
 
@@ -154,6 +155,20 @@ void webServerStartup() {
 
   // ----------------------------
   // Endpoints
+  server.on( "/RTCendpoint", HTTP_POST, [](AsyncWebServerRequest * request){}, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String assembledResponse;
+
+    for (size_t i = 0; i < len; i++) {
+      assembledResponse += data[i];
+      //Serial.write(data[i]);
+    }
+
+    Serial.println(assembledResponse);
+
+    request->send(200, "text/html", "<p style='color: green;'>OK</p>");
+  });
+
+  /*
   server.on("/RTCendpoint", HTTP_POST, [](AsyncWebServerRequest *request) {
     int params = request->params();
     
@@ -168,7 +183,7 @@ void webServerStartup() {
       request->send(200, "application/json", "{'msg':'done'}");
       // Parse json
       //if(config.deserialize(json)) {
-      }/* else {
+      } else {
         AsyncWebServerResponse *response = request->beginResponse(400, "application/json", "{'msg':'Could not parse JSON'}");
         request->send(response);
       }
@@ -176,8 +191,8 @@ void webServerStartup() {
     else {
       AsyncWebServerResponse *response = request->beginResponse(400, "application/json", "{'msg':'No body'}");
       request->send(response);
-    }*/
-  });
+    }
+  });*/
 
   // ----------------------------
   // Plaintext content

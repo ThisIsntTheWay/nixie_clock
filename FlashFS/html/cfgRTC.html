@@ -47,13 +47,13 @@
 					var tmp = document.getElementById("ntp_source").value;
 					xhr.send(JSON.stringify({
 						"mode": "ntp",
-						"ntp": tmp
+						"value": tmp
 					}));
 				} else if (chMAN = document.getElementById("manual_control").checked) {
 					var tmp = document.getElementById("manual_time").value;
 					xhr.send(JSON.stringify({
 						"mode": "manual",
-						"manualTime": tmp
+						"value": tmp
 					}));
 				}
 				
