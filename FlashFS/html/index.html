@@ -4,27 +4,23 @@
 		<style>
 			body { font-family: 'Roboto', sans-serif; }
 			h4 { padding-bottom: 0%; }
-			div { padding-left: 10%; }
 		</style>
 		<title>Nixie clock - Root</title>
 	</head>
 	<body>
 		<center>
 			<h1>EPS32 nixie clock</h1>
+		</center>
 		<div>
+			<center>
 			<b>The current time is:</b> %TIME%<br>
 			<p></p>
 
 			Please specify an option:<br>
-			<ul>
-				<li style="list-style-type:none">Control</li>
-					<ul>
-						<li><a href="/rtc">Set RTC</a></li>
-						<li><a href="/tube">Set individual tube</a></li>
-						<li><a href="/hue">Set philips HUE config</a></li>
-					</ul>
-			</ul>
+			<a href="/rtc">Set RTC</a><br>
+			<a href="/tube">Set individual tube</a><br>
+			<a href="/hue">Set philips HUE config</a><br>
+			</center>
 		</div>
-		</center>
 	</body>
 </html>

@@ -20,6 +20,10 @@
 // Init webserver
 AsyncWebServer server(80);
 
+//  ---------------------
+//  FUNCTIONS
+//  ---------------------
+
 // Replace placeholders in HTML files
 String webServerVarHandler(const String& var) {
 
@@ -31,8 +35,7 @@ String webServerVarHandler(const String& var) {
 
   } else if (var == "RTC_TIME") {
     // Current RTC time
-    String dummy = "TIME_VAR";
-    return dummy;
+    return getTime();
 
   } else if (var == "NTP_SOURCE") {
     // Current NTP server
@@ -64,18 +67,44 @@ String webServerVarHandler(const String& var) {
   return String();
 }
 
+/*
+DOES NOT WORK YET :(
+
+void serveWebRequest(char &fs, String& path, AsyncWebServerRequest *request) {
+      Serial.print(F("[T] WebServer: GET "));
+        Serial.println(path);
+
+      if(LITTLEFS.open(fs)) {
+        request->send(LITTLEFS, fs, "text/html", false, webServerVarHandler);
+      } else {
+        Serial.print("[X] WebServer: GET ");
+          Serial.print(path);
+          Serial.println(" - No local ressource.");
+      }
+}
+*/
+
+//  ---------------------
+//  TASKS
+//  ---------------------
+
 void taskWebServerStartup(void *parameter) {
 
   // Wait for FlashFS
   while (!FlashFSready) { vTaskDelay(500); }
   LITTLEFS.begin();
 
+  // ----------------------------
+  // static content
+
   // Root / Index
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
       Serial.println(F("[T] WebServer: GET /."));
 
-      if(SPIFFS.open("/htmlRoot.html")) {
-        request->send(LITTLEFS, "/htmlRoot.html", "text/html", false, webServerVarHandler);
+      String f = "/html/index.html";
+
+      if(LITTLEFS.open(f)) {
+        request->send(LITTLEFS, f, "text/html");
       } else {
         Serial.println("[X] WebServer: GET / - No local ressource.");
       }
@@ -85,8 +114,10 @@ void taskWebServerStartup(void *parameter) {
   server.on("/tube", HTTP_GET, [](AsyncWebServerRequest *request) {
       Serial.println(F("[T] WebServer: GET /tube."));
 
-      if(SPIFFS.open("/htmlTubes.html")) {
-        request->send(LITTLEFS, "/htmlTubes.html", "text/html", false, webServerVarHandler);
+      String f = "/html/cfgTUBE.html";
+
+      if(LITTLEFS.open(f)) {
+        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET /tube - No local ressource.");
       }
@@ -96,8 +127,10 @@ void taskWebServerStartup(void *parameter) {
   server.on("/rtc", HTTP_GET, [](AsyncWebServerRequest *request) {
       Serial.println(F("[T] WebServer: GET /rtc."));
 
-      if(SPIFFS.open("/htmlRTC.html")) {
-        request->send(LITTLEFS, "/htmlRTC.html", "text/html", false, webServerVarHandler);
+      String f = "/html/cfgRTC.html";
+
+      if(LITTLEFS.open(f)) {
+        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET /rtc - No local ressource.");
       }      
@@ -107,17 +140,27 @@ void taskWebServerStartup(void *parameter) {
   server.on("/hue", HTTP_GET, [](AsyncWebServerRequest *request) {
       Serial.println(F("[T] WebServer: GET /hue."));
 
-      if(SPIFFS.open("/htmlHUE.html")) {
-        request->send(LITTLEFS, "/htmlHUE.html", "text/html", false, webServerVarHandler);
+      String f = "/html/cfgHUE.html";
+
+      if(LITTLEFS.open(f)) {
+        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET /hue - No local ressource.");
       }
   });
 
+  // ----------------------------
+  // Plaintext content
+
   // Error pages
   server.onNotFound([](AsyncWebServerRequest *request){
     Serial.println(F("[T] WebServer: GET - 404."));
     request->send(404, "text/plain", "Content not found.");
+  });
+  
+  // Test
+  server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request) {
+      request->send(200, "text/plain", "server OK.");
   });
 
   // Start the webserver

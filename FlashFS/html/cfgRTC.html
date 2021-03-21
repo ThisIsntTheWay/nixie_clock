@@ -4,10 +4,14 @@
 			<style>
 				body { font-family: 'Roboto', sans-serif; }
 				h4 { padding-bottom: 0%; }
-				div { padding-left: 10%; }
 			</style>
 		<title>Nixie clock - RTC control</title>
 		<script type="text/javascript">
+			window.onload = function() {				
+				document.getElementById("ntp_config").style.display = "none";
+				document.getElementById("manual_config").style.display = "none";
+			}
+			
 			function showHideConfig() {
 				var chkNTP = document.getElementById("ntp_control");
 				var chMAN = document.getElementById("manual_control");
