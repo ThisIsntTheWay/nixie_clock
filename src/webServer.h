@@ -41,27 +41,26 @@ String processor(const String& var) {
 
   } else if (var == "NTP_SOURCE") {
     // Current NTP server
-    String dummy = "TIME_VAR";
-    return dummy;
+    return parseRTCconfig(1);
 
   } else if (var == "HUE_BRIDGE") {
     // Hue bridge IP
-    String dummy = "TIME_VAR";
+    String dummy = "BRIDGE IP";
     return dummy;
 
   } else if (var == "HUE_TOGGLEON_TIME") {
     // Hue toggle on time
-    String dummy = "TIME_VAR";
+    String dummy = "TOGGLE ON TIME";
     return dummy;
 
   } else if (var == "HUE_TOGGLEOFF_TIME") {
     // Hue toggle off time
-    String dummy = "TIME_VAR";
+    String dummy = "TOGGLE OFF TIME";
     return dummy;
 
   } else if (var == "TUBES_DISPLAY") {
     // Hue toggle off time
-    String dummy = "TIME_VAR";
+    String dummy = "1 2 3 4";
     return dummy;
 
   }

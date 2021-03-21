@@ -2,10 +2,14 @@
 #include <SPI.h>
 #include <RtcDS3234.h>
 #include <sysInit.h>
+#include <ArduinoJson.h>
 
 #ifndef rtc_h
 #define rtc_h
 
+//  ---------------------
+//  VARIABLES
+//  ---------------------
 // Time settings
 char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 3600;
@@ -13,39 +17,73 @@ const int   daylightOffset_sec = 3600;
 
 const uint8_t DS3234_CS_PIN = 5;
 
-char CFGFILE [512] = {'\0'};
-
 // Create RTC instance
 RtcDS3234<SPIClass> Rtc(SPI, DS3234_CS_PIN);
+
+// Structs
+struct rtcConfigStruct {
+    char NTP[64];
+    char Mode[8];
+    int GMT;
+    int DST;
+};
+
+struct rtcConfigStruct config;
 
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
 
 String getTime() {
+    /*
+    Serial.println("GET TIME CALLED");
     struct tm timeinfo;
     if (!getLocalTime(&timeinfo)) {
         String out = "<i>Cannot get time!</i>";
     }
 
+    Serial.println("CONSTRUCTED TIME");
     String out = (&timeinfo, "%A, %B %d %Y %H:%M:%S");
-    return out;
+    return out;*/
+    return "NODATA";
 }
 
-void parseRTCconfig() {
+String parseRTCconfig(int mode) {
+    // Mode param:
+    // 1: Return NTP server
+    // 2: Return config mode
+    
+    bool AutoConfig = true;
+
     // Read file
-    File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.cfg"), "r");
+    File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");
 
-    // Iterate through file
-    int i = 0;
+    // Parse JSON
+    StaticJsonDocument<200> cfgRTC;
 
-    while (rtcConfig.available()) {
-        CFGFILE [i] = rtcConfig.read();
+    // > Deserialize
+    DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
+    if (error)
+        Serial.println(F("[X] RTC_P: Could not deserialize JSON."));
 
-        i++;
+    // Populate config struct
+    strlcpy(config.NTP, cfgRTC["NTP"], sizeof(config.NTP));
+    strlcpy(config.Mode, cfgRTC["Mode"], sizeof(config.Mode));
+    config.GMT = cfgRTC["GMT"];
+    config.DST = cfgRTC["DST"];
+    
+    rtcConfig.close();
+
+    switch (mode) {
+        case 1:
+            return config.NTP;
+            break;
+        case 2:
+            return config.Mode;
+            break;
     }
 
-    rtcConfig.close();
+    return String();
 }
 
 //  ---------------------
@@ -72,28 +110,32 @@ void taskSetupRTC (void* parameters) {
     // Create RTC config if it does not yet exist.
     // Additionally, set up RTC if it actually does not exist.
     Serial.println(F("[T] RTC: Looking for config..."));
-    if (!(LITTLEFS.exists("/config/rtcConfig.cfg"))) {
+
+    if (!(LITTLEFS.exists("/config/rtcConfig.json"))) {
         Serial.println(F("[T] RTC: No RTC config yet."));
         
         if (!LITTLEFS.exists("/config")) {
             LITTLEFS.mkdir("/config");
         }
 
-        File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.cfg"), "w");
+        File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
 
         // Clear RTC
         Rtc.Enable32kHzPin(false);
         Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeNone);
 
-        // Write rtcConfig.cfg
+        // Construct JSON
+        StaticJsonDocument<200> cfgRTC;
 
-        rtcConfig.print("NTP = ");
-        rtcConfig.println(ntpServer);
-        rtcConfig.print("GMT = ");
-        rtcConfig.println(gmtOffset_sec);
-        rtcConfig.print("DST = ");
-        rtcConfig.println(daylightOffset_sec);
-        rtcConfig.println("MODE = NTP");
+        cfgRTC["NTP"] = ntpServer;
+        cfgRTC["GMT"] = gmtOffset_sec;
+        cfgRTC["DST"] = daylightOffset_sec;
+        cfgRTC["Mode"] = "NTP";
+
+        // Write rtcConfig.cfg
+        if (!(serializeJson(cfgRTC, rtcConfig))) {
+            Serial.println(F("[X] RTC: RTC config write failure."));
+        }
 
         rtcConfig.close();
 
@@ -105,11 +147,12 @@ void taskSetupRTC (void* parameters) {
         Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));
         Serial.println(F("[>] RTC: RTC config created."));
     } else {
+        // ToDo: Check if RTC is behind NTP time
         Serial.println(F("[T] RTC: Config found!"));
-        parseRTCconfig();
+        parseRTCconfig(1);
     }
 
-    // ToDo: Implement handling of rtcConfig.cfg
+    // ToDo: Implement handling of rtcConfig.json
     
     vTaskDelete(NULL);
 }

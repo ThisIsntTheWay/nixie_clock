@@ -18,7 +18,7 @@ void setup() {
     Serial.println(F("[i] Spawning tasks..."));
     xTaskCreate(taskWiFi, "WiFi initiator", 2048, NULL, 1, NULL);
     xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
-    xTaskCreate(taskSetupRTC, "RTC Setup", 2500, NULL, 1, NULL);
+    xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
 
     webServerStartup();
 
