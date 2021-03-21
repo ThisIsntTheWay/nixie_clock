@@ -16,7 +16,9 @@ Proper handling and grounding of HV components is critical for personal safety.
 This project uses the following libraries:<br/>
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br/>
 - [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)<br/>
-- SPFFS<br/>
+- [RTCLib](https://github.com/adafruit/RTClib)<br/>
+- [LittleFS](https://github.com/lorol/LITTLEFS)<br/>
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br/>
 
 ## Hardware
 **Microcontroller:** ESP32</br>
