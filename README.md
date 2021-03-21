@@ -1,5 +1,5 @@
 # Overview
-Nixie clock using IN-14 tubes, based on an ESP32 and programmed with the arduino framework.
+Nixie clock using IN-14 tubes, based on an ESP32 and programmed with the arduino framework.<br/>
 Also an attempt to utilize FreeRTOS.
 
 This project aims to implement the following basic features:
@@ -19,6 +19,9 @@ This project uses the following libraries:<br/>
 - [RTCLib](https://github.com/adafruit/RTClib)<br/>
 - [LittleFS](https://github.com/lorol/LITTLEFS)<br/>
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br/>
+
+Note: "TinyWire" must be removed as a dependency from RTCLib.<br/>
+This dependency is incompatible with ESP32 and will result in compiler errors.
 
 ## Hardware
 **Microcontroller:** ESP32</br>
