@@ -13,29 +13,38 @@ const int   daylightOffset_sec = 3600;
 
 const uint8_t DS3234_CS_PIN = 5;
 
+// Create RTC instance
+RtcDS3234<SPIClass> Rtc(SPI, DS3234_CS_PIN);
+
+//  ---------------------
+//  FUNCTIONS
+//  ---------------------
+
 void parseRTCconfig() {
     // Read file
+    File rtcConfig = LITTLEFS.open(F("/rtcConfig.cfg"), "r");
+
+    // Iterate through file
     int lineNumber = 0;
     String line;
-
-    File rtcConfig = SPIFFS.open("/rtcConfig.cfg", FILE_READ);
-
     while (rtcConfig.available()) {
         lineNumber++;
         
         line = rtcConfig.readStringUntil('\n'); // Read line by line from the file
         Serial.print(lineNumber);
+        Serial.print(" - ");
             Serial.println(line);
     }
 }
 
-// Create RTC instance
-RtcDS3234<SPIClass> Rtc(SPI, DS3234_CS_PIN);
+//  ---------------------
+//  TASKS
+//  ---------------------
 
 void taskSetupRTC (void* parameters) {
     Serial.println(F("[T] RTC: Starting setup..."));
 
-    // Wait for SPIFFS mount
+    // Wait for FlashFS mount mount
     while (!FlashFSready) {
         Serial.println(F("[T] RTC: No FlashFS yet."));
         vTaskDelay(500);
@@ -51,15 +60,16 @@ void taskSetupRTC (void* parameters) {
 
     // Create RTC config if it does not yet exist.
     // Additionally, set up RTC if it actually does not exist.
-    if (!(SPIFFS.exists("/rtcConfig.cfg"))) {
-        File rtcConfig = SPIFFS.open("/rtcConfig.cfg", FILE_WRITE);
+    Serial.println(F("[T] RTC: Looking for config..."));
+    if (!(LITTLEFS.exists("/rtcConfig.cfg"))) {
+        Serial.println(F("[T] RTC: No RTC config yet."));
+        File rtcConfig = LITTLEFS.open(F("/rtcConfig.cfg"), "w");
 
         // Clear RTC
         Rtc.Enable32kHzPin(false);
         Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeNone);
 
         // Write rtcConfig.cfg
-        Serial.println(F("[T] RTC: No RTC config yet."));
 
         rtcConfig.print("NTP = ");
         rtcConfig.println(ntpServer);
@@ -79,7 +89,7 @@ void taskSetupRTC (void* parameters) {
         Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));
         Serial.println(F("[>] RTC: RTC config created."));
     } else {
-        // Read file
+        Serial.println(F("[T] RTC: Config found!"));
         parseRTCconfig();
     }
 

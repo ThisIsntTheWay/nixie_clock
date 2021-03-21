@@ -16,17 +16,9 @@ void setup() {
 
     // FreeRTOS task creation
     Serial.println(F("[i] Spawning tasks..."));
-    xTaskCreate(
-        taskWiFi,                   // Function that should be called
-        "WiFi initiator",           // Name of the task (for debugging)
-        2048,                       // Stack size (bytes)
-        NULL,                       // Parameter to pass
-        1,                          // Task priority
-        NULL                        // Task handle
-    );
-    
-    xTaskCreate(taskFSMount, "FS Mount", 2000, NULL, 1, NULL);
-    xTaskCreate(taskSetupRTC, "FS Mount", 2000, NULL, 1, NULL);
+    xTaskCreate(taskWiFi, "WiFi initiator", 2048, NULL, 1, NULL);
+    xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
+    xTaskCreate(taskSetupRTC, "RTC Setup", 2500, NULL, 1, NULL);
 
     Serial.println(F("[i] Done with setup()."));
 }

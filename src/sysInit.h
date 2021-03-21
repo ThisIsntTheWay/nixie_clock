@@ -7,7 +7,7 @@
 #ifdef USE_LittleFS
     #define SPIFFS LITTLEFS
     #include <LITTLEFS.h> 
-    #define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
+    //#define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
 #else
     #include <SPIFFS.h>
 #endif
@@ -24,12 +24,12 @@ void taskWiFi(void* parameter) {
     // Connect to WiFi
     Serial.println(F("[T] WiFi: Begin."));
     WiFi.mode(WIFI_STA);
-    //WiFi.begin(SSID, PSK);
-    Serial.print(F("[T] WiFi: Trying to connect"));
+    WiFi.begin();
+    Serial.println(F("[T] WiFi: Trying to connect..."));
 
     while (WiFi.status() != WL_CONNECTED) {
-        Serial.print('.');
-        delay(500);
+        vTaskDelay(1000);
+        Serial.print(F("[T] WiFi: Not connected!"));
     }
     Serial.println(F(""));
     
@@ -57,7 +57,7 @@ void taskFSMount(void* parameter) {
 	}
 
     // List contents
-    File root = SPIFFS.open("/");
+    File root = LITTLEFS.open("/");
     File file = root.openNextFile();
 
     Serial.println("[i] FS: Listing files...");    
@@ -68,6 +68,7 @@ void taskFSMount(void* parameter) {
       file = root.openNextFile();
     }
 
+    Serial.println("[i] FS: Destroying task...");  
     vTaskDelete(NULL);
 }
 

@@ -8,7 +8,7 @@
 #ifdef USE_LittleFS
   #define SPIFFS LITTLEFS
   #include <LITTLEFS.h> 
-  #define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
+  //#define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
 #else
   #include <SPIFFS.h>
 #endif
