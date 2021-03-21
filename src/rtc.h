@@ -38,17 +38,12 @@ struct rtcConfigStruct config;
 //  ---------------------
 
 String getTime() {
-    /*
-    Serial.println("GET TIME CALLED");
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        String out = "<i>Cannot get time!</i>";
-    }
+    // Assemble datetime string
+    char buf1[20];
+    DateTime now = rtc.now();
+    sprintf(buf1, "%02d:%02d:%02d %02d/%02d/%02d",  now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
 
-    Serial.println("CONSTRUCTED TIME");
-    String out = (&timeinfo, "%A, %B %d %Y %H:%M:%S");
-    return out;*/
-    return "NODATA";
+    return buf1;
 }
 
 String parseRTCconfig(int mode) {
@@ -153,11 +148,13 @@ void taskSetupRTC (void* parameters) {
 
         // Sync RTC with NTP if mode is set to NTP
         if (parseRTCconfig(2) == "NTP") {
-            Serial.print(F("[T] RTC: Syncing with NTP... "));
             // Initiate NTP client, but wait for WiFi first.
             while (!WiFiReady) {
                 vTaskDelay(500);
             }
+            
+            Serial.println(F("[T] RTC: Syncing with NTP... "));
+
             NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
 
             timeClient.begin();
@@ -180,19 +177,34 @@ void taskSetupRTC (void* parameters) {
 void taskUpdateRTC(void* parameter) {
     // Wait for FS mount
     while (!FlashFSready) { vTaskDelay(500); }
+    Serial.println("[T] RTC sync: WiFi is ready.");
 
-    NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
-    // Check if updating is even required.
+    // Artificial delay to wait for network
+    vTaskDelay(1000);
 
-    if (parseRTCconfig(2) == "NTP") {
-        timeClient.begin();
-        timeClient.update();
+    for (;;) {
+        NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+        // Check if updating is even required.
 
-        // Check if NTP and RTC epochs are different
-        long ntpTime = timeClient.getEpochTime();
+        if (parseRTCconfig(2) == "NTP") {
+            timeClient.begin();
+            timeClient.update();
+
+            // Check if NTP and RTC epochs are different
+            long ntpTime = timeClient.getEpochTime();
+            long epochDiff = ntpTime - rtc.now().unixtime();
+
+
+            // Sync if epoch time differs too greatly from NTP and RTC
+            if (epochDiff < -5 || epochDiff > 5) {
+                Serial.print("[T] RTC sync: Epoch discrepancy: ");
+                    Serial.println(epochDiff);
+                rtc.adjust(ntpTime);
+            }
+        }
+
+        vTaskDelay(5000);
     }
-
-    vTaskDelay(5000);
 }
 
 #endif
