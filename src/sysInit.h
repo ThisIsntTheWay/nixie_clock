@@ -1,44 +1,58 @@
 #include "WiFi.h"
-#include <SPIFFS.h>
 
-#ifndef sysInit
-#define sysInit
+// Switch to LittleFS if needed
+#define USE_LittleFS
 
-bool SPIFFSready = false;
+#include <FS.h>
+#ifdef USE_LittleFS
+    #define SPIFFS LITTLEFS
+    #include <LITTLEFS.h> 
+    #define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
+#else
+    #include <SPIFFS.h>
+#endif
+
+#ifndef sysInit_h
+#define sysInit_h
+
+bool FlashFSready = false;
 
 void taskWiFi(void* parameter) {
-    const char* SSID = "Alter Eggstutz";
-    const char* PSK  = "Fischer1";
+    //const char* SSID = "Alter Eggstutz";
+    //const char* PSK  = "***";
 
     // Connect to WiFi
     Serial.println(F("[T] WiFi: Begin."));
     WiFi.mode(WIFI_STA);
-    WiFi.begin(SSID, PSK);
+    //WiFi.begin(SSID, PSK);
     Serial.print(F("[T] WiFi: Trying to connect"));
 
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print('.');
         delay(500);
     }
-    Serial.println(F(" "));
-
+    Serial.println(F(""));
+    
     Serial.println(F("[T] WiFi: Connected successfully."));
     Serial.print("[T] WiFi: IP: ");
         Serial.println(WiFi.localIP());
+
+    // Start webserver
+    webServerRequestHandler();
 
     vTaskDelete(NULL);
 }
 
 void taskFSMount(void* parameter) {
 
-    Serial.println(F("[T] SPFFS: Mounting..."));
+    Serial.println(F("[T] FS: Mounting..."));
 
-	if (SPIFFS.begin()) {
-		Serial.println("[T] SPFFS: Mounted.");
-        SPIFFSready = true;
+	if (LITTLEFS.begin()) {
+		Serial.println("[T] FS: Mounted.");
+        FlashFSready = true;
 	} else {
-		Serial.println("[X] SPFFS: Mount failure.");
-		Serial.println("[X] SPFFS: Rebooting ESP.");
+		Serial.println("[X] FS: Mount failure.");
+		Serial.println("[X] FS: Rebooting ESP.");
         ESP.restart();
 	}
 
@@ -46,13 +60,13 @@ void taskFSMount(void* parameter) {
     File root = SPIFFS.open("/");
     File file = root.openNextFile();
 
-    Serial.println("[i] SPFFS: Listing files...");    
+    Serial.println("[i] FS: Listing files...");    
     while(file) {
-      Serial.print("[>] SPFFS: File found: ");
+      Serial.print("[>] FS: File found: ");
       Serial.println(file.name());
  
       file = root.openNextFile();
-    }   
+    }
 
     vTaskDelete(NULL);
 }

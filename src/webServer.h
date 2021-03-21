@@ -1,10 +1,20 @@
-#include <FS.h>
-#include <SPIFFS.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-#ifndef webServer
-#define webServer
+// Switch to LittleFS if needed
+#define USE_LittleFS
+
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+  #define CONFIG_LITTLEFS_SPIFFS_COMPAT 1
+#else
+  #include <SPIFFS.h>
+#endif
+
+#ifndef webServer_h
+#define webServer_h
 
 // Init webserver
 AsyncWebServer server(80);
