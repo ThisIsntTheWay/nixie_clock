@@ -214,8 +214,9 @@ void webServerStartup() {
     else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
     
     // Save JSON response as variables
-    const char* responseM = data["mode"];
-    const char* responseV = data["value"];
+    const char* rIP = data["bridgeip"];
+    const char* rON = data["ontime"];
+    const char* rOFF = data["offtime"];
 
     // Serialize JSON
     String response;
@@ -223,20 +224,24 @@ void webServerStartup() {
 
     // Read file
     StaticJsonDocument<200> tmpJSON;
-    File rtcConfig = LITTLEFS.open(F("/config/hueConfig.json"), "r");
+    File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "r");
 
-    DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
+    DeserializationError error = deserializeJson(tmpJSON, hueConfig);
     if (error) {
         Serial.println(F("[X] WebServer: Could not deserialize JSON."));
         request->send(400, "text/html", "<p style='color: red;'>Cannot deserialize JSON.</p>");
     } else {
-      rtcConfig.close();
+      hueConfig.close();
+
+      // Only change things that require changing
+      if (!(data["bridgeip"] == "NaN")) { tmpJSON["IP"] = rIP; }
+      if (!(data["ontime"] == "NaN")) { tmpJSON["toggleOnTime"] = rON; }
+      if (!(data["offtime"] == "NaN")) { tmpJSON["toggleOffTime"] = rOFF; }
 
       // Write to file based on request body
-
-      // Write rtcConfig.cfg
-      File rtcConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
-      if (!(serializeJson(tmpJSON, rtcConfig))) {
+      // Write hueConfig.cfg
+      File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
+      if (!(serializeJson(tmpJSON, hueConfig))) {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
       } else {
@@ -244,7 +249,7 @@ void webServerStartup() {
       }
     }
 
-    rtcConfig.close();
+    hueConfig.close();
 
     Serial.println(response);
   });

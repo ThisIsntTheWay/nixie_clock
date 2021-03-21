@@ -22,11 +22,10 @@
 				var hue_ontime = document.getElementById('turnON').value;
 				var hue_offtime = document.getElementById('turnOFF').value;
 				
-				// Handle empty text boxes
-				if (bridgeip == null && hue_ontime == null && hue_offtime == null) { return; }
-				if (bridgeip == null) { bridgeip = "NOCHANGE"; } 
-				else if (hue_ontime == null) { hue_ontime = "NOCHANGE"; }
-				else if (hue_offtime == null) { hue_offtime = "NOCHANGE"; }
+				// Handle empty inputs
+				if (bridgeip === "") { bridgeip = "NaN"; }
+				if (hue_ontime === "") { hue_ontime = "NaN"; }
+				if (hue_offtime === "") { hue_offtime = "NaN"; }
 				
 				xhr.open("POST", "/HUEendpoint", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
