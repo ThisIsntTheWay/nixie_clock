@@ -33,19 +33,22 @@
 		<div>
 			<h3>Change RTC settings</h3>
 			Current time: <b>%RTC_TIME%</b><br>
-			(As of page load)<p>
+			(As of page load)<p><br>
+			
+			Current mode: <b>%TIME_MODE%</b><br>
+			NTP Server: <b>%NTP_SOURCE%</b><br><br>
 			
 			Set time source:<br>			
 			<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>
 			<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual<br>
 			<br>
 			<span id="ntp_config">
-				Set NTP source:
-				<input type="numeric" size="16" name="ntp_source" value=""/>
+				Set NTP server:
+				<input type="numeric" size="16" name="ntp_source" value=""/><br>
 			</span>
 			<span id="manual_config">
 				Set manual time:
-				<input type="numeric" size="16" name="manual_time" value=""/>
+				<input type="numeric" size="16" name="manual_time" value=""/><br>
 			</span>
 			<input type="submit" value="Apply" onclick="submit()"></input>
 		</div>

@@ -1,8 +1,9 @@
 #include <EEPROM.h>
-#include <SPI.h>
-#include <RtcDS3234.h>
-#include <sysInit.h>
+#include <RTClib.h>
+#include <Wire.h>
 #include <ArduinoJson.h>
+#include <NTPClient.h>
+#include <sysInit.h>
 
 #ifndef rtc_h
 #define rtc_h
@@ -15,13 +16,15 @@ char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 3600;
 const int   daylightOffset_sec = 3600;
 
-const uint8_t DS3234_CS_PIN = 5;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-// Create RTC instance
-RtcDS3234<SPIClass> Rtc(SPI, DS3234_CS_PIN);
+// Instances
+RTC_DS1307 rtc;
+WiFiUDP ntpUDP;
 
 // Structs
 struct rtcConfigStruct {
+    DateTime manualTime;
     char NTP[64];
     char Mode[8];
     int GMT;
@@ -77,9 +80,11 @@ String parseRTCconfig(int mode) {
     switch (mode) {
         case 1:
             return config.NTP;
+            Serial.println(config.NTP);
             break;
         case 2:
             return config.Mode;
+            Serial.println(config.Mode);
             break;
     }
 
@@ -93,18 +98,19 @@ String parseRTCconfig(int mode) {
 void taskSetupRTC (void* parameters) {
     Serial.println(F("[T] RTC: Starting setup..."));
 
-    // Wait for FlashFS mount mount
+    // Wait for FS mount
     while (!FlashFSready) {
-        Serial.println(F("[T] RTC: No FlashFS yet."));
+        Serial.println(F("[T] RTC: No FS yet."));
         vTaskDelay(500);
     }
 
-    SPI.begin();
-    Rtc.Begin();
-
-    if (!Rtc.GetIsRunning()) {
-        Serial.println(F("[T] RTC: RTC starting up."));
-        Rtc.SetIsRunning(true);
+    if (! rtc.begin())
+        Serial.println("[X] RTC: No module found.");
+    
+    // Set RTC datetime if it hasn't been running yet
+    if (! rtc.isrunning()) {
+        Serial.println("[i] RTC: Toggling module.");
+        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 
     // Create RTC config if it does not yet exist.
@@ -112,17 +118,13 @@ void taskSetupRTC (void* parameters) {
     Serial.println(F("[T] RTC: Looking for config..."));
 
     if (!(LITTLEFS.exists("/config/rtcConfig.json"))) {
-        Serial.println(F("[T] RTC: No RTC config yet."));
+        Serial.println(F("[T] RTC: No config found."));
         
         if (!LITTLEFS.exists("/config")) {
             LITTLEFS.mkdir("/config");
         }
 
         File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
-
-        // Clear RTC
-        Rtc.Enable32kHzPin(false);
-        Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeNone);
 
         // Construct JSON
         StaticJsonDocument<200> cfgRTC;
@@ -134,7 +136,7 @@ void taskSetupRTC (void* parameters) {
 
         // Write rtcConfig.cfg
         if (!(serializeJson(cfgRTC, rtcConfig))) {
-            Serial.println(F("[X] RTC: RTC config write failure."));
+            Serial.println(F("[X] RTC: Config write failure."));
         }
 
         rtcConfig.close();
@@ -144,17 +146,53 @@ void taskSetupRTC (void* parameters) {
         //struct tm timeinfo;
 
         // Set time on RTC
-        Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));
-        Serial.println(F("[>] RTC: RTC config created."));
+        Serial.println(F("[>] RTC: Config created."));
     } else {
         // ToDo: Check if RTC is behind NTP time
         Serial.println(F("[T] RTC: Config found!"));
-        parseRTCconfig(1);
-    }
 
-    // ToDo: Implement handling of rtcConfig.json
+        // Sync RTC with NTP if mode is set to NTP
+        if (parseRTCconfig(2) == "NTP") {
+            Serial.print(F("[T] RTC: Syncing with NTP... "));
+            // Initiate NTP client, but wait for WiFi first.
+            while (!WiFiReady) {
+                vTaskDelay(500);
+            }
+            NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+
+            timeClient.begin();
+            timeClient.update();
+
+            long ntpTime = timeClient.getEpochTime();
+            Serial.print("[T] RTC: NTP Epoch: ");
+                Serial.println(ntpTime);
+            Serial.print("[T] RTC: RTC Epoch: ");
+                Serial.println(rtc.now().unixtime());
+            
+            // Adjust RTC
+            rtc.adjust(DateTime(ntpTime));
+        }
+    }
     
     vTaskDelete(NULL);
+}
+
+void taskUpdateRTC(void* parameter) {
+    // Wait for FS mount
+    while (!FlashFSready) { vTaskDelay(500); }
+
+    NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+    // Check if updating is even required.
+
+    if (parseRTCconfig(2) == "NTP") {
+        timeClient.begin();
+        timeClient.update();
+
+        // Check if NTP and RTC epochs are different
+        long ntpTime = timeClient.getEpochTime();
+    }
+
+    vTaskDelay(5000);
 }
 
 #endif

@@ -12,17 +12,20 @@
 void setup() {
     Serial.begin(115200);
 
-    Serial.println(F("[i] START BOOTUP"));
-
-    // FreeRTOS task creation
+    // FreeRTOS tasks
     Serial.println(F("[i] Spawning tasks..."));
     xTaskCreate(taskWiFi, "WiFi initiator", 2048, NULL, 1, NULL);
     xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
     xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
+    xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
+
+    xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, NULL);
 
     webServerStartup();
 
     Serial.println(F("[i] Done with setup()."));
+    Serial.print("[i] Free heap: ");
+        Serial.println(ESP.getFreeHeap());
 }
 
 // Empty loop thanks to RTOS

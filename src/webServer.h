@@ -1,6 +1,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <rtc.h>
+#include <philipsHue.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -43,20 +44,21 @@ String processor(const String& var) {
     // Current NTP server
     return parseRTCconfig(1);
 
+  } else if (var == "TIME_MODE") {
+    // Current NTP server
+    return parseRTCconfig(2);
+
   } else if (var == "HUE_BRIDGE") {
     // Hue bridge IP
-    String dummy = "BRIDGE IP";
-    return dummy;
+    return parseHUEconfig(1);
 
   } else if (var == "HUE_TOGGLEON_TIME") {
     // Hue toggle on time
-    String dummy = "TOGGLE ON TIME";
-    return dummy;
+    return parseHUEconfig(2);
 
   } else if (var == "HUE_TOGGLEOFF_TIME") {
     // Hue toggle off time
-    String dummy = "TOGGLE OFF TIME";
-    return dummy;
+    return parseHUEconfig(3);
 
   } else if (var == "TUBES_DISPLAY") {
     // Hue toggle off time

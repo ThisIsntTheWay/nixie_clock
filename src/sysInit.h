@@ -115,10 +115,10 @@ void taskFSMount(void* parameter) {
 
     // Open dir folder
     File dir = LITTLEFS.open("/");
+    
     // List file at root
     listFilesInDir(dir, 1);
 
-    Serial.println("[i] FS: Destroying task...");
     vTaskDelete(NULL);
 }
 
