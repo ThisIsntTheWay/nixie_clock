@@ -191,7 +191,7 @@ void webServerStartup() {
       } 
       else if (data["mode"] == "manual") {
         tmpJSON["manualTime"] = responseV;
-        rtc.adjust(DateTime(responseV));
+        rtc.adjust(responseV);
       }
 
       // Write rtcConfig.cfg
