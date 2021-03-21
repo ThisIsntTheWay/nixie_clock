@@ -103,8 +103,8 @@ void taskWebServerStartup(void *parameter) {
 
       String f = "/html/index.html";
 
-      if(LITTLEFS.open(f)) {
-        request->send(LITTLEFS, f, "text/html");
+      if(LITTLEFS.exists(f)) {
+        request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET / - No local ressource.");
       }
@@ -116,7 +116,7 @@ void taskWebServerStartup(void *parameter) {
 
       String f = "/html/cfgTUBE.html";
 
-      if(LITTLEFS.open(f)) {
+      if(LITTLEFS.exists(f)) {
         request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET /tube - No local ressource.");
@@ -129,7 +129,7 @@ void taskWebServerStartup(void *parameter) {
 
       String f = "/html/cfgRTC.html";
 
-      if(LITTLEFS.open(f)) {
+      if(LITTLEFS.exists(f)) {
         request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET /rtc - No local ressource.");
@@ -142,7 +142,7 @@ void taskWebServerStartup(void *parameter) {
 
       String f = "/html/cfgHUE.html";
 
-      if(LITTLEFS.open(f)) {
+      if(LITTLEFS.exists(f)) {
         request->send(LITTLEFS, f, "text/html", false, webServerVarHandler);
       } else {
         Serial.println("[X] WebServer: GET /hue - No local ressource.");

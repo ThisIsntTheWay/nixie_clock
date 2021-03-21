@@ -13,6 +13,8 @@ const int   daylightOffset_sec = 3600;
 
 const uint8_t DS3234_CS_PIN = 5;
 
+char CFGFILE [512] = {'\0'};
+
 // Create RTC instance
 RtcDS3234<SPIClass> Rtc(SPI, DS3234_CS_PIN);
 
@@ -32,19 +34,18 @@ String getTime() {
 
 void parseRTCconfig() {
     // Read file
-    File rtcConfig = LITTLEFS.open(F("/rtcConfig.cfg"), "r");
+    File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.cfg"), "r");
 
     // Iterate through file
-    int lineNumber = 0;
-    String line;
+    int i = 0;
+
     while (rtcConfig.available()) {
-        lineNumber++;
-        
-        line = rtcConfig.readStringUntil('\n'); // Read line by line from the file
-        Serial.print(lineNumber);
-        Serial.print(" - ");
-            Serial.println(line);
+        CFGFILE [i] = rtcConfig.read();
+
+        i++;
     }
+
+    rtcConfig.close();
 }
 
 //  ---------------------
@@ -71,9 +72,14 @@ void taskSetupRTC (void* parameters) {
     // Create RTC config if it does not yet exist.
     // Additionally, set up RTC if it actually does not exist.
     Serial.println(F("[T] RTC: Looking for config..."));
-    if (!(LITTLEFS.exists("/rtcConfig.cfg"))) {
+    if (!(LITTLEFS.exists("/config/rtcConfig.cfg"))) {
         Serial.println(F("[T] RTC: No RTC config yet."));
-        File rtcConfig = LITTLEFS.open(F("/rtcConfig.cfg"), "w");
+        
+        if (!LITTLEFS.exists("/config")) {
+            LITTLEFS.mkdir("/config");
+        }
+
+        File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.cfg"), "w");
 
         // Clear RTC
         Rtc.Enable32kHzPin(false);
