@@ -50,8 +50,6 @@ String parseRTCconfig(int mode) {
     // Mode param:
     // 1: Return NTP server
     // 2: Return config mode
-    
-    bool AutoConfig = true;
 
     // Read file
     File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");

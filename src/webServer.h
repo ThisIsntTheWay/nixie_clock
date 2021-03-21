@@ -163,41 +163,49 @@ void webServerStartup() {
     } else if (json.is<JsonObject>()) {
       data = json.as<JsonObject>();
     }
+    
+    // Save JSON response as variables
+    const char* responseM = data["mode"];
+    const char* responseV = data["value"];
 
     // Serialize JSON
     String response;
     serializeJson(data, response);
 
     // Read file
-    File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r+");
-    StaticJsonDocument<200> cfgRTC;
+    StaticJsonDocument<200> tmpJSON;
+    File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");
 
-    DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
+    DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
     if (error) {
         Serial.println(F("[X] WebServer: Could not deserialize JSON."));
         request->send(400, "text/html", "<p style='color: red;'>Cannot deserialize JSON.</p>");
     } else {
+      rtcConfig.close();
+
     // Write to file based on request body
-      if (data["mode"] == "manual") {
-        strlcpy(config.Mode, data["mode"], sizeof(config.Mode));
-        strlcpy(config.NTP, data["value"], sizeof(config.Mode));
+      tmpJSON["Mode"] = responseM;
+      if (data["mode"] == "ntp") {
+        Serial.println("MODE IS NTP");
+        tmpJSON["NTP"] = responseV;
 
-      } else if (data["mode"] == "ntp") {
-        strlcpy(config.Mode, data["mode"], sizeof(config.Mode));
-        config.manualTime = data["value"];
-
+      }
+      else if (data["mode"] == "manual") {
+        Serial.println("MODE IS MANUAL");
+        tmpJSON["manualTime"] = responseV;
       }
 
       // Write rtcConfig.cfg
-      if (!(serializeJson(cfgRTC, rtcConfig))) {
+      File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
+      if (!(serializeJson(tmpJSON, rtcConfig))) {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
       } else {
         request->send(200, "text/html", "<p style='color: green;'>OK</p>");
       }
-
-      rtcConfig.close();
     }
+
+    rtcConfig.close();
 
     Serial.println(response);
   });
