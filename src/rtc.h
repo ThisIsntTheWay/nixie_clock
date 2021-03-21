@@ -125,7 +125,7 @@ void taskSetupRTC (void* parameters) {
         cfgRTC["NTP"] = ntpServer;
         cfgRTC["GMT"] = gmtOffset_sec;
         cfgRTC["DST"] = daylightOffset_sec;
-        cfgRTC["Mode"] = "NTP";
+        cfgRTC["Mode"] = "ntp";
 
         // Write rtcConfig.cfg
         if (!(serializeJson(cfgRTC, rtcConfig))) {
@@ -143,30 +143,6 @@ void taskSetupRTC (void* parameters) {
     } else {
         // ToDo: Check if RTC is behind NTP time
         Serial.println(F("[T] RTC: Config found!"));
-
-        // Sync RTC with NTP if mode is set to NTP
-        if (parseRTCconfig(2) == "NTP") {
-            // Initiate NTP client, but wait for WiFi first.
-            while (!WiFiReady) {
-                vTaskDelay(500);
-            }
-            
-            Serial.println(F("[T] RTC: Syncing with NTP... "));
-
-            NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
-
-            timeClient.begin();
-            timeClient.update();
-
-            long ntpTime = timeClient.getEpochTime();
-            Serial.print("[T] RTC: NTP Epoch: ");
-                Serial.println(ntpTime);
-            Serial.print("[T] RTC: RTC Epoch: ");
-                Serial.println(rtc.now().unixtime());
-            
-            // Adjust RTC
-            rtc.adjust(DateTime(ntpTime));
-        }
     }
     
     vTaskDelete(NULL);
@@ -185,7 +161,7 @@ void taskUpdateRTC(void* parameter) {
 
         // Check if RTC should be synced with NTP
         bool timeClientRunning = false;
-        if (parseRTCconfig(2) == "NTP") {
+        if (parseRTCconfig(2) == "ntp") {
             timeClient.begin();
             timeClient.forceUpdate();
 
@@ -200,9 +176,10 @@ void taskUpdateRTC(void* parameter) {
             if (epochDiff < -5 || epochDiff > 5) {
                 Serial.print("[T] RTC sync: Epoch discrepancy: ");
                     Serial.println(epochDiff);
-                rtc.adjust(ntpTime);
+                rtc.adjust(DateTime(ntpTime));
             }
         } else {
+            Serial.println("[T] RTC sync: In manual mode.");
             // Terminate NTP client
             if (timeClientRunning) { timeClient.end(); }
         }

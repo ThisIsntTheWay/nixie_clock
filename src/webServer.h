@@ -183,16 +183,15 @@ void webServerStartup() {
     } else {
       rtcConfig.close();
 
-    // Write to file based on request body
+      // Write to file based on request body
       tmpJSON["Mode"] = responseM;
-      if (data["mode"] == "ntp") {
-        Serial.println("MODE IS NTP");
-        tmpJSON["NTP"] = responseV;
 
-      }
+      if (data["mode"] == "ntp") {
+        tmpJSON["NTP"] = responseV;
+      } 
       else if (data["mode"] == "manual") {
-        Serial.println("MODE IS MANUAL");
         tmpJSON["manualTime"] = responseV;
+        rtc.adjust(DateTime(responseV));
       }
 
       // Write rtcConfig.cfg
