@@ -148,8 +148,35 @@ void webServerStartup() {
   });
 
   // Serve favicon
-  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(LITTLEFS, "/html/favicon.png", "image/png");
+  });
+
+  // ----------------------------
+  // Endpoints
+  server.on("/RTCendpoint", HTTP_POST, [](AsyncWebServerRequest *request) {
+    int params = request->params();
+    
+    request->send(200, "application/json", "{'msg':'done'}");
+  
+    if(request->hasParam("body", true)) {
+      AsyncWebParameter* p = request->getParam("body", true);
+      String json = p->value();
+
+      Serial.println(json);
+
+      request->send(200, "application/json", "{'msg':'done'}");
+      // Parse json
+      //if(config.deserialize(json)) {
+      }/* else {
+        AsyncWebServerResponse *response = request->beginResponse(400, "application/json", "{'msg':'Could not parse JSON'}");
+        request->send(response);
+      }
+    }
+    else {
+      AsyncWebServerResponse *response = request->beginResponse(400, "application/json", "{'msg':'No body'}");
+      request->send(response);
+    }*/
   });
 
   // ----------------------------

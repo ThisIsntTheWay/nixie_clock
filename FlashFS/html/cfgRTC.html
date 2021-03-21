@@ -8,7 +8,9 @@
 				h4 { padding-bottom: 0px; }
 			</style>
 		<title>Nixie clock - RTC control</title>
-		<script type="text/javascript">			
+		<script type="text/javascript">
+			var message = null;
+			
 			window.onload = function() {				
 				document.getElementById("ntp_config").style.display = "none";
 				document.getElementById("manual_config").style.display = "none";
@@ -25,22 +27,37 @@
 			}
 			
 			function submit() {
+				// Form POST request
+				var responseText = document.getElementById('response');
 				var xhr = new XMLHttpRequest();
-				xhr.open("POST", "/RTCendpoint", true);
 				
+				xhr.open("POST", "/RTCendpoint", true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
+				
+				// Display server response at HTML element with ID 'response'
+				xhr.onload = (res) => {
+					console.log(res['target']['response']);
+					message = res['target']['response'];
+					responseText.innerHTML = message;
+
+				};
+				
+				// Dispatch POST request
 				if(document.getElementById("ntp_control").checked) {
-					xhr.setRequestHeader('Content-Type', 'application/json');
+					var tmp = document.getElementById("ntp_source").value;
 					xhr.send(JSON.stringify({
-						mode: ntp,
-						ntp: ntp
+						"mode": "ntp",
+						"ntp": tmp
 					}));
 				} else if (chMAN = document.getElementById("manual_control").checked) {
-					xhr.setRequestHeader('Content-Type', 'application/json');
+					var tmp = document.getElementById("manual_time").value;
 					xhr.send(JSON.stringify({
-						mode: manual,
-						manualTime: ntp
-					}));					
+						"mode": "manual",
+						"manualTime": tmp
+					}));
 				}
+				
+				//location.reload();
 			}
 		</script>
 	</head>
@@ -62,13 +79,15 @@
 			
 			<span id="ntp_config">
 				Set NTP server:
-				<input type="numeric" size="16" name="ntp_source" value=""/><br>
+				<input type="numeric" size="16" id="ntp_source" value=""/><br>
 			</span>
 			<span id="manual_config">
 				Set manual time:
-				<input type="numeric" size="16" name="manual_time" value=""/><br>
+				<input type="numeric" size="16" id="manual_time" value=""/><br>
 			</span>
+			<br>
 			<input type="submit" value="Apply" onclick="submit()"></input>
+			<p id="response"></p>
 		</div>
 		</center>
 	</body>
