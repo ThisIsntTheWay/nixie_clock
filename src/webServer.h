@@ -155,44 +155,51 @@ void webServerStartup() {
 
   // ----------------------------
   // Endpoints
-  server.on( "/RTCendpoint", HTTP_POST, [](AsyncWebServerRequest * request){}, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
-    String assembledResponse;
-
-    for (size_t i = 0; i < len; i++) {
-      assembledResponse += data[i];
-      //Serial.write(data[i]);
+  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    // Construct JSON
+    StaticJsonDocument<200> data;
+    if (json.is<JsonArray>()) {
+      data = json.as<JsonArray>();
+    } else if (json.is<JsonObject>()) {
+      data = json.as<JsonObject>();
     }
 
-    Serial.println(assembledResponse);
+    // Serialize JSON
+    String response;
+    serializeJson(data, response);
 
-    request->send(200, "text/html", "<p style='color: green;'>OK</p>");
-  });
+    // Read file
+      File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
+      StaticJsonDocument<200> cfgRTC;
 
-  /*
-  server.on("/RTCendpoint", HTTP_POST, [](AsyncWebServerRequest *request) {
-    int params = request->params();
-    
-    request->send(200, "application/json", "{'msg':'done'}");
-  
-    if(request->hasParam("body", true)) {
-      AsyncWebParameter* p = request->getParam("body", true);
-      String json = p->value();
+      DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
+      if (error)
+          Serial.println(F("[X] RTC_P: Could not deserialize JSON."));
 
-      Serial.println(json);
+    // Write to file based on request body
+      if (data["mode"] == "manual") {
+        strlcpy(config.Mode, data["mode"], sizeof(config.Mode));
+        strlcpy(config.NTP, data["value"], sizeof(config.Mode));
 
-      request->send(200, "application/json", "{'msg':'done'}");
-      // Parse json
-      //if(config.deserialize(json)) {
-      } else {
-        AsyncWebServerResponse *response = request->beginResponse(400, "application/json", "{'msg':'Could not parse JSON'}");
-        request->send(response);
+      } else if (data["mode"] == "ntp") {
+        strlcpy(config.Mode, data["mode"], sizeof(config.Mode));
+        config.manualTime = data["value"];
+
       }
-    }
-    else {
-      AsyncWebServerResponse *response = request->beginResponse(400, "application/json", "{'msg':'No body'}");
-      request->send(response);
-    }
-  });*/
+
+      // Write rtcConfig.cfg
+      if (!(serializeJson(cfgRTC, rtcConfig))) {
+        Serial.println(F("[X] WebServer: Config write failure."));
+        request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
+      } else {
+        request->send(200, "text/html", "<p style='color: green;'>OK</p>");
+      }
+
+      rtcConfig.close();
+
+    Serial.println(response);
+  });
+  server.addHandler(handler);
 
   // ----------------------------
   // Plaintext content
@@ -211,8 +218,6 @@ void webServerStartup() {
   // Start the webserver
   server.begin();
   Serial.println(F("[T] WebServer: Start."));
-
-  //vTaskDelete(NULL);
 }
 
 #endif

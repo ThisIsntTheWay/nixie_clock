@@ -24,7 +24,7 @@ WiFiUDP ntpUDP;
 
 // Structs
 struct rtcConfigStruct {
-    DateTime manualTime;
+    int manualTime;
     char NTP[64];
     char Mode[8];
     int GMT;
