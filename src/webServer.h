@@ -169,13 +169,14 @@ void webServerStartup() {
     serializeJson(data, response);
 
     // Read file
-      File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
-      StaticJsonDocument<200> cfgRTC;
+    File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r+");
+    StaticJsonDocument<200> cfgRTC;
 
-      DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
-      if (error)
-          Serial.println(F("[X] RTC_P: Could not deserialize JSON."));
-
+    DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
+    if (error) {
+        Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+        request->send(400, "text/html", "<p style='color: red;'>Cannot deserialize JSON.</p>");
+    } else {
     // Write to file based on request body
       if (data["mode"] == "manual") {
         strlcpy(config.Mode, data["mode"], sizeof(config.Mode));
@@ -196,6 +197,7 @@ void webServerStartup() {
       }
 
       rtcConfig.close();
+    }
 
     Serial.println(response);
   });
