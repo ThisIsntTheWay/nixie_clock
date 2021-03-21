@@ -6,7 +6,7 @@
 				h4 { padding-bottom: 0px; }
 			</style>
 		<title>Nixie clock - RTC control</title>
-		<script type="text/javascript">
+		<script type="text/javascript">			
 			window.onload = function() {				
 				document.getElementById("ntp_config").style.display = "none";
 				document.getElementById("manual_config").style.display = "none";
@@ -23,7 +23,22 @@
 			}
 			
 			function submit() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", "/RTCendpoint", true);
 				
+				if(document.getElementById("ntp_control").checked) {
+					xhr.setRequestHeader('Content-Type', 'application/json');
+					xhr.send(JSON.stringify({
+						mode: ntp,
+						ntp: ntp
+					}));
+				} else if (chMAN = document.getElementById("manual_control").checked) {
+					xhr.setRequestHeader('Content-Type', 'application/json');
+					xhr.send(JSON.stringify({
+						mode: manual,
+						manualTime: ntp
+					}));					
+				}
 			}
 		</script>
 	</head>
@@ -42,6 +57,7 @@
 			<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>
 			<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual<br>
 			<br>
+			
 			<span id="ntp_config">
 				Set NTP server:
 				<input type="numeric" size="16" name="ntp_source" value=""/><br>

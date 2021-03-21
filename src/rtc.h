@@ -184,11 +184,14 @@ void taskUpdateRTC(void* parameter) {
 
     for (;;) {
         NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
-        // Check if updating is even required.
 
+        // Check if RTC should be synced with NTP
+        bool timeClientRunning = false;
         if (parseRTCconfig(2) == "NTP") {
             timeClient.begin();
-            timeClient.update();
+            timeClient.forceUpdate();
+
+            timeClientRunning = true;
 
             // Check if NTP and RTC epochs are different
             long ntpTime = timeClient.getEpochTime();
@@ -201,6 +204,9 @@ void taskUpdateRTC(void* parameter) {
                     Serial.println(epochDiff);
                 rtc.adjust(ntpTime);
             }
+        } else {
+            // Terminate NTP client
+            if (timeClientRunning) { timeClient.end(); }
         }
 
         vTaskDelay(5000);
