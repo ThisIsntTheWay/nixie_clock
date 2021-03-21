@@ -29,7 +29,7 @@ void taskWiFi(void* parameter) {
 
     while (WiFi.status() != WL_CONNECTED) {
         vTaskDelay(1000);
-        Serial.print(F("[T] WiFi: Not connected!"));
+        Serial.print(F("[T] WiFi: Not connected yet!"));
     }
     Serial.println(F(""));
     
@@ -37,9 +37,7 @@ void taskWiFi(void* parameter) {
     Serial.print("[T] WiFi: IP: ");
         Serial.println(WiFi.localIP());
 
-    // Start webserver
-    webServerRequestHandler();
-
+    Serial.println("[i] WiFi: Destroying task...");  
     vTaskDelete(NULL);
 }
 

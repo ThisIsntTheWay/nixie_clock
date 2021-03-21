@@ -20,6 +20,16 @@ RtcDS3234<SPIClass> Rtc(SPI, DS3234_CS_PIN);
 //  FUNCTIONS
 //  ---------------------
 
+String getTime() {
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        String out = "<i>Cannot get time!</i>";
+    }
+
+    String out = (&timeinfo, "%A, %B %d %Y %H:%M:%S");
+    return out;
+}
+
 void parseRTCconfig() {
     // Read file
     File rtcConfig = LITTLEFS.open(F("/rtcConfig.cfg"), "r");

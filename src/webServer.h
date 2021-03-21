@@ -1,5 +1,6 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <rtc.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -26,8 +27,8 @@ String webServerVarHandler(const String& var) {
   // A switch..case statement cannot be used with datatype "string".
   if (var == "TIME") {
     // System time
-    String dummy = "TIME_VAR";
-    return dummy;
+    return getTime();
+
   } else if (var == "RTC_TIME") {
     // Current RTC time
     String dummy = "TIME_VAR";
@@ -63,15 +64,20 @@ String webServerVarHandler(const String& var) {
   return String();
 }
 
-void webServerRequestHandler() {
+void taskWebServerStartup(void *parameter) {
+
+  // Wait for FlashFS
+  while (!FlashFSready) { vTaskDelay(500); }
+  LITTLEFS.begin();
+
   // Root / Index
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
       Serial.println(F("[T] WebServer: GET /."));
 
       if(SPIFFS.open("/htmlRoot.html")) {
-        request->send(SPIFFS, "/htmlRoot.html", "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, "/htmlRoot.html", "text/html", false, webServerVarHandler);
       } else {
-        Serial.println("[X] webServer: GET / - No local ressource.");
+        Serial.println("[X] WebServer: GET / - No local ressource.");
       }
   });
   
@@ -80,9 +86,9 @@ void webServerRequestHandler() {
       Serial.println(F("[T] WebServer: GET /tube."));
 
       if(SPIFFS.open("/htmlTubes.html")) {
-        request->send(SPIFFS, "/htmlTubes.html", "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, "/htmlTubes.html", "text/html", false, webServerVarHandler);
       } else {
-        Serial.println("[X] webServer: GET /tube - No local ressource.");
+        Serial.println("[X] WebServer: GET /tube - No local ressource.");
       }
   });
 
@@ -91,9 +97,9 @@ void webServerRequestHandler() {
       Serial.println(F("[T] WebServer: GET /rtc."));
 
       if(SPIFFS.open("/htmlRTC.html")) {
-        request->send(SPIFFS, "/htmlRTC.html", "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, "/htmlRTC.html", "text/html", false, webServerVarHandler);
       } else {
-        Serial.println("[X] webServer: GET /rtc - No local ressource.");
+        Serial.println("[X] WebServer: GET /rtc - No local ressource.");
       }      
   });
 
@@ -102,9 +108,9 @@ void webServerRequestHandler() {
       Serial.println(F("[T] WebServer: GET /hue."));
 
       if(SPIFFS.open("/htmlHUE.html")) {
-        request->send(SPIFFS, "/htmlHUE.html", "text/html", false, webServerVarHandler);
+        request->send(LITTLEFS, "/htmlHUE.html", "text/html", false, webServerVarHandler);
       } else {
-        Serial.println("[X] webServer: GET /hue - No local ressource.");
+        Serial.println("[X] WebServer: GET /hue - No local ressource.");
       }
   });
 
@@ -117,6 +123,8 @@ void webServerRequestHandler() {
   // Start the webserver
   server.begin();
   Serial.println(F("[T] WebServer: Start."));
+
+  vTaskDelete(NULL);
 }
 
 #endif
