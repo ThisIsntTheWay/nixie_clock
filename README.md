@@ -36,5 +36,15 @@ The tubes must be supplied with 180V due to their design.
 :information_source: The 180V are sourced externally.<br/>
 No DC-DC step-up circuit diagrams are provided.
 
-## Notes
-Circuit diagrams and gerber files are currently WIP and not yet ready for release.
+## Progress
+Circuit diagrams and gerber files are currently WIP and not yet ready for release.<br/>
+Software-wise, the following features have been implemented so far:
+ - [X] Implement webserver
+ - [X] Implement RTC
+ - [X] Implement config files
+ - [X] Change configs from webGUI
+ - [ ] Implement proper manual time control
+ - [ ] Implement nixie logic
+ - [ ] Implement nixie config in webGUI
+ - [ ] Store SSID and PSK in config files
+ - [ ] Change network settings from webGUI
