@@ -21,7 +21,7 @@ This project uses the following libraries:<br/>
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br/>
 
 Note: "TinyWire" must be removed as a dependency from RTCLib.<br/>
-This dependency is incompatible with ESP32 and will result in compiler errors.
+This library is incompatible with the ESP32 and will result in compiler errors.
 
 ## Hardware
 **Microcontroller:** ESP32</br>
