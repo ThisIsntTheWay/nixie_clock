@@ -1,3 +1,11 @@
+/*
+    ESP32 Nixie Clock - Webservre module
+    (c) V. Klopfenstein, 2021
+
+    This code block spawns an instance of ESPAsyncWebserver
+    Anything web-related occurs in here
+*/
+
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include "AsyncJson.h"

@@ -1,3 +1,11 @@
+/*
+    ESP32 Nixie Clock - Entrypoint
+    (c) V. Klopfenstein, 2021
+
+    This is the entrypoint of the whole program.
+    The purpose of this file is to spawn all tasks built with FreeRTOS.
+*/
+
 #include "Arduino.h"
 
 // Custom headers

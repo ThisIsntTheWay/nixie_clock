@@ -1,4 +1,14 @@
-#include <EEPROM.h>
+/*
+    ESP32 Nixie Clock - RTC module
+    (c) V. Klopfenstein, 2021
+
+    All tasks/functions in here are related to RTC initialization and usage
+    It...
+     - Inits the RTC
+     - Prepares and reads JSON configuration files related to RTC operations
+     - Regularely synchronizes the RTC with an NTP endpoint
+*/
+
 #include <RTClib.h>
 #include <Wire.h>
 #include <ArduinoJson.h>
@@ -73,11 +83,9 @@ String parseRTCconfig(int mode) {
     switch (mode) {
         case 1:
             return config.NTP;
-            Serial.println(config.NTP);
             break;
         case 2:
             return config.Mode;
-            Serial.println(config.Mode);
             break;
     }
 
@@ -149,9 +157,10 @@ void taskSetupRTC (void* parameters) {
 }
 
 void taskUpdateRTC(void* parameter) {
-    // Wait for FS mount
+    // Wait for FS mount and WiFi to be connected
     while (!FlashFSready) { vTaskDelay(500); }
-    Serial.println("[T] RTC sync: WiFi is ready.");
+    while (!WiFiReady) { vTaskDelay(500); }
+    Serial.println("[T] RTC sync: FS and WiFi is ready.");
 
     // Artificial delay to wait for network
     vTaskDelay(1000);
@@ -162,7 +171,9 @@ void taskUpdateRTC(void* parameter) {
         // Check if RTC should be synced with NTP
         bool timeClientRunning = false;
         if (parseRTCconfig(2) == "ntp") {
-            timeClient.begin();
+            if (!timeClientRunning)
+                timeClient.begin();
+                
             timeClient.forceUpdate();
 
             timeClientRunning = true;

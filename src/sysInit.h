@@ -1,3 +1,15 @@
+/*
+    ESP32 Nixie Clock - System initialization
+    (c) V. Klopfenstein, 2021
+
+    All tasks/functions in here are related to system intialization/preparation.
+    It...
+     - Connects WiFi
+     - Mounts the onboard flash FS
+    
+    The results produced by these actions are relied on by all later tasks.
+*/
+
 #include "WiFi.h"
 
 // Switch to LittleFS if needed
