@@ -1,5 +1,5 @@
 /*
-    ESP32 Nixie Clock - Webservre module
+    ESP32 Nixie Clock - Webserver module
     (c) V. Klopfenstein, 2021
 
     This code block spawns an instance of ESPAsyncWebserver

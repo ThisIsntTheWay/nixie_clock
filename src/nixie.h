@@ -2,10 +2,10 @@
     ESP32 Nixie Clock - Nixie module
     (c) V. Klopfenstein, 2021
 
-    All tasks/functions in here are related to nixie tube and bitshift operations
+    All tasks/functions in here are related to nixie tube and bitshift operations.
     It...
-     - Prepares and reads JSON configuration files related to nixie operations
-     - Regularely updates the nixie tubes
+     - Prepares and reads JSON configuration files related to nixie operations.
+     - Regularely updates the nixie tubes.
 */
 
 #ifndef nixie_h
