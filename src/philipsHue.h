@@ -2,10 +2,10 @@
     ESP32 Nixie Clock - Philips HUE module
     (c) V. Klopfenstein, 2021
 
-    All tasks/functions in here are related to interfacing with a philips HUE ecosystem
+    All tasks/functions in here are related to interfacing with a philips HUE ecosystem.
     It...
-     - Prepares and reads JSON configuration files related to philips HUE operations
-     - Interacts with a philips HUE bridge on demand
+     - Prepares and reads JSON configuration files related to philips HUE operations.
+     - Interacts with a philips HUE bridge on demand.
 */
 
 #include <sysInit.h>

@@ -2,11 +2,11 @@
     ESP32 Nixie Clock - RTC module
     (c) V. Klopfenstein, 2021
 
-    All tasks/functions in here are related to RTC initialization and usage
+    All tasks/functions in here are related to RTC initialization and usage.
     It...
      - Inits the RTC
-     - Prepares and reads JSON configuration files related to RTC operations
-     - Regularely synchronizes the RTC with an NTP endpoint
+     - Prepares and reads JSON configuration files related to RTC operations.
+     - Regularely synchronizes the RTC with an NTP endpoint.
 */
 
 #include <RTClib.h>

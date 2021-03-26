@@ -4,8 +4,8 @@
 
     All tasks/functions in here are related to system intialization/preparation.
     It...
-     - Connects WiFi
-     - Mounts the onboard flash FS
+     - Connects WiFi.
+     - Mounts the onboard flash FS.
     
     The results produced by these actions are relied on by all later tasks.
 */
