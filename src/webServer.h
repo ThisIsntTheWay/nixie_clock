@@ -186,26 +186,36 @@ void webServerStartup() {
     DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
     if (error) {
         Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-        request->send(400, "text/html", "<p style='color: red;'>Cannot deserialize JSON.</p>");
+        request->send(400, "text/html", "{'error': {'message': 'Cannot deserialize JSON!'}}");
     } else {
       rtcConfig.close();
+
+      String errMsg = String("Cannot write to config!");
+      bool InputValid = true;
 
       // Write to file based on request body
       tmpJSON["Mode"] = responseM;
 
       if (data["mode"] == "ntp") {
-        tmpJSON["NTP"] = responseV;
-      } 
+        if(validateEntry(responseV, 1, 4)) { tmpJSON["NTP"] = responseV; }
+        else {
+          InputValid = false;
+          errMsg = errMsg + String(" Server bad format.");
+        }
+      }
       else if (data["mode"] == "manual") {
         tmpJSON["manualTime"] = responseV;
         rtc.adjust(responseV);
+      } else {
+        InputValid = false;
+        errMsg = errMsg + String(" No mode specified.");
       }
 
       // Write rtcConfig.cfg
       File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
-      if (!(serializeJson(tmpJSON, rtcConfig))) {
+      if (!(serializeJson(tmpJSON, rtcConfig)) || !InputValid) {
         Serial.println(F("[X] WebServer: Config write failure."));
-        request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
+        request->send(400, "application/json", errMsg);
       } else {
         request->send(200, "text/html", "<p style='color: green;'>OK</p>");
       }
@@ -228,29 +238,11 @@ void webServerStartup() {
     const char* rON = data["ontime"];
     const char* rOFF = data["offtime"];
 
-    // Validate entry
-
-    validateEntry(rIP, 1, 4);
-    Serial.println("------ JSON RESPONSE:");
-    Serial.print(rIP);
-      Serial.print(" ");
-      int LEN = 0;
-      while (rIP[LEN] != 0) LEN++;
-      Serial.println(LEN);
-
-    Serial.print(rON);
+    /*Serial.print(rOFF);
       Serial.print(" ");
       LEN = 0;
       while (rON[LEN] != 0) LEN++;
-      Serial.println(LEN);
-
-    Serial.print(rOFF);
-      Serial.print(" ");
-      LEN = 0;
-      while (rON[LEN] != 0) LEN++;
-      Serial.println(LEN);
-
-    Serial.println("------");
+      Serial.println(LEN);*/
 
     // Serialize JSON
     String response;
@@ -263,35 +255,47 @@ void webServerStartup() {
     DeserializationError error = deserializeJson(tmpJSON, hueConfig);
     if (error) {
         Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-        request->send(400, "text/html", "<p style='color: red;'>Cannot deserialize JSON.</p>");
+        request->send(400, "text/html", "{'error': {'message': 'Cannot deserialize JSON!'}}");
     } else {
       hueConfig.close();
+
+      String errMsg = String("Cannot write to config!");
+      bool InputValid = true;
 
       // Validate entries and change if needed
       if (!(data["bridgeip"] == "NaN")) {
         if (validateEntry(rIP, 1, 7)) {
           tmpJSON["IP"] = rIP;
-        } else { Serial.println("Will not change rIP");}
+        } else {
+          InputValid = false;
+          errMsg = errMsg + String(" vrIP bad format. ");
+        }
       }
-      
+
       if (!(data["ontime"] == "NaN")) {
         if (validateEntry(rON, 1, 4)) {
           tmpJSON["toggleOnTime"] = rON;
-        } else { Serial.println("Will not change rON");}
+        } else {
+          InputValid = false;
+          errMsg = errMsg + String(" rOn bad format. ");
+        }
       }
 
       if (!(data["offtime"] == "NaN")) {
         if (validateEntry(rOFF, 1, 4)) {
           tmpJSON["toggleOffTime"] = rOFF;
-        } else { Serial.println("Will not change rOff");}
+        } else {
+          InputValid = false;
+          errMsg = errMsg + String(" rOff bad format.");
+        }
       }
 
       // Write to file based on request body
       // Write hueConfig.cfg
       File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
-      if (!(serializeJson(tmpJSON, hueConfig))) {
+      if ( !(serializeJson(tmpJSON, hueConfig)) || !InputValid ) {
         Serial.println(F("[X] WebServer: Config write failure."));
-        request->send(400, "text/html", "<p style='color: red;'>Cannot write to config.</p>");
+        request->send(400, "text/html", errMsg);
       } else {
         request->send(200, "text/html", "<p style='color: green;'>OK</p>");
       }
@@ -309,7 +313,7 @@ void webServerStartup() {
   // Error pages
   server.onNotFound([](AsyncWebServerRequest *request){
     Serial.println(F("[T] WebServer: GET - 404."));
-    request->send(404, "text/html", "<center><h1>Content not found.");
+    request->send(404, "text/html", "<center><h1>Content not found.</center</h1>");
   });
   
   // Test
