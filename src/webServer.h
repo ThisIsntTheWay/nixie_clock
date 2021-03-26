@@ -2,8 +2,8 @@
     ESP32 Nixie Clock - Webserver module
     (c) V. Klopfenstein, 2021
 
-    This code block spawns an instance of ESPAsyncWebserver
-    Anything web-related occurs in here
+    This code block spawns an instance of ESPAsyncWebserver.
+    Anything web-related occurs in here.
 */
 
 #include <AsyncTCP.h>
@@ -11,6 +11,8 @@
 #include "AsyncJson.h"
 #include <rtc.h>
 #include <philipsHue.h>
+
+#include <utilities.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -226,6 +228,30 @@ void webServerStartup() {
     const char* rON = data["ontime"];
     const char* rOFF = data["offtime"];
 
+    // Validate entry
+
+    validateEntry(rIP, 1, 4);
+    Serial.println("------ JSON RESPONSE:");
+    Serial.print(rIP);
+      Serial.print(" ");
+      int LEN = 0;
+      while (rIP[LEN] != 0) LEN++;
+      Serial.println(LEN);
+
+    Serial.print(rON);
+      Serial.print(" ");
+      LEN = 0;
+      while (rON[LEN] != 0) LEN++;
+      Serial.println(LEN);
+
+    Serial.print(rOFF);
+      Serial.print(" ");
+      LEN = 0;
+      while (rON[LEN] != 0) LEN++;
+      Serial.println(LEN);
+
+    Serial.println("------");
+
     // Serialize JSON
     String response;
     serializeJson(data, response);
@@ -241,10 +267,24 @@ void webServerStartup() {
     } else {
       hueConfig.close();
 
-      // Only change things that require changing
-      if (!(data["bridgeip"] == "NaN")) { tmpJSON["IP"] = rIP; }
-      if (!(data["ontime"] == "NaN")) { tmpJSON["toggleOnTime"] = rON; }
-      if (!(data["offtime"] == "NaN")) { tmpJSON["toggleOffTime"] = rOFF; }
+      // Validate entries and change if needed
+      if (!(data["bridgeip"] == "NaN")) {
+        if (validateEntry(rIP, 1, 7)) {
+          tmpJSON["IP"] = rIP;
+        } else { Serial.println("Will not change rIP");}
+      }
+      
+      if (!(data["ontime"] == "NaN")) {
+        if (validateEntry(rON, 1, 4)) {
+          tmpJSON["toggleOnTime"] = rON;
+        } else { Serial.println("Will not change rON");}
+      }
+
+      if (!(data["offtime"] == "NaN")) {
+        if (validateEntry(rOFF, 1, 4)) {
+          tmpJSON["toggleOffTime"] = rOFF;
+        } else { Serial.println("Will not change rOff");}
+      }
 
       // Write to file based on request body
       // Write hueConfig.cfg
