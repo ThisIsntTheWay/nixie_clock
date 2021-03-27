@@ -12,6 +12,7 @@
 #include <webServer.h>
 #include <sysInit.h>
 #include <rtc.h>
+#include <nixie.h>
 
 //  ---------------------
 //  MAIN
@@ -28,6 +29,7 @@ void setup() {
     xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
 
     xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, NULL);
+    xTaskCreate(taskUpdateNixie, "Nixie updater", 3500, NULL, 1, NULL);
 
     webServerStartup();
 
