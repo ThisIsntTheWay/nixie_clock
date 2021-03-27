@@ -185,8 +185,8 @@ void webServerStartup() {
 
     DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
     if (error) {
-        Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-        request->send(400, "text/html", "{'error': {'message': 'Cannot deserialize JSON!'}}");
+      Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+        request->send(400, "application/json", "{'status': 'error', 'message': 'Cannot deserialize JSON!'}}");
     } else {
       rtcConfig.close();
 
@@ -215,9 +215,9 @@ void webServerStartup() {
       File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
       if (!(serializeJson(tmpJSON, rtcConfig)) || !InputValid) {
         Serial.println(F("[X] WebServer: Config write failure."));
-        request->send(400, "application/json", errMsg);
+        request->send(400, "application/json", "{'status': 'error', 'message': '" + errMsg + "'}}");
       } else {
-        request->send(200, "text/html", "<p style='color: green;'>OK</p>");
+        request->send(200, "application/json", "{'status': 'success', 'message': 'Config was updated.'}}");
       }
     }
 
@@ -254,8 +254,8 @@ void webServerStartup() {
 
     DeserializationError error = deserializeJson(tmpJSON, hueConfig);
     if (error) {
-        Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-        request->send(400, "text/html", "{'error': {'message': 'Cannot deserialize JSON!'}}");
+      Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+        request->send(400, "application/json", "{'status': 'error', 'message': 'Cannot deserialize JSON!'}}");
     } else {
       hueConfig.close();
 
@@ -295,9 +295,9 @@ void webServerStartup() {
       File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
       if ( !(serializeJson(tmpJSON, hueConfig)) || !InputValid ) {
         Serial.println(F("[X] WebServer: Config write failure."));
-        request->send(400, "text/html", errMsg);
+        request->send(400, "application/json", "{'status': 'error', 'message': '" + errMsg + "'}}");
       } else {
-        request->send(200, "text/html", "<p style='color: green;'>OK</p>");
+        request->send(200, "application/json", "{'status': 'success', 'message': 'Config was updated.'}}");
       }
     }
 
@@ -318,7 +318,7 @@ void webServerStartup() {
   
   // Test
   server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(200, "text/plain", "server OK.");
+        request->send(200, "application/json", "{'status': 'success', 'message': 'Server is OK.'}}");
   });
 
   // Start the webserver
