@@ -43,17 +43,24 @@ struct rtcConfigStruct {
 
 struct rtcConfigStruct config;
 
+bool RTCready = false;
+
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
 
 String getTime() {
     // Assemble datetime string
-    char buf1[20];
-    DateTime now = rtc.now();
-    sprintf(buf1, "%02d:%02d:%02d %02d/%02d/%02d",  now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
 
-    return buf1;
+    if (!RTCready) {
+        return String("RTC not ready.");
+    } else {
+        char buf1[20];
+        DateTime now = rtc.now();
+        sprintf(buf1, "%02d:%02d:%02d %02d/%02d/%02d",  now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
+
+        return buf1;
+    }
 }
 
 String parseRTCconfig(int mode) {
@@ -105,12 +112,15 @@ void taskSetupRTC (void* parameters) {
         vTaskDelay(500);
     }
 
-    if (! rtc.begin())
-        Serial.println("[X] RTC: No module found.");
+    if (!rtc.begin()) {
+        Serial.println(F("[X] RTC: No module found."));
+        Serial.println(F("[X] RTC: Aborting..."));
+        vTaskDelete(NULL);
+    } else { RTCready = true; }
     
     // Set RTC datetime if it hasn't been running yet
     if (! rtc.isrunning()) {
-        Serial.println("[i] RTC: Toggling module.");
+        Serial.println("[i] RTC: Module offline, turning on...");
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 
