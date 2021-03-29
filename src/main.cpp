@@ -9,10 +9,10 @@
 #include "Arduino.h"
 
 // Custom headers
-#include <webServer.h>
-#include <sysInit.h>
-#include <rtc.h>
-#include <nixie.h>
+#include <system/webServer.h>
+#include <system/rtc.h>
+#include <system/nixie.h>
+#include <utils/sysInit.h>
 
 //  ---------------------
 //  MAIN

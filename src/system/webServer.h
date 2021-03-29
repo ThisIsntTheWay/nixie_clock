@@ -9,10 +9,10 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include "AsyncJson.h"
-#include <rtc.h>
-#include <philipsHue.h>
 
-#include <utilities.h>
+#include <system/rtc.h>
+#include <system/philipsHue.h>
+#include <utils/utilities.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS

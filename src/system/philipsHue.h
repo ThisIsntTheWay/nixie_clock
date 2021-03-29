@@ -8,7 +8,7 @@
      - Interacts with a philips HUE bridge on demand.
 */
 
-#include <sysInit.h>
+#include <utils/sysInit.h>
 #include <ArduinoJson.h>
 
 #ifndef philipsHue_h

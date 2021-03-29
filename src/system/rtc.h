@@ -13,7 +13,7 @@
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include <NTPClient.h>
-#include <sysInit.h>
+#include <utils/sysInit.h>
 
 #ifndef rtc_h
 #define rtc_h

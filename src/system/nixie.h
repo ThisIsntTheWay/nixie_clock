@@ -9,7 +9,7 @@
 */
 
 #include <arduino.h>
-#include <rtc.h>
+#include <system/rtc.h>
 #ifndef nixie_h
 #define nixie_h
 
@@ -80,12 +80,12 @@ void taskUpdateNixie(void* parameter) {
     for (;;) {
         
         // Periodically display time
-        if (lastMinute != now.minute();) {
+        if (lastMinute != now.minute()) {
             Serial.println(F("[T] Nixie: Updating minutes..."));
 
             int lastMinute = now.minute();
             displayNumber(now.hour(), now.minute());
-        } else if (lastHour != now.hour();) {
+        } else if (lastHour != now.hour()) {
             Serial.println(F("[T] Nixie: Updating hours..."));
             
             int lastHour = now.minute();
