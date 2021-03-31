@@ -1,7 +1,7 @@
-// Bitshift pins
-#define DS_PIN 32   // Latch
-#define SH_CP 33    // Clock
-#define ST_CP 25    // Data
+
+#define DS_PIN 19   // Latch | ST_CP
+#define SH_CP 18    // Clock | SH_CP
+#define ST_CP 23    // Data  | DS
 
 int i = 0;
 
@@ -37,24 +37,26 @@ void displayNumber(int number_1, int number_2) {//, int number_3, int number_4) 
     // Push to shift registers
     digitalWrite(DS_PIN, LOW);
     shiftOut(ST_CP, SH_CP, MSBFIRST, (n1 << 4) | n2);
+    //shiftOut(ST_CP, SH_CP, LSBFIRST, n2);
     digitalWrite(DS_PIN, HIGH);
 }
 
 void setup() {
   Serial.begin(115200);
   pinMode(DS_PIN, OUTPUT);
+  pinMode(SH_CP, OUTPUT);
+  pinMode(ST_CP, OUTPUT);
 }
 
 void loop() {
   i++;
   
-  if (i > 8)
+  if (i > 9)
     i = 0;
 
   Serial.println(i);
   
-  displayNumber(i,i);
+  displayNumber(i,i+1);
 
-  delay(500);
+  delay(2000);
 }
-
