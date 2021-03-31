@@ -18,9 +18,9 @@
 //  ---------------------
 
 // Bitshift pins
-#define DS_PIN 32   // Latch
-#define SH_CP 33    // Clock
-#define ST_CP 25    // Data
+#define DS_PIN 19   // Latch | ST_CP
+#define SH_CP 18    // Clock | SH_CP
+#define ST_CP 23    // Data  | DS
 
 byte data;
 
