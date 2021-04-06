@@ -71,6 +71,7 @@ String parseHUEconfig(int mode) {
 // Dispatch POST
 char sendHUELightReq(int lightID, bool state) {
     // Init connection to HUE bridge
+    // Ref: https://developers.meethue.com/develop/get-started-2/
     String URI = "http://" + parseHUEconfig(1) + "/api/1028d66426293e821ecfd9ef1a0731df/lights/" + lightID;
     char* request = "";
     http.begin(URI);
@@ -81,6 +82,9 @@ char sendHUELightReq(int lightID, bool state) {
         case false: char* request = "{\"on\":false}"; break;
         case true: char* request = "{\"on\":true}"; break;
     }
+
+    // Potentially of interest:
+    // https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
     int httpResponse = http.PUT(request);
 
