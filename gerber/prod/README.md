@@ -4,7 +4,7 @@ This directory contains gerber files ready for production.
 ## Iterations
 A quick summary about all PCB revisions.
 ### Iteration 1 - 19.10.2020
-Removed due to superior designs.
+Removed due to superior designs.  
 ![PCB Rev1](https://i.imgur.com/5bnLabF.png)
 
 ### Iteration 2 - 05.04.2021
