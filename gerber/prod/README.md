@@ -22,12 +22,12 @@ Both boards are designed to be connected using a 20-pin IDC connector.
 #### nixie_clock_prod_rev2.zip (WIP)
 The same principle as revision 1, this time with considerable changes though:
 - Increased clearances.
-- Improved 0.1uF cap placement by DS3231.
+- Changed RTC battery holder to a THT variant.
+- Improved cap placement by RTC IC.
 - Removed duplicate tracks - mostly GND.
-- Expanded GND plane in logic unit/bottom PCB.
+- Expanded GND plane in logic unit.
 - Improved all copper areas.
-- Added an additional 12V and GND pin directly connected to the PSU.
-- Exchanged the LM2575T with an MC7805CTG.
-  - This has led to a decrease in layout complexity and amount of parts.
-
+- Exposed an additional 12V and GND trace.
+- Swapped the LM2575T with an MC7805CTG.
+  - Reasons being less layout complexity and components cost.
 ![PCB Rev2](https://i.imgur.com/CQF3Qro.png)
