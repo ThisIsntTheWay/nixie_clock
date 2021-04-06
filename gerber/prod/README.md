@@ -20,4 +20,3 @@ The logic unit (lower part) houses the following systems:
 Both boards are designed to be connected using a 20-pin IDC connector.
 170V power must be sourced externally.
 ![PCB Rev1](https://i.imgur.com/M2vcEAB.png)
-
