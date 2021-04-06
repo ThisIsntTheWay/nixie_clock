@@ -10,6 +10,7 @@
 
 #include <utils/sysInit.h>
 #include <ArduinoJson.h>
+#include <HTTPClient.h>
 
 #ifndef philipsHue_h
 #define philipsHue_h
@@ -17,6 +18,8 @@
 //  ---------------------
 //  VARIABLES
 //  ---------------------
+
+HTTPClient http;
 
 // Structs
 struct hueConfigStruct {
@@ -63,6 +66,30 @@ String parseHUEconfig(int mode) {
     }
 
     return String();
+}
+
+// Dispatch POST
+char sendHUELightReq(int lightID, bool state) {
+    // Init connection to HUE bridge
+    String URI = "http://" + parseHUEconfig(1) + "/api/1028d66426293e821ecfd9ef1a0731df/lights/" + lightID;
+    char* request = "";
+    http.begin(URI);
+
+    // POST and return response
+    http.addHeader("Content-Type", "application/json");
+    switch (state) {
+        case false: char* request = "{\"on\":false}"; break;
+        case true: char* request = "{\"on\":true}"; break;
+    }
+
+    int httpResponse = http.PUT(request);
+
+    //Serial.print(F("[i] HUE: HTTP Response: "));
+    //    Serial.println(httpResponse);
+
+    http.end();
+
+    return httpResponse;
 }
 
 //  ---------------------
