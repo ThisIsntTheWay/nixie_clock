@@ -30,7 +30,7 @@ byte data;
 
 // The following function was inspired by:
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
-void displayNumber(int number_1, int number_2) {//, int number_3, int number_4) {
+void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     byte n1, n2, n3, n4;
 
     switch (number_1) {
@@ -59,7 +59,7 @@ void displayNumber(int number_1, int number_2) {//, int number_3, int number_4) 
         case 9: n2 = 0b1001; break;
     }
 
-    /*switch (number_3) {
+    switch (number_3) {
         case 0: n3 = 0b0000; break;
         case 1: n3 = 0b1000; break;
         case 2: n3 = 0b0100; break;
@@ -83,7 +83,7 @@ void displayNumber(int number_1, int number_2) {//, int number_3, int number_4) 
         case 7: n4 = 0b1110; break;
         case 8: n4 = 0b0001; break;
         case 9: n4 = 0b1001; break;
-    }*/
+    }
 
     // Push to shift registers
     digitalWrite(DS_PIN, LOW);
@@ -116,12 +116,12 @@ void taskUpdateNixie(void* parameter) {
             Serial.println(F("[T] Nixie: Updating minutes..."));
 
             lastMinute = now.minute();
-            displayNumber(now.hour(), now.minute());
+            displayNumber(now.hour(), now.minute(), 0, 0);
         } else if (lastHour != now.hour()) {
             Serial.println(F("[T] Nixie: Updating hours..."));
             
             lastHour = now.minute();
-            displayNumber(now.hour(), now.minute());
+            displayNumber(now.hour(), now.minute(), 0, 0);
         } else {
             Serial.println(F("[T] Nixie: Idle..."));
         }
