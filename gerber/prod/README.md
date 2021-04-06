@@ -14,7 +14,7 @@ The logic unit (lower part) houses the following systems:
 - ESP32-WROOM-32, DS3231.
 - 12VDC > 5V step-down using a fixed value LM2575T.
 
-Both boards are designed to be connected using a 20-pin IDC connector.
+Both boards are designed to be connected using a 20-pin IDC connector.  
 170V power must be sourced externally.
 ![PCB Rev1](https://i.imgur.com/M2vcEAB.png)
 
