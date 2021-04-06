@@ -29,4 +29,5 @@ The same principle as revision 1, this time with considerable changes though:
 - Added an additional 12V and GND pin directly connected to the PSU.
 - Exchanged the LM2575T with an MC7805CTG.
   - This has led to a decrease in layout complexity and amount of parts.
+
 ![PCB Rev2](https://i.imgur.com/CQF3Qro.png)
