@@ -45,6 +45,7 @@ Software-wise, the following features have been implemented so far:
  - [X] Implement webserver.
  - [X] Implement RTC.
  - [X] Implement config files.
+ - [X] Implement HUE API.
  - [X] Change configs from webGUI.
  - [ ] Implement proper manual time control.
  - [x] Implement nixie logic.
