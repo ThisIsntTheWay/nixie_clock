@@ -107,25 +107,20 @@ void taskUpdateNixie(void* parameter) {
     
     Serial.println(F("[T] Nixie: Spawning nixie updater..."));
     for (;;) {
-        /*Serial.print(F("[T] Nixie: Time is: "));
-            Serial.print(now.hour());
-            Serial.print("/");
-            Serial.println(now.minute());
-        Serial.print(F("[T] Nixie: Last time is: "));
-            Serial.print(lastHour);
-            Serial.print("/");
-            Serial.println(lastMinute);*/
+        DateTime rtcDT = rtc.now();
         
         // Periodically display time
         if (lastMinute != rtcDT.minute()) {
-            Serial.println(F("[T] Nixie: Updating minutes..."));
+            Serial.print(F("[T] Nixie: Updating! last minute was: "));
+            Serial.print(lastMinute); Serial.print(", now: "); Serial.println(rtcDT.minute());
 
             lastMinute = rtcDT.minute();
             displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
         } else if (lastHour != rtcDT.hour()) {
-            Serial.println(F("[T] Nixie: Updating hours..."));
+            Serial.print(F("[T] Nixie: Updating! last hour was: "));
+            Serial.print(lastHour); Serial.print(", now: "); Serial.println(rtcDT.hour());
             
-            lastHour = rtcDT.minute();
+            lastHour = rtcDT.hour();
             displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
         }
 
