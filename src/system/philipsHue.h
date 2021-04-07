@@ -71,8 +71,6 @@ String parseHUEconfig(int mode) {
 int getHueLightIndex() {
     // Acquire JSON response from HUE bridge
     String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights";
-    Serial.print("HUE LIGHT INDEX URI: ");
-        Serial.println(URI);
 
     http.useHTTP10(true);
     http.begin(URI);
@@ -103,7 +101,7 @@ char sendHUELightReq(int lightID, bool state) {
     // Init connection to HUE bridge
     // Ref: https://developers.meethue.com/develop/get-started-2/
     String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights/" + lightID + "/state";
-    Serial.println(URI);
+        //Serial.println(URI);
 
     http.begin(URI);
 
@@ -116,8 +114,8 @@ char sendHUELightReq(int lightID, bool state) {
 
     int httpResponse = http.PUT(request);
 
-    Serial.print("[i] HUE: HTTP Response: ");
-        Serial.println(httpResponse);
+    /*Serial.print("[i] HUE: HTTP Response: ");
+        Serial.println(httpResponse);*/
 
     http.end();
 
@@ -141,9 +139,8 @@ void taskSetupHUE(void* paramter) {
     if (!(LITTLEFS.exists("/config/hueConfig.json"))) {
         Serial.println("[T] HUE: No config found.");
         
-        if (!LITTLEFS.exists("/config")) {
+        if (!LITTLEFS.exists("/config"))
             LITTLEFS.mkdir("/config");
-        }
 
         File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
 
@@ -156,15 +153,11 @@ void taskSetupHUE(void* paramter) {
         cfgHUE["toggleOffTime"] = "1800";
 
         // Write config file
-        if (!(serializeJson(cfgHUE, hueConfig))) {
+        if (!(serializeJson(cfgHUE, hueConfig)))
             Serial.println(F("[X] HUE: Config write failure."));
-        }
 
         hueConfig.close();
         Serial.println(F("[>] HUE: Config created."));
-    } else {
-        // ToDo: Check if RTC is behind NTP time
-        Serial.println(F("[T] HUE: Config found!"));
     }
 
     vTaskDelete(NULL);

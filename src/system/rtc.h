@@ -128,9 +128,8 @@ void taskSetupRTC (void* parameters) {
     if (!(LITTLEFS.exists("/config/rtcConfig.json"))) {
         Serial.println(F("[T] RTC: No config found."));
         
-        if (!LITTLEFS.exists("/config")) {
+        if (!LITTLEFS.exists("/config"))
             LITTLEFS.mkdir("/config");
-        }
 
         File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
 
@@ -143,9 +142,8 @@ void taskSetupRTC (void* parameters) {
         cfgRTC["Mode"] = "ntp";
 
         // Write rtcConfig.cfg
-        if (!(serializeJson(cfgRTC, rtcConfig))) {
+        if (!(serializeJson(cfgRTC, rtcConfig)))
             Serial.println(F("[X] RTC: Config write failure."));
-        }
 
         rtcConfig.close();
 
@@ -155,9 +153,6 @@ void taskSetupRTC (void* parameters) {
 
         // Set time on RTC
         Serial.println(F("[>] RTC: Config created."));
-    } else {
-        // ToDo: Check if RTC is behind NTP time
-        Serial.println(F("[T] RTC: Config found!"));
     }
     
     vTaskDelete(NULL);
@@ -189,7 +184,6 @@ void taskUpdateRTC(void* parameter) {
             long ntpTime = timeClient.getEpochTime();
             long epochDiff = ntpTime - rtc.now().unixtime();
 
-
             // Sync if epoch time differs too greatly from NTP and RTC
             if (epochDiff < -5 || epochDiff > 5) {
                 Serial.print("[T] RTC sync: Epoch discrepancy: ");
@@ -199,7 +193,8 @@ void taskUpdateRTC(void* parameter) {
         } else {
             Serial.println("[T] RTC sync: In manual mode.");
             // Terminate NTP client
-            if (timeClientRunning) { timeClient.end(); }
+            if (timeClientRunning)
+                timeClient.end();
         }
 
         vTaskDelay(5000);
