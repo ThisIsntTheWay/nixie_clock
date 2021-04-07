@@ -88,12 +88,9 @@ String parseRTCconfig(int mode) {
     rtcConfig.close();
 
     switch (mode) {
-        case 1:
-            return config.NTP;
-            break;
-        case 2:
-            return config.Mode;
-            break;
+        case 1: return config.NTP; break;
+        case 2: return config.Mode; break;
+        default: return "[RTC parser: wrong param]";
     }
 
     return String();
