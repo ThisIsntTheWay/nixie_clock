@@ -137,6 +137,19 @@ void webServerStartup() {
         Serial.println("[X] WebServer: GET /hue - No local ressource.");
       }
   });
+  
+  // Debug interface
+  server.on("/debug", HTTP_GET, [](AsyncWebServerRequest *request) {
+      Serial.println(F("[T] WebServer: GET /debug."));
+
+      String f = "/html/debug.html";
+
+      if(LITTLEFS.exists(f)) {
+        request->send(LITTLEFS, f, String(), false, processor);
+      } else {
+        Serial.println("[X] WebServer: GET /debug - No local ressource.");
+      }
+  });
 
   // Serve favicon
   server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
