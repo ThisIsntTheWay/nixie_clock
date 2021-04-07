@@ -100,9 +100,10 @@ void taskUpdateNixie(void* parameter) {
     pinMode(DS_PIN, OUTPUT);
 
     while (!RTCready) { vTaskDelay(1000); }
-    DateTime now = rtc.now();
-    int lastMinute = now.minute();
-    int lastHour = now.hour();
+    DateTime rtcDT = rtc.now();
+
+    int lastMinute = rtcDT.minute();
+    int lastHour = rtcDT.hour();
     
     Serial.println(F("[T] Nixie: Spawning nixie updater..."));
     for (;;) {
@@ -116,16 +117,16 @@ void taskUpdateNixie(void* parameter) {
             Serial.println(lastMinute);*/
         
         // Periodically display time
-        if (lastMinute != now.minute()) {
+        if (lastMinute != rtcDT.minute()) {
             Serial.println(F("[T] Nixie: Updating minutes..."));
 
-            lastMinute = now.minute();
-            displayNumber(now.hour(), now.minute(), 0, 0);
-        } else if (lastHour != now.hour()) {
+            lastMinute = rtcDT.minute();
+            displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
+        } else if (lastHour != rtcDT.hour()) {
             Serial.println(F("[T] Nixie: Updating hours..."));
             
-            lastHour = now.minute();
-            displayNumber(now.hour(), now.minute(), 0, 0);
+            lastHour = rtcDT.minute();
+            displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
         }
 
         vTaskDelay(3000);
