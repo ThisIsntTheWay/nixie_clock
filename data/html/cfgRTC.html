@@ -41,13 +41,18 @@
 					responseText.innerHTML = message;
 
 				};
+
+				var gmt = document.getElementById("gmt").value;
+				var dst = document.getElementById("dst").value;
 				
 				// Dispatch POST request
 				if(document.getElementById("ntp_control").checked) {
 					var tmp = document.getElementById("ntp_source").value;
 					xhr.send(JSON.stringify({
 						"mode": "ntp",
-						"value": tmp
+						"value": tmp,
+						"gmt": gmt,
+						"dst": dst
 					}));
 				} else if (chMAN = document.getElementById("manual_control").checked) {
 					var tmp = document.getElementById("manual_time").value;
@@ -70,20 +75,22 @@
 			(As of page load)<p><br>
 			
 			Current mode: <b>%TIME_MODE%</b><br>
-			NTP Server: <b>%NTP_SOURCE%</b><br><br>
+			NTP server: <b>%NTP_SOURCE%</b><br>
+			GMT value: <b>%GMT_VAL%</b><br>
+			DST value: <b>%DST_VAL%</b><br><br>
 			
-			Set time source:<br>			
+			Set time source:<br>
 			<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>
 			<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual<br>
 			<br>
 			
 			<span id="ntp_config">
-				Set NTP server:
-				<input type="numeric" size="16" id="ntp_source" value=""/><br>
+				Set NTP server: <input type="numeric" size="16" id="ntp_source" value=""/><br>
+				GMT offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
+				DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>	
 			</span>
 			<span id="manual_config">
-				Set manual time:
-				<input type="numeric" size="16" id="manual_time" value=""/><br>
+				Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>
 			</span>
 			<br>
 			<input type="submit" value="Apply" onclick="submit()"></input>
