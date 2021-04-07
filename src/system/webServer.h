@@ -12,7 +12,6 @@
 
 #include <system/rtc.h>
 #include <system/philipsHue.h>
-#include <utils/utilities.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -191,7 +190,7 @@ void webServerStartup() {
     DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
     if (error) {
       Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-      request->send(400, "application/json", "{'status': 'error', 'message': 'Cannot deserialize JSON!'}");
+      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Cannot deserialize JSON!\"}");
     } else {
       rtcConfig.close();
 
@@ -205,17 +204,17 @@ void webServerStartup() {
       int e = 0;
       if (data["mode"] == "ntp") {
         if (data.containsKey("value")) {
-          if (validateEntry(rV, 1, 4)) { tmpJSON["NTP"] = rV; }
+          if (String(rV).length() < 4) { tmpJSON["NTP"] = rV; }
           else { InputValid = false; errMsg = errMsg + String(" Server bad format."); }
         } else { e++; }
         
         if (data.containsKey("gmt")) {
-          if (validateEntry(rGMT, 2, 4)) { tmpJSON["GMT"] = rGMT; }
+          if (String(rGMT).length() > 4) { tmpJSON["GMT"] = rGMT; }
           else { InputValid = false; errMsg = errMsg + String(" GMT bad format."); }
         } else { e++; }
 
         if (data.containsKey("dst")) {
-          if (validateEntry(rDST, 2, 4)) { tmpJSON["DST"] = rDST; }
+          if (String(rDST).length() > 4) { tmpJSON["DST"] = rDST; }
           else { InputValid = false; errMsg = errMsg + String(" DST bad format."); }
         } else { e++; } 
       }
@@ -236,9 +235,9 @@ void webServerStartup() {
       File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
       if (!(serializeJson(tmpJSON, rtcConfig)) || !InputValid) {
         Serial.println(F("[X] WebServer: Config write failure."));
-        request->send(400, "application/json", "{'status': 'error', 'message': '" + errMsg + "'}");
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
-        request->send(200, "application/json", "{'status': 'success', 'message': 'Config was updated.'}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
       }
     }
 
@@ -280,7 +279,7 @@ void webServerStartup() {
     DeserializationError error = deserializeJson(tmpJSON, hueConfig);
     if (error) {
       Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-        request->send(400, "application/json", "{'status': 'error', 'message': 'Cannot deserialize JSON!'}");
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Cannot deserialize JSON!\"}");
     } else {
       hueConfig.close();
 
@@ -292,7 +291,7 @@ void webServerStartup() {
       int e = 0;
       if (data.containsKey("bridgeip")) {
         if (!(data["bridgeip"] == "NaN")) {
-          if (validateEntry(rIP, 1, 7)) { tmpJSON["IP"] = rIP; }
+          if (String(rIP).length() < 7) { tmpJSON["IP"] = rIP; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rIP bad format. ");
@@ -302,7 +301,7 @@ void webServerStartup() {
       
       if (data.containsKey("apiuser")) {
         if (!(data["apiuser"] == "NaN")) {
-          if (validateEntry(rUSR, 1, 7)) { tmpJSON["user"] = rUSR; }
+          if (String(rUSR).length() < 7) { tmpJSON["user"] = rUSR; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rUSR bad format. ");
@@ -312,7 +311,7 @@ void webServerStartup() {
 
       if (data.containsKey("ontime")) {
         if (!(data["ontime"] == "NaN")) {
-          if (validateEntry(rON, 1, 4)) { tmpJSON["toggleOnTime"] = rON; }
+          if (String(rON).length() < 4) { tmpJSON["toggleOnTime"] = rON; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOn bad format. ");
@@ -322,7 +321,7 @@ void webServerStartup() {
 
       if (data.containsKey("offtime")) {
         if (!(data["offtime"] == "NaN")) {
-          if (validateEntry(rOFF, 1, 4)) { tmpJSON["toggleOffTime"] = rOFF; }
+          if (String(rON).length() < 4) { tmpJSON["toggleOffTime"] = rOFF; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOff bad format.");
@@ -331,13 +330,13 @@ void webServerStartup() {
       } else { e++; Serial.println("rOff validation failure.");}
 
       // Write to file based on request body
-      // Produce error if 'e' is equal to 4, InputValid is false or JSON could not get serialized
+      // Produce error if \"e\" is equal to 4, InputValid is false or JSON could not get serialized
       File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
       if ( !(serializeJson(tmpJSON, hueConfig)) || !InputValid || (e == 4)) {
         Serial.println(F("[X] WebServer: Config write failure."));
-        request->send(400, "application/json", "{'status': 'error', 'message': '" + errMsg + "'}");
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
-        request->send(200, "application/json", "{'status': 'success', 'message': 'Config was updated.'}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
       }
     }
 
@@ -353,34 +352,38 @@ void webServerStartup() {
 
   server.on("/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (parseRTCconfig(2) == "ntp") {
-      NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+      Serial.println("[T] WebServer: Enforcing RTC sync.");
 
+      NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
       timeClient.begin();
       timeClient.forceUpdate();
 
-      request->send(200, "application/json", "{'status': 'success', 'epoch': " + String(timeClient.getEpochTime()) + "}");
+      long ntpTime = timeClient.getEpochTime();
+      rtc.adjust(DateTime(ntpTime));
+
+      request->send(200, "application/json", "{\"status\": \"success\", \"epoch\": " + String(ntpTime) + "}");
       timeClient.end();
     } else {
-      request->send(400, "application/json", "{'status': 'error', 'message': 'No sync in manual mode.'}");
+      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"NTP is disabled.\"}");
     }
   });
 
   server.on("/getHUEindex", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", "{'status': 'success', 'lightsAmount': " + String(getHueLightIndex()) + "}");
+    request->send(200, "application/json", "{\"status\": \"success\", \"lightsAmount\": " + String(getHueLightIndex()) + "}");
   });
 
   server.on("/turnOffHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
     int l = getHueLightIndex();
     for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
 
-    request->send(200, "application/json", "{'status': 'success', 'message': 'OK'}");
+    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
   });
 
   server.on("/turnOnHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
     int l = getHueLightIndex();
     for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
 
-    request->send(200, "application/json", "{'status': 'success', 'message': 'OK'}");
+    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
   });
 
   // ----------------------------
