@@ -11,7 +11,7 @@
 		<script type="text/javascript">
 			var message = null;
 			
-			window.onload = function() {				
+			window.onload = function() {			
 				document.getElementById("ntp_config").style.display = "none";
 				document.getElementById("manual_config").style.display = "none";
 			}
@@ -25,21 +25,34 @@
 				dvNTP.style.display = chkNTP.checked ? "block" : "none";
 				dvMAN.style.display = chMAN.checked ? "block" : "none";
 			}
+
+			function forceSync() {
+				var responseText = document.getElementById('response');	
+				var xhr = new XMLHttpRequest();
+				
+				xhr.open("GET", "/RTCsync", true);
+				
+				// Display server response at HTML element with ID 'response'
+				xhr.onload = (res) => {
+					message = res['target']['response'];
+					responseText.innerHTML = message;
+				};
+
+				xhr.send();
+			}
 			
 			function submit() {
-				// Form POST request
 				var responseText = document.getElementById('response');
 				var xhr = new XMLHttpRequest();
 				
+				// Form POST request
 				xhr.open("POST", "/RTCendpoint", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
 				
 				// Display server response at HTML element with ID 'response'
 				xhr.onload = (res) => {
-					console.log(res['target']['response']);
 					message = res['target']['response'];
 					responseText.innerHTML = message;
-
 				};
 				
 				// Dispatch POST request
@@ -51,7 +64,8 @@
 					var gmt = document.getElementById("gmt").value;
 					var dst = document.getElementById("dst").value;
 
-					if (ntp_source) {obj.source = ntp_source}
+					// Only include non-empty values
+					if (ntp_source) {obj.value = ntp_source}
 					if (gmt) {obj.gmt = gmt}
 					if (dst) {obj.dst = dst}
 
@@ -64,8 +78,6 @@
 						"value": tmp
 					}));
 				}
-				
-				//location.reload();
 			}
 		</script>
 	</head>
@@ -75,7 +87,8 @@
 		<div>
 			<h3>Change RTC settings</h3>
 			Current time: <b>%RTC_TIME%</b><br>
-			(As of page load)<p><br>
+			(As of page load)<br>
+			<a href="#" onclick="forceSync()">Enforce sync</a><p><br>
 			
 			Current mode: <b>%TIME_MODE%</b><br>
 			NTP server: <b>%NTP_SOURCE%</b><br>
@@ -95,7 +108,6 @@
 			<span id="manual_config">
 				Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>
 			</span>
-			<br>
 			<input type="submit" value="Apply" onclick="submit()"></input>
 			<p id="response"></p>
 		</div>
