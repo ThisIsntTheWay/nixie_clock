@@ -190,7 +190,7 @@ void taskUpdateRTC(void* parameter) {
 
             // Sync if epoch time differs too greatly from NTP and RTC
             // Also ignore discrepancy if its difference is way too huge, indicating a bad NTP sync
-            if ((epochDiff < -10 || epochDiff > 10) && (epochDiff < -1000000 || epochDiff > 1000000)) {
+            if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
                 Serial.print("[T] RTC sync: Clearing epoch discrepancy: ");
                     Serial.println(epochDiff);
                 rtc.adjust(DateTime(ntpTime));
