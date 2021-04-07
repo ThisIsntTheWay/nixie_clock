@@ -37,10 +37,10 @@ AsyncWebServer server(80);
 
 // Replace placeholders in HTML files
 String processor(const String& var) {
-  Serial.print("PROCESSOR: ");
-    Serial.println(var);
+  /*Serial.print("PROCESSOR: ");
+    Serial.println(var);*/
 
-  // Unfortunately, var can only be handled with if conditions in this scenario.
+  // Unfortunately, var can only be handled withlots of if conditions:
   // A switch..case statement cannot be used with datatype "string".
   if (var == "TIME" || var == "RTC_TIME") {
     return getTime();
@@ -71,8 +71,7 @@ String processor(const String& var) {
     return parseHUEconfig(4);
 
   } else if (var == "TUBES_DISPLAY") { // Hue toggle off time
-    String dummy = "1 2 3 4";
-    return dummy;
+    return "Not implemented";
   }
 
   return String();
@@ -196,28 +195,29 @@ void webServerStartup() {
     } else {
       rtcConfig.close();
 
-      String errMsg = String("Cannot write to config!");
+      String errMsg = String("Failure!");
       bool InputValid = true;
 
       // Write to file based on request body
       tmpJSON["Mode"] = rM;
 
       // NTP mode
+      int e = 0;
       if (data["mode"] == "ntp") {
         if (data.containsKey("value")) {
           if (validateEntry(rV, 1, 4)) { tmpJSON["NTP"] = rV; }
           else { InputValid = false; errMsg = errMsg + String(" Server bad format."); }
-        }
+        } else { e++; }
         
         if (data.containsKey("gmt")) {
-          if (validateEntry(rGMT, 1, 4)) { tmpJSON["GMT"] = rGMT; }
+          if (validateEntry(rGMT, 2, 4)) { tmpJSON["GMT"] = rGMT; }
           else { InputValid = false; errMsg = errMsg + String(" GMT bad format."); }
-        }
+        } else { e++; }
 
         if (data.containsKey("dst")) {
-          if (validateEntry(rDST, 1, 4)) { tmpJSON["DST"] = rDST; }
+          if (validateEntry(rDST, 2, 4)) { tmpJSON["DST"] = rDST; }
           else { InputValid = false; errMsg = errMsg + String(" DST bad format."); }
-        }   
+        } else { e++; } 
       }
 
       // Manual mode
@@ -228,6 +228,9 @@ void webServerStartup() {
         InputValid = false;
         errMsg = errMsg + String(" No mode specified.");
       }
+
+      // Handle empty request body
+      if (e == 3) { InputValid = false; errMsg = errMsg + String(" Expected fields are empty.");}
 
       // Write rtcConfig.cfg
       File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "w");
@@ -343,6 +346,24 @@ void webServerStartup() {
     Serial.println(response);
   });
   server.addHandler(huehandler);
+
+  // ----------------------------
+  // Executors
+  // ----------------------------
+
+  server.on("/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (parseRTCconfig(2) == "ntp") {
+      NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+
+      timeClient.begin();
+      timeClient.forceUpdate();
+
+      request->send(200, "application/json", "{'status': 'success', 'epoch': " + String(timeClient.getEpochTime()) + "}");
+      timeClient.end();
+    } else {
+      request->send(400, "application/json", "{'status': 'error', 'message': 'No sync in manual mode.'}");
+    }
+  });
 
   server.on("/getHUEindex", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "application/json", "{'status': 'success', 'lightsAmount': " + String(getHueLightIndex()) + "}");
