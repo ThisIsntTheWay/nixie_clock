@@ -16,7 +16,7 @@ int validateEntry(const char *input, const int mode, const int versus) {
 
     switch (mode) {
         // Verify length
-        // Return FALSE if less than versus
+        // Return FALSE if length if less than versus
         case 1:
             if (inString.length() < versus)
                 out = 0;
