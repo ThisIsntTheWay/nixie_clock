@@ -106,10 +106,14 @@ void taskUpdateNixie(void* parameter) {
     
     Serial.println(F("[T] Nixie: Spawning nixie updater..."));
     for (;;) {
-        Serial.print(F("[T] Nixie: lastHour: "));
-            Serial.println(lastHour);
-        Serial.print(F("[T] Nixie: lastMinute: "));
-            Serial.println(lastMinute);
+        /*Serial.print(F("[T] Nixie: Time is: "));
+            Serial.print(now.hour());
+            Serial.print("/");
+            Serial.println(now.minute());
+        Serial.print(F("[T] Nixie: Last time is: "));
+            Serial.print(lastHour);
+            Serial.print("/");
+            Serial.println(lastMinute);*/
         
         // Periodically display time
         if (lastMinute != now.minute()) {
@@ -122,8 +126,6 @@ void taskUpdateNixie(void* parameter) {
             
             lastHour = now.minute();
             displayNumber(now.hour(), now.minute(), 0, 0);
-        } else {
-            Serial.println(F("[T] Nixie: Idle..."));
         }
 
         vTaskDelay(3000);
