@@ -166,7 +166,7 @@ void taskUpdateRTC(void* parameter) {
     // Wait for FS mount and WiFi to be connected
     while (!FlashFSready) { vTaskDelay(500); }
     while (!WiFiReady) { vTaskDelay(500); }
-    Serial.println("[T] RTC sync: FS and WiFi is ready.");
+    Serial.println("[T] RTC sync: FS and WiFi both ready.");
 
     // Artificial delay to wait for network
     vTaskDelay(1000);
@@ -189,14 +189,14 @@ void taskUpdateRTC(void* parameter) {
             long epochDiff = ntpTime - rtc.now().unixtime();
 
             // Sync if epoch time differs too greatly from NTP and RTC
-            // Also ignore discrepancy if its difference is way too huge.
+            // Also ignore discrepancy if its difference is way too huge, indicating a bad NTP sync
             if ((epochDiff < -10 || epochDiff > 10) && (epochDiff < -1000000 || epochDiff > 1000000)) {
-                Serial.print("[T] RTC sync: Epoch discrepancy: ");
+                Serial.print("[T] RTC sync: Clearing epoch discrepancy: ");
                     Serial.println(epochDiff);
                 rtc.adjust(DateTime(ntpTime));
             }
         } else {
-            Serial.println("[T] RTC sync: In manual mode.");
+            Serial.println("[i] RTC sync: In manual mode.");
             // Terminate NTP client
             if (timeClientRunning)
                 timeClient.end();
