@@ -31,35 +31,6 @@ bool FlashFSready = false;
 bool WiFiReady = false;
 
 //  ---------------------
-//  FUNCTIONS
-//  ---------------------
-
-void listFilesInDir(File dir, int numTabs) {
-    while (true) {
-    
-        File entry =  dir.openNextFile();
-        if (! entry) {
-            // no more files in the folder
-            break;
-        }
-        for (uint8_t i = 0; i < numTabs; i++) {
-            Serial.print('\t');
-        }
-        Serial.print(entry.name());
-
-        if (entry.isDirectory()) {
-            Serial.println("/");
-            listFilesInDir(entry, numTabs + 1);
-        } else {
-            // display size for file, nothing for directory
-            Serial.print("\t\t");
-            Serial.println(entry.size(), DEC);
-        }
-        entry.close();
-    }
-}
-
-//  ---------------------
 //  TASKS
 //  ---------------------
 
@@ -110,26 +81,19 @@ void taskFSMount(void* parameter) {
 
     // Get all information of SPIFFS
     // Taken from: https://diyprojects.io/esp32-get-started-spiff-library-read-write-modify-files/
-    unsigned int totalBytes = SPIFFS.totalBytes();
-    unsigned int usedBytes = SPIFFS.usedBytes();
-
     Serial.println("===== File system info =====");
-
     Serial.print("Total space:      ");
-    Serial.print(totalBytes);
+    Serial.print(SPIFFS.totalBytes());
     Serial.println(" bytes");
 
     Serial.print("Total space used: ");
-    Serial.print(usedBytes);
+    Serial.print(SPIFFS.usedBytes());
     Serial.println(" bytes");
 
     Serial.println();
 
     // Open dir folder
     File dir = LITTLEFS.open("/");
-    
-    // List file at root
-    listFilesInDir(dir, 1);
 
     vTaskDelete(NULL);
 }
