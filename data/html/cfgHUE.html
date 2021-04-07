@@ -37,7 +37,6 @@
 					console.log(res['target']['response']);
 					message = res['target']['response'];
 					responseText.innerHTML = message;
-
 				};
 				
 				// Dispatch POST request
@@ -61,9 +60,9 @@
 			Change to: 
 			<input type="numeric" size="16" id="bridge_ip" value="" maxlength="16" /><br>
 			<br>
-			HUE bridge APU user: <b>%HUE_API_USER%</b><br>
+			HUE bridge API user: <b>%HUE_API_USER%</b><br>
 			Change to: 
-			<input type="numeric" size="16" id="bridge_user" value="" maxlength="16" /><br>
+			<input type="numeric" size="16" id="bridge_user" value="" maxlength="42" /><br>
 			<br>
 			
 			<b>Time control</b><br>
@@ -76,7 +75,7 @@
 			
 			Change turn <span class="red">off</span> time:
 			<input type="numeric" size="6" id="turnOFF" maxlength="6" /></p>
-			<input type="submit" value="Apply" onclick="submit()" />
+			<input type="submit" value="Apply" onclick="submit()" /></p>
 			<p id="response"></p>
 		</div>
 		</center>

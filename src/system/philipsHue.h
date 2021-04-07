@@ -24,6 +24,7 @@ HTTPClient http;
 // Structs
 struct hueConfigStruct {
     char IP[15];
+    char username[42];
     int toggleOnTime;
     int toggleOffTime;
 };
@@ -44,10 +45,11 @@ String parseHUEconfig(int mode) {
     // > Deserialize
     DeserializationError error = deserializeJson(cfgHUE, hueConfig);
     if (error)
-        Serial.println(F("[X] RTC_P: Could not deserialize JSON."));
+        //Serial.println("[X] HUE parser: Could not deserialize JSON.");
 
     // Populate config struct
     strlcpy(hueConfigStr.IP, cfgHUE["IP"], sizeof(hueConfigStr.IP));
+    strlcpy(hueConfigStr.username, cfgHUE["user"], sizeof(hueConfigStr.username));
     hueConfigStr.toggleOnTime = cfgHUE["toggleOnTime"];
     hueConfigStr.toggleOffTime = cfgHUE["toggleOffTime"];
 
@@ -55,41 +57,67 @@ String parseHUEconfig(int mode) {
 
     // Determine what variable to return
     switch (mode) {
-        case 1:
-            return hueConfigStr.IP;
-            break;
-        case 2:
-            return String(hueConfigStr.toggleOnTime);
-            break;
-        case 3:
-            return String(hueConfigStr.toggleOffTime);
+        case 1: return hueConfigStr.IP; break;
+        case 2: return hueConfigStr.username; break;
+        case 3: return String(hueConfigStr.toggleOnTime); break;
+        case 4: return String(hueConfigStr.toggleOffTime); break;
+        default: return "[HUE parser: wrong param]";
     }
 
     return String();
+}
+
+// Get amount of lights
+int getHueLightIndex() {
+    // Acquire JSON response from HUE bridge
+    String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights";
+    Serial.print("HUE LIGHT INDEX URI: ");
+        Serial.println(URI);
+
+    http.useHTTP10(true);
+    http.begin(URI);
+    http.GET();
+
+    // Deserialize JSON response from HUE bridge
+    // Ref: https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
+    DynamicJsonDocument doc(3200);
+    deserializeJson(doc, http.getStream());
+    http.end();
+
+    JsonObject root = doc.as<JsonObject>();
+    
+    // Iterate through all root elements in JSON object
+    if (doc.containsKey("error")) {
+        Serial.println("[HUE] Could not determine light amount.");
+        return 99;
+    }
+
+    int lightsAmount = 0;
+    for (JsonPair kv : root) { lightsAmount++; }
+
+    return lightsAmount;
 }
 
 // Dispatch POST
 char sendHUELightReq(int lightID, bool state) {
     // Init connection to HUE bridge
     // Ref: https://developers.meethue.com/develop/get-started-2/
-    String URI = "http://" + parseHUEconfig(1) + "/api/1028d66426293e821ecfd9ef1a0731df/lights/" + lightID;
-    char* request = "";
+    String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights/" + lightID + "/state";
+    Serial.println(URI);
+
     http.begin(URI);
 
     // POST and return response
-    http.addHeader("Content-Type", "application/json");
-    switch (state) {
-        case false: char* request = "{\"on\":false}"; break;
-        case true: char* request = "{\"on\":true}"; break;
-    }
+    String request;
 
-    // Potentially of interest:
-    // https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
+    http.addHeader("Content-Type", "application/json");
+    if (state == false) { request = "{\"on\": false}"; }
+    else { request = "{\"on\": true}"; }
 
     int httpResponse = http.PUT(request);
 
-    //Serial.print(F("[i] HUE: HTTP Response: "));
-    //    Serial.println(httpResponse);
+    Serial.print("[i] HUE: HTTP Response: ");
+        Serial.println(httpResponse);
 
     http.end();
 
@@ -101,17 +129,17 @@ char sendHUELightReq(int lightID, bool state) {
 //  ---------------------
 
 void taskSetupHUE(void* paramter) {
-    Serial.println(F("[T] HUE: Looking for config..."));
+    Serial.println("[T] HUE: Looking for config...");
 
     // Wait for FS mount
     while (!FlashFSready) {
-        Serial.println(F("[T] HUE: No FS yet."));
+        Serial.println("[T] HUE: FS not yet ready...");
         vTaskDelay(500);
     }
 
     // Open HUE config
     if (!(LITTLEFS.exists("/config/hueConfig.json"))) {
-        Serial.println(F("[T] HUE: No config yet."));
+        Serial.println("[T] HUE: No config found.");
         
         if (!LITTLEFS.exists("/config")) {
             LITTLEFS.mkdir("/config");
@@ -123,6 +151,7 @@ void taskSetupHUE(void* paramter) {
         StaticJsonDocument<150> cfgHUE;
 
         cfgHUE["IP"] = "192.168.1.0";
+        cfgHUE["user"] = "CHANGEME";
         cfgHUE["toggleOnTime"] = "0800";
         cfgHUE["toggleOffTime"] = "1800";
 
