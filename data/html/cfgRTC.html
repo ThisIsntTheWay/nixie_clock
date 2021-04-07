@@ -41,19 +41,22 @@
 					responseText.innerHTML = message;
 
 				};
-
-				var gmt = document.getElementById("gmt").value;
-				var dst = document.getElementById("dst").value;
 				
 				// Dispatch POST request
 				if(document.getElementById("ntp_control").checked) {
-					var tmp = document.getElementById("ntp_source").value;
-					xhr.send(JSON.stringify({
-						"mode": "ntp",
-						"value": tmp,
-						"gmt": gmt,
-						"dst": dst
-					}));
+					// Construct JSON object
+					var obj = {mode: "ntp"};
+
+					var ntp_source = document.getElementById("ntp_source").value;
+					var gmt = document.getElementById("gmt").value;
+					var dst = document.getElementById("dst").value;
+
+					if (ntp_source) {obj.source = ntp_source}
+					if (gmt) {obj.gmt = gmt}
+					if (dst) {obj.dst = dst}
+
+					xhr.send(JSON.stringify(obj));
+
 				} else if (chMAN = document.getElementById("manual_control").checked) {
 					var tmp = document.getElementById("manual_time").value;
 					xhr.send(JSON.stringify({
