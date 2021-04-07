@@ -37,7 +37,7 @@ void taskfactoryResetWDT(void* parameter) {
         currMillis = millis();
         if (digitalRead(FACT_RST)) {
             // Trigger factory reset if pin is HIGH for at least 5 seconds
-            if (currMillis > lastMillis + 5000) {
+            if ((currMillis > lastMillis + 5000) || EnforceFactoryReset) {
                 // Perform factory reset
                 Serial.println("[!!!] FACTORY RESET INITIATED [!!!]");
 

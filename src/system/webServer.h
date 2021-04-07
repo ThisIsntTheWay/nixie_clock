@@ -30,6 +30,8 @@
 // Init webserver
 AsyncWebServer server(80);
 
+bool EnforceFactoryReset = false;
+
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
@@ -204,18 +206,18 @@ void webServerStartup() {
       int e = 0;
       if (data["mode"] == "ntp") {
         if (data.containsKey("value")) {
-          if (String(rV).length() < 4) { tmpJSON["NTP"] = rV; }
-          else { InputValid = false; errMsg = errMsg + String(" Server bad format."); }
+          if (String(rV).length() > 5) { tmpJSON["NTP"] = rV; }
+          else { InputValid = false; errMsg = errMsg + String(" Server bad length."); }
         } else { e++; }
         
         if (data.containsKey("gmt")) {
-          if (String(rGMT).length() > 4) { tmpJSON["GMT"] = rGMT; }
-          else { InputValid = false; errMsg = errMsg + String(" GMT bad format."); }
+          if (String(rGMT).length() < 4) { tmpJSON["GMT"] = rGMT; }
+          else { InputValid = false; errMsg = errMsg + String(" GMT bad length."); }
         } else { e++; }
 
         if (data.containsKey("dst")) {
-          if (String(rDST).length() > 4) { tmpJSON["DST"] = rDST; }
-          else { InputValid = false; errMsg = errMsg + String(" DST bad format."); }
+          if (String(rDST).length() < 4) { tmpJSON["DST"] = rDST; }
+          else { InputValid = false; errMsg = errMsg + String(" DST bad length."); }
         } else { e++; } 
       }
 
@@ -356,20 +358,24 @@ void webServerStartup() {
 
       NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
       timeClient.begin();
-      timeClient.forceUpdate();
+      if (timeClient.forceUpdate()) {
+        long ntpTime = timeClient.getEpochTime();
+        rtc.adjust(DateTime(ntpTime));
 
-      long ntpTime = timeClient.getEpochTime();
-      rtc.adjust(DateTime(ntpTime));
+        request->send(200, "application/json", "{\"status\": \"success\", \"epoch\": " + String(ntpTime) + "}");
+      } else {
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"NTP server unresponsive.\"}");
+      }
 
-      request->send(200, "application/json", "{\"status\": \"success\", \"epoch\": " + String(ntpTime) + "}");
       timeClient.end();
     } else {
       request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"NTP is disabled.\"}");
     }
   });
 
-  server.on("/getHUEindex", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", "{\"status\": \"success\", \"lightsAmount\": " + String(getHueLightIndex()) + "}");
+  server.on("/enforceReset", HTTP_GET, [](AsyncWebServerRequest *request) {
+    EnforceFactoryReset = true;
+    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Initiated reset!\"}");
   });
 
   server.on("/turnOffHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
