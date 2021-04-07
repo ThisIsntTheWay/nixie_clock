@@ -356,8 +356,9 @@ void webServerStartup() {
     if (parseRTCconfig(2) == "ntp") {
       Serial.println("[T] WebServer: Enforcing RTC sync.");
 
-      NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+      NTPClient timeClient(ntpUDP, config.NTP, config.GMT + config.DST);
       timeClient.begin();
+      
       if (timeClient.forceUpdate()) {
         long ntpTime = timeClient.getEpochTime();
         rtc.adjust(DateTime(ntpTime));

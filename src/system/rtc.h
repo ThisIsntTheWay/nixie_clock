@@ -172,7 +172,7 @@ void taskUpdateRTC(void* parameter) {
     vTaskDelay(1000);
 
     for (;;) {
-        NTPClient timeClient(ntpUDP, config.NTP, config.GMT);
+        NTPClient timeClient(ntpUDP, config.NTP, config.GMT + config.DST);
 
         // Check if RTC should be synced with NTP
         bool timeClientRunning = false;
