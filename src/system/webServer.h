@@ -211,12 +211,12 @@ void webServerStartup() {
         } else { e++; }
         
         if (data.containsKey("gmt")) {
-          if (String(rGMT).length() < 4) { tmpJSON["GMT"] = rGMT; }
+          if (String(rGMT).length() < 5) { tmpJSON["GMT"] = rGMT; }
           else { InputValid = false; errMsg = errMsg + String(" GMT bad length."); }
         } else { e++; }
 
         if (data.containsKey("dst")) {
-          if (String(rDST).length() < 4) { tmpJSON["DST"] = rDST; }
+          if (String(rDST).length() < 5) { tmpJSON["DST"] = rDST; }
           else { InputValid = false; errMsg = errMsg + String(" DST bad length."); }
         } else { e++; } 
       }
