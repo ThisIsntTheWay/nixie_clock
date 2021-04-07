@@ -168,7 +168,7 @@ void webServerStartup() {
     DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
     if (error) {
       Serial.println(F("[X] WebServer: Could not deserialize JSON."));
-        request->send(400, "application/json", "{'status': 'error', 'message': 'Cannot deserialize JSON!'}");
+      request->send(400, "application/json", "{'status': 'error', 'message': 'Cannot deserialize JSON!'}");
     } else {
       rtcConfig.close();
 
@@ -179,7 +179,7 @@ void webServerStartup() {
       tmpJSON["Mode"] = rM;
 
       if (data["mode"] == "ntp") {
-        if (validateEntry(rM, 1, 4)) { tmpJSON["NTP"] = rV; }
+        if (validateEntry(rV, 1, 4)) { tmpJSON["NTP"] = rV; }
         else {
           InputValid = false;
           errMsg = errMsg + String(" Server bad format.");
@@ -247,6 +247,7 @@ void webServerStartup() {
 
       // Validate entries and change if needed
       // Skip empty data fields
+      int e = 0;
       if (data.containsKey("bridgeip")) {
         if (!(data["bridgeip"] == "NaN")) {
           if (validateEntry(rIP, 1, 7)) { tmpJSON["IP"] = rIP; }
@@ -255,7 +256,7 @@ void webServerStartup() {
             errMsg = errMsg + String(" rIP bad format. ");
           }
         }
-      } else { Serial.println("rIP validation failure.");}
+      } else { e++; Serial.println("rIP validation failure.");}
       
       if (data.containsKey("apiuser")) {
         if (!(data["apiuser"] == "NaN")) {
@@ -265,7 +266,7 @@ void webServerStartup() {
             errMsg = errMsg + String(" rUSR bad format. ");
           }
         }
-      } else { Serial.println("rUSR validation failure.");}
+      } else { e++; Serial.println("rUSR validation failure.");}
 
       if (data.containsKey("ontime")) {
         if (!(data["ontime"] == "NaN")) {
@@ -275,7 +276,7 @@ void webServerStartup() {
             errMsg = errMsg + String(" rOn bad format. ");
           }
         }
-      } else { Serial.println("rOn validation failure.");}
+      } else { e++; Serial.println("rOn validation failure.");}
 
       if (data.containsKey("offtime")) {
         if (!(data["offtime"] == "NaN")) {
@@ -285,11 +286,12 @@ void webServerStartup() {
             errMsg = errMsg + String(" rOff bad format.");
           }
         }
-      } else { Serial.println("rOff validation failure.");}
+      } else { e++; Serial.println("rOff validation failure.");}
 
       // Write to file based on request body
+      // Produce error if 'e' is equal to 4, InputValid is false or JSON could not get serialized
       File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "w");
-      if ( !(serializeJson(tmpJSON, hueConfig)) || !InputValid ) {
+      if ( !(serializeJson(tmpJSON, hueConfig)) || !InputValid || (e == 4)) {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "application/json", "{'status': 'error', 'message': '" + errMsg + "'}");
       } else {
