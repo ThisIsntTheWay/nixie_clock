@@ -90,7 +90,7 @@ void setup() {
     // Perpetual tasks
         xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, &TaskRTC_Handle);
         xTaskCreate(taskUpdateNixie, "Nixie updater", 3500, NULL, 1, &TaskNixie_Handle);
-        xTaskCreate(taskfactoryResetWDT, "FRST WDT", 1500, NULL, 1, NULL);
+        xTaskCreate(taskfactoryResetWDT, "FRST WDT", 2000, NULL, 1, NULL);
 
     webServerStartup();
 
