@@ -84,13 +84,18 @@ String parseRTCconfig(int mode) {
     strlcpy(config.Mode, cfgRTC["Mode"], sizeof(config.Mode));
     config.GMT = cfgRTC["GMT"];
     config.DST = cfgRTC["DST"];
+
+    String gmt = String(config.GMT);
+    String dst = String(config.DST);
     
     rtcConfig.close();
 
     switch (mode) {
         case 1: return config.NTP; break;
         case 2: return config.Mode; break;
-        default: return "[RTC parser: wrong param]";
+        case 3: return gmt; break;
+        case 4: return dst; break;
+        default: return "[RTC: unknown mode]";
     }
 
     return String();
@@ -149,7 +154,6 @@ void taskSetupRTC (void* parameters) {
 
         // Sync time with NTP
         configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-        //struct tm timeinfo;
 
         // Set time on RTC
         Serial.println(F("[>] RTC: Config created."));
@@ -185,7 +189,8 @@ void taskUpdateRTC(void* parameter) {
             long epochDiff = ntpTime - rtc.now().unixtime();
 
             // Sync if epoch time differs too greatly from NTP and RTC
-            if (epochDiff < -5 || epochDiff > 5) {
+            // Also ignore discrepancy if its difference is way too huge.
+            if ((epochDiff < -10 || epochDiff > 10) && (epochDiff < -1000000 || epochDiff > 1000000)) {
                 Serial.print("[T] RTC sync: Epoch discrepancy: ");
                     Serial.println(epochDiff);
                 rtc.adjust(DateTime(ntpTime));
@@ -197,7 +202,7 @@ void taskUpdateRTC(void* parameter) {
                 timeClient.end();
         }
 
-        vTaskDelay(5000);
+        vTaskDelay(60000);
     }
 }
 

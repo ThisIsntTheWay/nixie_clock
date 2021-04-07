@@ -51,6 +51,12 @@ String processor(const String& var) {
   } else if (var == "TIME_MODE") { // Current NTP server
     return parseRTCconfig(2);
 
+  } else if (var == "GMT_VAL") { // Current DMT
+    return parseRTCconfig(3);
+
+  } else if (var == "DST_VAL") { // Current DST
+    return parseRTCconfig(4);
+
   } else if (var == "HUE_BRIDGE") { // Hue bridge IP
     return parseHUEconfig(1);
 
@@ -160,6 +166,9 @@ void webServerStartup() {
   // Endpoints
   // ----------------------------
 
+  // ============
+  // RTC ENDPOINT
+  
   AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
@@ -169,6 +178,8 @@ void webServerStartup() {
     // Save JSON response as variables
     const char* rM = data["mode"];
     const char* rV = data["value"];
+    const char* rGMT = data["gmt"];
+    const char* rDST = data["dst"];
 
     // Serialize JSON
     String response;
@@ -191,13 +202,25 @@ void webServerStartup() {
       // Write to file based on request body
       tmpJSON["Mode"] = rM;
 
+      // NTP mode
       if (data["mode"] == "ntp") {
-        if (validateEntry(rV, 1, 4)) { tmpJSON["NTP"] = rV; }
-        else {
-          InputValid = false;
-          errMsg = errMsg + String(" Server bad format.");
+        if (data.containsKey("value")) {
+          if (validateEntry(rV, 1, 4)) { tmpJSON["NTP"] = rV; }
+          else { InputValid = false; errMsg = errMsg + String(" Server bad format."); }
         }
+        
+        if (data.containsKey("gmt")) {
+          if (validateEntry(rGMT, 1, 4)) { tmpJSON["GMT"] = rGMT; }
+          else { InputValid = false; errMsg = errMsg + String(" GMT bad format."); }
+        }
+
+        if (data.containsKey("dst")) {
+          if (validateEntry(rDST, 1, 4)) { tmpJSON["DST"] = rDST; }
+          else { InputValid = false; errMsg = errMsg + String(" DST bad format."); }
+        }   
       }
+
+      // Manual mode
       else if (data["mode"] == "manual") {
         tmpJSON["manualTime"] = rV;
         rtc.adjust(rV);
@@ -222,6 +245,9 @@ void webServerStartup() {
   });
   server.addHandler(rtchandler);
 
+  // ============
+  // HUE ENDPOINT
+  
   AsyncCallbackJsonWebHandler *huehandler = new AsyncCallbackJsonWebHandler("/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
