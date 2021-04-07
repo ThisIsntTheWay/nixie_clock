@@ -61,7 +61,7 @@ String parseHUEconfig(int mode) {
         case 2: return hueConfigStr.username; break;
         case 3: return String(hueConfigStr.toggleOnTime); break;
         case 4: return String(hueConfigStr.toggleOffTime); break;
-        default: return "[HUE parser: wrong param]";
+        default: return "[HUE: unknown mode]";
     }
 
     return String();
