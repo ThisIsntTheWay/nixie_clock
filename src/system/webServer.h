@@ -209,7 +209,8 @@ void webServerStartup() {
 
     DeserializationError error = deserializeJson(tmpJSON, rtcConfig);
     if (error) {
-      Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+      Serial.println(F("[X] RTC_W: Could not deserialize JSON:"));
+        Serial.println(error.c_str());
       request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Cannot deserialize JSON!\"}");
     } else {
       rtcConfig.close();
@@ -298,7 +299,8 @@ void webServerStartup() {
 
     DeserializationError error = deserializeJson(tmpJSON, hueConfig);
     if (error) {
-      Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+      Serial.println(F("[X] HUE_W: Could not deserialize JSON:"));
+        Serial.println(error.c_str());
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Cannot deserialize JSON!\"}");
     } else {
       hueConfig.close();
@@ -385,15 +387,17 @@ void webServerStartup() {
     serializeJson(data, response);
 
     // Read file
-    StaticJsonDocument<200> tmpJSON;
-    File netConfig = LITTLEFS.open(F("/config/netConfig.json"), "r");
+    StaticJsonDocument<500> tmpJSON;
+    File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "r");
 
-    DeserializationError error = deserializeJson(tmpJSON, netConfig);
+    DeserializationError error = deserializeJson(tmpJSON, netConfigF);
     if (error) {
-      Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+      Serial.println(F("[X] NET_W: Could not deserialize JSON:"));
+      Serial.println(error.c_str());
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Cannot deserialize JSON!\"}");
+        netConfigF.close();
     } else {
-      netConfig.close();
+      netConfigF.close();
 
       String errMsg = String("Config write failure.");
       bool InputValid = true;
@@ -402,6 +406,7 @@ void webServerStartup() {
       // Skip empty data fields
       int e = 0;
       if (data.containsKey("mode")) {
+        Serial.println("Got mode.");
         if (data["mode"] == "AP" || data["mode"] == "Client") {
           tmpJSON["Mode"] = rMode;
         } else {
@@ -411,17 +416,19 @@ void webServerStartup() {
       }
       
       if (data.containsKey("wifi_ssid")) {
+        Serial.println("Got wifi_ssid.");
         tmpJSON["WiFi_SSID"] = rSSID;        
       }
 
       if (data.containsKey("wifi_psk")) {
+        Serial.println("Got wifi_psk.");
         tmpJSON["WiFi_PSK"] = rPSK;        
       }
 
       // Write to file based on request body
       // Produce error if \"e\" is equal to 4, InputValid is false or JSON could not get serialized
-      File netConfig = LITTLEFS.open(F("/config/netConfig.json"), "w");
-      if ( !(serializeJson(tmpJSON, netConfig)) || !InputValid) {
+      File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "w");
+      if ( !(serializeJson(tmpJSON, netConfigF)) || !InputValid) {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
@@ -429,7 +436,7 @@ void webServerStartup() {
       }
     }
 
-    netConfig.close();
+    netConfigF.close();
 
     Serial.println(response);
   });
