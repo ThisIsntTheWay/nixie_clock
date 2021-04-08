@@ -135,7 +135,8 @@ void taskUpdateNixie(void* parameter) {
 
             lastMinute = rtcDT.minute();
             displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
-        } else if (lastHour != rtcDT.hour()) {
+        }
+        if (lastHour != rtcDT.hour()) {
             Serial.print("[T] Nixie: Updating hours. ");
             Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
             
@@ -143,7 +144,7 @@ void taskUpdateNixie(void* parameter) {
             displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
         }
 
-        vTaskDelay(3000);
+        vTaskDelay(1500);
     }
 }
 
