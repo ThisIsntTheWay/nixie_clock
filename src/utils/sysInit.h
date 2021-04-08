@@ -30,6 +30,7 @@
 
 bool FlashFSready = false;
 bool WiFiReady = false;
+bool APmode = true;
 
 struct netConfigStruct {
     char Mode[7];
@@ -52,6 +53,8 @@ void taskWiFi(void* parameter) {
     const char* AP_PSK  = "NixieClock2021";
 
     // Check for net config file
+    Serial.println("[T] WiFi: Looking for config...");
+
     while (!FlashFSready) { vTaskDelay(1000); }
     if (!(LITTLEFS.exists("/config/netConfig.json"))) {
         Serial.println(F("[T] WiFi: No config found."));
@@ -98,8 +101,10 @@ void taskWiFi(void* parameter) {
     
     netConfigF.close();
 
+    Serial.println(netConfig.Mode);
+
     // Start WiFi AP or client based on config file params
-    if (netConfig.Mode == "AP") {
+    if (strcmp(netConfig.Mode, "AP") == 0) {
         Serial.println("[i] WiFi: Starting AP.");
 
         WiFi.softAP(netConfig.SSID, netConfig.PSK);
@@ -109,6 +114,7 @@ void taskWiFi(void* parameter) {
         WiFiReady = true;
 
     } else {
+        bool APmode = false;
         Serial.println("[i] WiFi: Starting client.");
         Serial.print("[i] WiFi: Trying to connect to: ");
             Serial.println(netConfig.SSID);
@@ -119,7 +125,7 @@ void taskWiFi(void* parameter) {
 
         while (WiFi.status() != WL_CONNECTED) {
             if (i > 15) {
-                Serial.println("[X] WiFi: Retry timeout.");
+                Serial.println("[X] WiFi: Connection timeout.");
                 vTaskDelete(NULL);
             }
 
@@ -149,7 +155,7 @@ void taskFSMount(void* parameter) {
 	} else {
 		Serial.println("[X] FS: Mount failure.");
 		Serial.println("[X] FS: Rebooting ESP.");
-        ESP.restart();
+        //ESP.restart();
 	}
 
     // Get all information of SPIFFS
