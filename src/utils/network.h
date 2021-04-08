@@ -127,8 +127,6 @@ void taskWiFi(void* parameter) {
         Serial.println(F("[>] WiFi: Config created."));
     } else {
         Serial.println(F("[i] WiFi: Config found!"));
-        Serial.println(parseNetConfig(4));
-        Serial.println(parseNetConfig(5));
     }
 
     // Parse net config file
@@ -136,7 +134,7 @@ void taskWiFi(void* parameter) {
     File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "r");
 
     // Parse JSON
-    StaticJsonDocument<250> cfgNet;
+    StaticJsonDocument<300> cfgNet;
     DeserializationError error = deserializeJson(cfgNet, netConfigF);
     if (error) {
         Serial.print(F("[X] WiFi: Could not deserialize JSON: "));
@@ -164,8 +162,11 @@ void taskWiFi(void* parameter) {
     } else {
         APmode = false;
         Serial.println("[i] WiFi: Starting client.");
-        Serial.print("[i] WiFi: Trying to connect to: ");
-            Serial.println(netConfig.WiFi_SSID);
+        Serial.print("[i] WiFi: Connecting to: '");
+            Serial.print(netConfig.WiFi_SSID);
+            Serial.print("' using '");
+            Serial.print(netConfig.WiFi_PSK);
+            Serial.println("'.");
 
         int i = 0;
         WiFi.mode(WIFI_STA);
