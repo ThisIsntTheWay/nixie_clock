@@ -68,6 +68,7 @@ String parseNetConfig(int mode) {
     strlcpy(netConfig.AP_SSID, cfgNet["AP_SSID"], sizeof(netConfig.AP_SSID));
     strlcpy(netConfig.AP_PSK, cfgNet["AP_PSK"], sizeof(netConfig.AP_PSK));
     strlcpy(netConfig.WiFi_SSID, cfgNet["WiFi_SSID"], sizeof(netConfig.WiFi_SSID));
+    strlcpy(netConfig.WiFi_PSK, cfgNet["WiFi_PSK"], sizeof(netConfig.WiFi_PSK));
     
     netConfigF.close();
 
@@ -76,6 +77,7 @@ String parseNetConfig(int mode) {
         case 2: return netConfig.AP_SSID; break;
         case 3: return netConfig.AP_PSK; break;
         case 4: return netConfig.WiFi_SSID; break;
+        case 5: return netConfig.WiFi_PSK; break;
         default: return "[NET: unknown mode]";
     }
 
@@ -108,12 +110,12 @@ void taskWiFi(void* parameter) {
         cfgNet["Mode"] = "AP";
         cfgNet["AP_SSID"] = AP_SSID;
         cfgNet["AP_PSK"] = AP_PSK;
-        cfgNet["WiFi_SSID"] = 0;
-        cfgNet["WiFi_PSK"] = 0;
-        cfgNet["IP"] = 0;
-        cfgNet["Netmask"] = 0;
-        cfgNet["Gateway"] = 0;
-        cfgNet["DNS"] = 0;
+        cfgNet["WiFi_SSID"] = "NaN";
+        cfgNet["WiFi_PSK"] = "NaN";
+        cfgNet["IP"] = "NaN";
+        cfgNet["Netmask"] = "NaN";
+        cfgNet["Gateway"] = "NaN";
+        cfgNet["DNS"] = "NaN";
 
         // Write netConfig.cfg
         if (!(serializeJson(cfgNet, netConfigF)))
@@ -124,7 +126,9 @@ void taskWiFi(void* parameter) {
         // Set time on RTC
         Serial.println(F("[>] WiFi: Config created."));
     } else {
-        Serial.println(F("[i] WiFi: Config found!."));
+        Serial.println(F("[i] WiFi: Config found!"));
+        Serial.println(parseNetConfig(4));
+        Serial.println(parseNetConfig(5));
     }
 
     // Parse net config file
@@ -134,8 +138,10 @@ void taskWiFi(void* parameter) {
     // Parse JSON
     StaticJsonDocument<250> cfgNet;
     DeserializationError error = deserializeJson(cfgNet, netConfigF);
-    if (error)
-        Serial.println(F("[X] WiFi: Could not deserialize JSON."));
+    if (error) {
+        Serial.print(F("[X] WiFi: Could not deserialize JSON: "));
+            Serial.println(error.c_str());
+    }
         
     strlcpy(netConfig.Mode, cfgNet["Mode"], sizeof(netConfig.Mode));
     strlcpy(netConfig.AP_SSID, cfgNet["AP_SSID"], sizeof(netConfig.AP_SSID));
@@ -144,7 +150,9 @@ void taskWiFi(void* parameter) {
     netConfigF.close();
 
     // Start WiFi AP or client based on config file params
-    if (strcmp(netConfig.Mode, "AP") == 0) {
+    if (strcmp(netConfig.Mode, "AP") == 0 || strcmp(netConfig.WiFi_SSID, "NaN") == 0) {
+        if (strcmp(netConfig.WiFi_SSID, "NaN") == 0)
+            Serial.println("[!] WiFi: Mode is 'client', but SSID is invalid.");
         Serial.println("[i] WiFi: Starting AP.");
 
         WiFi.softAP(netConfig.AP_SSID, netConfig.AP_PSK);
@@ -154,7 +162,7 @@ void taskWiFi(void* parameter) {
         WiFiReady = true;
 
     } else {
-        bool APmode = false;
+        APmode = false;
         Serial.println("[i] WiFi: Starting client.");
         Serial.print("[i] WiFi: Trying to connect to: ");
             Serial.println(netConfig.WiFi_SSID);
