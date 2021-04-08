@@ -10,8 +10,12 @@
     The results produced by these actions are relied on by all later tasks.
 */
 
+#include <ArduinoJson.h>
 #include "WiFi.h"
 #include <WiFiClientSecure.h>
+
+#ifndef network_h
+#define network_h
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -25,17 +29,16 @@
     #include <SPIFFS.h>
 #endif
 
-#ifndef sysInit_h
-#define sysInit_h
-
 bool FlashFSready = false;
 bool WiFiReady = false;
 bool APmode = true;
 
 struct netConfigStruct {
     char Mode[7];
-    char SSID[64];
-    char PSK[64];
+    char AP_SSID[64];
+    char AP_PSK[64];
+    char WiFi_SSID[64];
+    char WiFi_PSK[64];
     char IP[16];
     char Netmask[16];
     char Gateway[16];
@@ -43,6 +46,41 @@ struct netConfigStruct {
 };
 
 struct netConfigStruct netConfig;
+
+//  ---------------------
+//  FUNCTIONS
+//  ---------------------
+String parseNetConfig(int mode) {
+
+    // Read file
+    File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "r");
+
+    // Parse JSON
+    StaticJsonDocument<300> cfgNet;
+
+    // > Deserialize
+    DeserializationError error = deserializeJson(cfgNet, netConfigF);
+    if (error)
+        Serial.println(F("[X] NET_P: Could not deserialize JSON."));
+
+    // Populate config struct
+    strlcpy(netConfig.Mode, cfgNet["Mode"], sizeof(netConfig.Mode));
+    strlcpy(netConfig.AP_SSID, cfgNet["AP_SSID"], sizeof(netConfig.AP_SSID));
+    strlcpy(netConfig.AP_PSK, cfgNet["AP_PSK"], sizeof(netConfig.AP_PSK));
+    strlcpy(netConfig.WiFi_SSID, cfgNet["WiFi_SSID"], sizeof(netConfig.WiFi_SSID));
+    
+    netConfigF.close();
+
+    switch (mode) {
+        case 1: return netConfig.Mode; break;
+        case 2: return netConfig.AP_SSID; break;
+        case 3: return netConfig.AP_PSK; break;
+        case 4: return netConfig.WiFi_SSID; break;
+        default: return "[NET: unknown mode]";
+    }
+
+    return String();
+}
 
 //  ---------------------
 //  TASKS
@@ -68,8 +106,10 @@ void taskWiFi(void* parameter) {
         StaticJsonDocument<250> cfgNet;
 
         cfgNet["Mode"] = "AP";
-        cfgNet["SSID"] = AP_SSID;
-        cfgNet["PSK"] = AP_PSK;
+        cfgNet["AP_SSID"] = AP_SSID;
+        cfgNet["AP_PSK"] = AP_PSK;
+        cfgNet["WiFi_SSID"] = 0;
+        cfgNet["WiFi_PSK"] = 0;
         cfgNet["IP"] = 0;
         cfgNet["Netmask"] = 0;
         cfgNet["Gateway"] = 0;
@@ -96,18 +136,16 @@ void taskWiFi(void* parameter) {
         Serial.println(F("[X] WiFi: Could not deserialize JSON."));
         
     strlcpy(netConfig.Mode, cfgNet["Mode"], sizeof(netConfig.Mode));
-    strlcpy(netConfig.SSID, cfgNet["SSID"], sizeof(netConfig.SSID));
-    strlcpy(netConfig.PSK, cfgNet["PSK"], sizeof(netConfig.PSK));
+    strlcpy(netConfig.AP_SSID, cfgNet["AP_SSID"], sizeof(netConfig.AP_SSID));
+    strlcpy(netConfig.AP_PSK, cfgNet["AP_PSK"], sizeof(netConfig.AP_PSK));
     
     netConfigF.close();
-
-    Serial.println(netConfig.Mode);
 
     // Start WiFi AP or client based on config file params
     if (strcmp(netConfig.Mode, "AP") == 0) {
         Serial.println("[i] WiFi: Starting AP.");
 
-        WiFi.softAP(netConfig.SSID, netConfig.PSK);
+        WiFi.softAP(netConfig.AP_SSID, netConfig.AP_PSK);
         Serial.print("[i] WiFi: AP IP address: ");
             Serial.println(WiFi.softAPIP());
 
@@ -117,11 +155,11 @@ void taskWiFi(void* parameter) {
         bool APmode = false;
         Serial.println("[i] WiFi: Starting client.");
         Serial.print("[i] WiFi: Trying to connect to: ");
-            Serial.println(netConfig.SSID);
+            Serial.println(netConfig.WiFi_SSID);
 
         int i = 0;
         WiFi.mode(WIFI_STA);
-        WiFi.begin(netConfig.SSID, netConfig.PSK);
+        WiFi.begin(netConfig.WiFi_SSID, netConfig.WiFi_PSK);
 
         while (WiFi.status() != WL_CONNECTED) {
             if (i > 15) {
