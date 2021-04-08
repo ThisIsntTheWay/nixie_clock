@@ -23,7 +23,7 @@
 				var dvClient = document.getElementById("client_config");
 				
 				dvAP.style.display = chAP.checked ? "block" : "none";
-				dvCLI.dvClient.display = chClient.checked ? "block" : "none";
+				dvClient.style.display = chClient.checked ? "block" : "none";
 			}
 			
 			function submit() {
@@ -65,8 +65,8 @@
 			Current mode: <b>%NET_MODE%</b><br><br>
 			
 			Set operation mode:<br>
-			<input type="radio" id="mode_AP" name="r"/>Access Point<br>
-			<input type="radio" id="mode_Client" name="r"/>WiFi client<br>
+			<input type="radio" id="mode_AP" name="r" onclick="showHideConfig()"/>Access Point<br>
+			<input type="radio" id="mode_Client" name="r" onclick="showHideConfig()"/>WiFi client<br>
 			<br>
 			
 			<span id="ap_config">
@@ -75,9 +75,8 @@
 			</span>
 			<span id="client_config">
 				Current WiFi SSID: <b>%WIFI_SSID%</b><br>
-				Current WiFi PSK: <b>* * *</b><br>
-				Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value="" onclick="showHideConfig()"/><br>
-				Set WiFi PSK: <input type="password" size="16" id="wifi_client_psk" value="" onclick="showHideConfig()"/><br>
+				Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value=""/><br>
+				Set WiFi PSK: <input type="password" size="16" id="wifi_client_psk" value=""/><br>
 			</span>
 			<br>
 			<input type="submit" value="Apply" onclick="submit()"></input>
