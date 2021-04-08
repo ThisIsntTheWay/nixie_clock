@@ -123,6 +123,8 @@ void taskWiFi(void* parameter) {
 
         // Set time on RTC
         Serial.println(F("[>] WiFi: Config created."));
+    } else {
+        Serial.println(F("[i] WiFi: Config found!."));
     }
 
     // Parse net config file
