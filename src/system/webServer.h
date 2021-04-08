@@ -404,7 +404,6 @@ void webServerStartup() {
 
       // Validate entries and change if needed
       // Skip empty data fields
-      int e = 0;
       if (data.containsKey("mode")) {
         Serial.println("Got mode.");
         if (data["mode"] == "AP" || data["mode"] == "Client") {
@@ -505,7 +504,7 @@ void webServerStartup() {
 void taskSetupWebserver(void *parameter) {
   int i = 0;
   while (!WiFiReady) {
-    if (i > 15) {
+    if (i > 30) {
       Serial.println("[X] WebServer: Network timeout.");
       vTaskDelete(NULL);
     }
@@ -513,7 +512,7 @@ void taskSetupWebserver(void *parameter) {
     i++;
     vTaskDelay(500);
   }
-  
+
   webServerStartup();
 
   vTaskDelete(NULL);
