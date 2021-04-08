@@ -170,8 +170,20 @@ void taskSetupRTC (void* parameters) {
 
 void taskUpdateRTC(void* parameter) {
     // Wait for FS mount and WiFi to be connected
+    
+    int i = 0;
     while (!FlashFSready) { vTaskDelay(500); }
-    while (!WiFiReady) { vTaskDelay(500); }
+    while (!WiFiReady) {
+        vTaskDelay(500);
+        while (!WiFiReady) {
+            if (i > 15) {
+                Serial.println("[X] RTC sync: Network timeout.");
+                vTaskDelete(NULL);
+            }
+            i++;
+            vTaskDelay(500);
+        } 
+    }
     Serial.println("[T] RTC sync: FS and WiFi both ready.");
 
     // Artificial delay to wait for network

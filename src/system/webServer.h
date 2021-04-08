@@ -503,7 +503,17 @@ void webServerStartup() {
 }
 
 void taskSetupWebserver(void *parameter) {
-  while (!WiFiReady) { vTaskDelay(1000); }
+  int i = 0;
+  while (!WiFiReady) {
+    if (i > 15) {
+      Serial.println("[X] WebServer: Network timeout.");
+      vTaskDelete(NULL);
+    }
+
+    i++;
+    vTaskDelay(500);
+  }
+  
   webServerStartup();
 
   vTaskDelete(NULL);
