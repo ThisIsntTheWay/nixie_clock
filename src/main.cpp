@@ -12,7 +12,7 @@
 #include <system/webServer.h>
 #include <system/rtc.h>
 #include <system/nixie.h>
-#include <utils/sysInit.h>
+#include <utils/network.h>
 
 TaskHandle_t TaskRTC_Handle;
 TaskHandle_t TaskNixie_Handle;
@@ -20,10 +20,6 @@ TaskHandle_t TaskNixie_Handle;
 // https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2018/08/esp32-pinout-chip-ESP-WROOM-32.png
 // Factory reset button GPIO pin
 #define FACT_RST 17
-
-//  ---------------------
-//  FUNCTIONS
-//  ---------------------
 
 // Task to monitor if a factory reset has been triggered.
 void taskfactoryResetWDT(void* parameter) {
