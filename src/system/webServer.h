@@ -3,7 +3,7 @@
     (c) V. Klopfenstein, 2021
 
     This code block spawns an instance of ESPAsyncWebserver.
-    Anything web-related occurs in here.
+    Anything related to a webserver happens here.
 */
 
 #include <AsyncTCP.h>
@@ -38,54 +38,23 @@ bool EnforceFactoryReset = false;
 
 // Replace placeholders in HTML files
 String processor(const String& var) {
-  /*Serial.print("PROCESSOR: ");
-    Serial.println(var);*/
 
   // Unfortunately, var can only be handled withlots of if conditions:
   // A switch..case statement cannot be used with datatype "string".
-  if (var == "TIME" || var == "RTC_TIME") {
-    return getTime();
-
-  } else if (var == "NTP_SOURCE") { // Current NTP server
-    return parseRTCconfig(1);
-
-  } else if (var == "TIME_MODE") { // Current NTP server
-    return parseRTCconfig(2);
-
-  } else if (var == "GMT_VAL") { // Current DMT
-    return parseRTCconfig(3);
-
-  } else if (var == "DST_VAL") { // Current DST
-    return parseRTCconfig(4);
-
-  } else if (var == "HUE_BRIDGE") { // Hue bridge IP
-    return parseHUEconfig(1);
-
-  } else if (var == "HUE_API_USER") { // Hue API User   
-    //Serial.println(parseHUEconfig(2));
-    return "* * *";
-
-  } else if (var == "HUE_TOGGLEON_TIME") { // Hue toggle on time
-    return parseHUEconfig(3);
-
-  } else if (var == "HUE_TOGGLEOFF_TIME") { // Hue toggle off time
-    return parseHUEconfig(4);
-
-  } else if (var == "NET_MODE") { // Hue toggle off time
-    return parseNetConfig(1);
-
-  } else if (var == "AP_SSID") { // AP SSID
-    return parseNetConfig(2);
-
-  } else if (var == "AP_PSK") { // AP PSK
-    return parseNetConfig(3);
-
-  } else if (var == "WIFI_SSID") { // WiFi Client SSID
-    return parseNetConfig(4);
-
-  } else if (var == "TUBES_DISPLAY") { // Hue toggle off time
-    return "Not implemented";
-  }
+  if (var == "TIME" || var == "RTC_TIME")   { return getTime(); }           // Current Time
+  else if (var == "NTP_SOURCE")             { return parseRTCconfig(1); }   // Current NTP server
+  else if (var == "TIME_MODE")              { return parseRTCconfig(2); }   // Current time source 
+  else if (var == "GMT_VAL")                { return parseRTCconfig(3); }   // Current GMT
+  else if (var == "DST_VAL")                { return parseRTCconfig(4); }   // Current DST
+  else if (var == "HUE_BRIDGE")             { return parseHUEconfig(1); }   // HUE bridge IP    
+  else if (var == "HUE_API_USER")           { return "* * *"; }             // HUE API User
+  else if (var == "HUE_TOGGLEON_TIME")      { return parseHUEconfig(3); }   // HUE toggle ON time return 
+  else if (var == "HUE_TOGGLEOFF_TIME")     { return parseHUEconfig(4); }   // HUE toggle OFF time
+  else if (var == "NET_MODE")               { return parseNetConfig(1); }   // Network mode
+  else if (var == "AP_SSID")                { return parseNetConfig(2); }   // AP SSID
+  else if (var == "AP_PSK")                 { return parseNetConfig(3); }   // AP PSK 
+  else if (var == "WIFI_SSID")              { return parseNetConfig(4); }   // WiFi Client SSID
+  else if (var == "TUBES_DISPLAY")          { return "Not implemented"; }   // Nixie tubes display
 
   return String();
 }
