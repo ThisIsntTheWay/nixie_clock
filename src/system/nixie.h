@@ -91,6 +91,26 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     digitalWrite(DS_PIN, HIGH);
 }
 
+int getCryptoPrice(String ticker, String quote) {
+
+    if (!WiFiReady)
+        return 0;
+
+    // Obtain ticker price from binance
+    http.useHTTP10(true);
+    http.begin("https://api.binance.com/api/v3/ticker/price?symbol=" + ticker + quote);
+    http.GET();
+
+    StaticJsonDocument<100> doc;
+    deserializeJson(doc, http.getStream());
+    http.end();
+    
+    if (doc.containsKey("error"))
+        return 0;
+
+    return doc["price"];
+}
+
 //  ---------------------
 //  TASKS
 //  ---------------------
