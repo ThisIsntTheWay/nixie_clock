@@ -71,6 +71,18 @@ String processor(const String& var) {
   } else if (var == "HUE_TOGGLEOFF_TIME") { // Hue toggle off time
     return parseHUEconfig(4);
 
+  } else if (var == "NET_MODE") { // Hue toggle off time
+    return parseNetConfig(1);
+
+  } else if (var == "AP_SSID") { // AP SSID
+    return parseNetConfig(2);
+
+  } else if (var == "AP_PSK") { // AP PSK
+    return parseNetConfig(3);
+
+  } else if (var == "WIFI_SSID") { // WiFi Client SSID
+    return parseNetConfig(4);
+
   } else if (var == "TUBES_DISPLAY") { // Hue toggle off time
     return "Not implemented";
   }
@@ -143,18 +155,24 @@ void webServerStartup() {
         Serial.println("[X] WebServer: GET /hue - No local ressource.");
       }
   });
+
+  // Network config
+  server.on("/network", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println(F("[T] WebServer: GET /network."));
+
+    String f = "/html/cfgNET.html";
+
+    if(LITTLEFS.exists(f)) {
+      request->send(LITTLEFS, f, String(), false, processor);
+    } else {
+      Serial.println("[X] WebServer: GET /network - No local ressource.");
+    }      
+  });
   
   // Debug interface
   server.on("/debug", HTTP_GET, [](AsyncWebServerRequest *request) {
-      Serial.println(F("[T] WebServer: GET /debug."));
-
-      String f = "/html/debug.html";
-
-      if(LITTLEFS.exists(f)) {
-        request->send(LITTLEFS, f, String(), false, processor);
-      } else {
-        Serial.println("[X] WebServer: GET /debug - No local ressource.");
-      }
+    String f = "/html/debug.html";
+    request->send(LITTLEFS, f, String(), false, processor);
   });
 
   // Serve favicon
@@ -347,6 +365,75 @@ void webServerStartup() {
     Serial.println(response);
   });
   server.addHandler(huehandler);
+
+  // ============
+  // Network ENDPOINT
+  
+  AsyncCallbackJsonWebHandler *nethandler = new AsyncCallbackJsonWebHandler("/api/NETendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    // Construct JSON
+    StaticJsonDocument<200> data;
+    if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
+    else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
+    
+    // Save JSON response as variables
+    const char* rMode = data["mode"];
+    const char* rSSID = data["wifi_ssid"];
+    const char* rPSK = data["wifi_psk"];
+
+    // Serialize JSON
+    String response;
+    serializeJson(data, response);
+
+    // Read file
+    StaticJsonDocument<200> tmpJSON;
+    File netConfig = LITTLEFS.open(F("/config/netConfig.json"), "r");
+
+    DeserializationError error = deserializeJson(tmpJSON, netConfig);
+    if (error) {
+      Serial.println(F("[X] WebServer: Could not deserialize JSON."));
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Cannot deserialize JSON!\"}");
+    } else {
+      netConfig.close();
+
+      String errMsg = String("Config write failure.");
+      bool InputValid = true;
+
+      // Validate entries and change if needed
+      // Skip empty data fields
+      int e = 0;
+      if (data.containsKey("mode")) {
+        if (data["mode"] == "AP" || data["mode"] == "Client") {
+          tmpJSON["mode"] = rMode;
+        } else {
+            InputValid = false;
+            errMsg = errMsg + String(" Mode not recognized.");
+        }
+      }
+      
+      if (data.containsKey("wifi_ssid")) {
+        tmpJSON["wifi_ssid"] = rSSID;        
+      }
+
+      if (data.containsKey("wifi_psk")) {
+        tmpJSON["wifi_psk"] = rPSK;        
+      }
+
+      // Write to file based on request body
+      // Produce error if \"e\" is equal to 4, InputValid is false or JSON could not get serialized
+      File netConfig = LITTLEFS.open(F("/config/netConfig.json"), "w");
+      if ( !(serializeJson(tmpJSON, netConfig)) || !InputValid) {
+        Serial.println(F("[X] WebServer: Config write failure."));
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
+      } else {
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
+      }
+    }
+
+    netConfig.close();
+
+    Serial.println(response);
+  });
+  server.addHandler(nethandler);
 
   // ----------------------------
   // Executors
