@@ -183,23 +183,27 @@ void taskUpdateRTC(void* parameter) {
         // Check if RTC should be synced with NTP
         bool timeClientRunning = false;
         if (parseRTCconfig(2) == "ntp") {
-            if (!timeClientRunning)
-                timeClient.begin();
-                
-            timeClient.forceUpdate();
+            if (!APmode) {
+                if (!timeClientRunning)
+                    timeClient.begin();
+                    
+                timeClient.forceUpdate();
 
-            timeClientRunning = true;
+                timeClientRunning = true;
 
-            // Check if NTP and RTC epochs are different
-            long ntpTime = timeClient.getEpochTime();
-            long epochDiff = ntpTime - rtc.now().unixtime();
+                // Check if NTP and RTC epochs are different
+                long ntpTime = timeClient.getEpochTime();
+                long epochDiff = ntpTime - rtc.now().unixtime();
 
-            // Sync if epoch time differs too greatly from NTP and RTC
-            // Also ignore discrepancy if its difference is way too huge, indicating a bad NTP sync
-            if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
-                Serial.print("[T] RTC sync: Clearing epoch discrepancy: ");
-                    Serial.println(epochDiff);
-                rtc.adjust(DateTime(ntpTime));
+                // Sync if epoch time differs too greatly from NTP and RTC
+                // Also ignore discrepancy if its difference is way too huge, indicating a bad NTP sync
+                if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
+                    Serial.print("[T] RTC sync: Clearing epoch discrepancy: ");
+                        Serial.println(epochDiff);
+                    rtc.adjust(DateTime(ntpTime));
+                }
+            } else {
+                Serial.println("[X] RTC sync: ESP in AP mode.");
             }
         } else {
             Serial.println("[i] RTC sync: In manual mode.");
