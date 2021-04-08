@@ -169,7 +169,7 @@ void webServerStartup() {
   // ============
   // RTC ENDPOINT
   
-  AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+  AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/RTCendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
@@ -252,7 +252,7 @@ void webServerStartup() {
   // ============
   // HUE ENDPOINT
   
-  AsyncCallbackJsonWebHandler *huehandler = new AsyncCallbackJsonWebHandler("/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+  AsyncCallbackJsonWebHandler *huehandler = new AsyncCallbackJsonWebHandler("/api/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
     StaticJsonDocument<200> data;
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
@@ -352,7 +352,7 @@ void webServerStartup() {
   // Executors
   // ----------------------------
 
-  server.on("/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/api/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (parseRTCconfig(2) == "ntp") {
       Serial.println("[T] WebServer: Enforcing RTC sync.");
 
@@ -374,23 +374,23 @@ void webServerStartup() {
     }
   });
 
-  server.on("/enforceReset", HTTP_GET, [](AsyncWebServerRequest *request) {
-    EnforceFactoryReset = true;
-    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Initiated reset!\"}");
-  });
-
-  server.on("/turnOffHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/api/turnOffHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
     int l = getHueLightIndex();
     for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
 
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
   });
 
-  server.on("/turnOnHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/api/turnOnHUE", HTTP_GET, [](AsyncWebServerRequest *request) {
     int l = getHueLightIndex();
     for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
 
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
+  });
+
+  server.on("/debug/enforceReset", HTTP_GET, [](AsyncWebServerRequest *request) {
+    EnforceFactoryReset = true;
+    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Initiated reset!\"}");
   });
 
   // ----------------------------
