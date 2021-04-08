@@ -9,7 +9,7 @@ This project aims to implement the following basic features:
  - WebGUI for configuring all of the above. 
 
 :warning: **Safety warning**</br>
-Vacuum tubes generally use high voltage (180V+) in operation.<br/>
+Vacuum tubes generally use high voltage (170V+) in operation.<br/>
 Proper handling and grounding of HV components is critical for personal safety.
 
 ## Software libraries
@@ -30,14 +30,18 @@ This library is incompatible with the ESP32 and will result in compiler errors.
 **Driver IC:** 4x K155ID1
 
 Theoretically, any cylindrical 13 pin IN tube could be used.<br/>
-The PCB will be designed with the dimensions of the IN-14 in mind though.
+However, the PCB will be designed with the dimensions of the IN-14.
 
 ## Power
-The MCU will be driven using 5V, enough to power the shift registers and driver ICs.<br/>
-The tubes must be supplied with 180V due to their design.
+The circuit has an intake of 12VDC, which is used for the following purposes:
+ - Step-up to 170VDC to power all nixie tubes. 
+ - Step-down to 5VDC to power all ICs.
+   - This 5VDC is further decreased to 3.3VDC to power the MCU and RTC.
 
-:information_source: The 180V are sourced externally.<br/>
-No DC-DC step-up circuit diagrams are provided.
+The reason for 12VDC versus 5VDC is for a much stabler generation of 170V.  
+Whilst it is possible to step-up said voltage from just 5VDC as well, it is very taxing on those components.  
+
+:information_source: The step-up circuit for the 170VDC is not included in the schematic.<br/>
 
 ## Progress
 Circuit diagrams and gerber files are currently WIP and not yet ready for release.<br/>
