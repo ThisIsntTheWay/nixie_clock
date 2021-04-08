@@ -408,4 +408,11 @@ void webServerStartup() {
   Serial.println("[T] WebServer: Start.");
 }
 
+void taskSetupWebserver(void *parameter) {
+  while (!WiFiReady) { vTaskDelay(1000); }
+  webServerStartup();
+
+  vTaskDelete(NULL);
+}
+
 #endif

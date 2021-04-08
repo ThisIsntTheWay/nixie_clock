@@ -86,6 +86,7 @@ void setup() {
         xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
         xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
         xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
+        xTaskCreate(taskSetupWebserver, "Webserser start", 5500, NULL, 1, NULL);
 
     // Perpetual tasks
         xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, &TaskRTC_Handle);
@@ -97,8 +98,4 @@ void setup() {
         Serial.println(ESP.getFreeHeap());
 }
 
-void loop() {
-    // Start webserver if WiFi is ready
-    if(WiFiReady && FlashFSready)
-        webServerStartup();
-}
+void loop() {}
