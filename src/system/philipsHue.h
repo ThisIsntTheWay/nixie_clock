@@ -130,8 +130,14 @@ void taskSetupHUE(void* paramter) {
     Serial.println("[T] HUE: Looking for config...");
 
     // Wait for FS mount
+    int i = 0;
     while (!FlashFSready) {
-        Serial.println("[T] HUE: FS not yet ready...");
+        if (i > 10) {
+            Serial.println("[X] HUE: FS mount timeout.");
+            vTaskDelete(NULL);
+        }
+
+        i++;
         vTaskDelay(500);
     }
 

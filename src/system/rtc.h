@@ -109,8 +109,14 @@ void taskSetupRTC (void* parameters) {
     Serial.println(F("[T] RTC: Starting setup..."));
 
     // Wait for FS mount
+    int i = 0;
     while (!FlashFSready) {
-        Serial.println(F("[T] RTC: No FS yet."));
+        if (i > 10) {
+            Serial.println("[X] RTC: FS mount timeout.");
+            vTaskDelete(NULL);
+        }
+
+        i++;
         vTaskDelay(500);
     }
 
