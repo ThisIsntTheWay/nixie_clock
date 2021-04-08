@@ -89,7 +89,6 @@ void setup() {
         xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 1, &TaskNixie_Handle);
         xTaskCreate(taskfactoryResetWDT, "FRST WDT", 2000, NULL, 1, NULL);
 
-    Serial.println(F("[i] Done with setup()."));
     Serial.print("[i] Free heap: ");
         Serial.println(ESP.getFreeHeap());
 }
