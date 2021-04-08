@@ -7,7 +7,7 @@
      - Connects WiFi.
      - Mounts the onboard flash FS.
     
-    The results produced by these actions are relied on by all later tasks.
+    The results produced by these actions are relied on by all other tasks.
 */
 
 #include <ArduinoJson.h>
@@ -171,7 +171,7 @@ void taskWiFi(void* parameter) {
 
         int i = 0;
         WiFi.mode(WIFI_STA);
-        
+
         // For some reason, parseNetConfig() mus be called prior to extracting data from the netConfig struct.
         // I have no idea why (yet)
         WiFi.begin(netConfig.WiFi_SSID, netConfig.WiFi_PSK);
