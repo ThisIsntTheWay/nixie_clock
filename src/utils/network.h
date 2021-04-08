@@ -147,7 +147,7 @@ void taskWiFi(void* parameter) {
     
     netConfigF.close();
 
-    // Start WiFi AP or client based on config file params
+    // Start WiFi AP if mode is 'AP'
     if (strcmp(netConfig.Mode, "AP") == 0 || strcmp(netConfig.WiFi_SSID, "NaN") == 0) {
         if (strcmp(netConfig.WiFi_SSID, "NaN") == 0)
             Serial.println("[!] WiFi: Mode is 'client', but SSID is invalid.");
@@ -159,17 +159,21 @@ void taskWiFi(void* parameter) {
 
         WiFiReady = true;
 
+    // Start WiFi client if mode is 'Client'
     } else {
         APmode = false;
         Serial.println("[i] WiFi: Starting client.");
         Serial.print("[i] WiFi: Connecting to: '");
-            Serial.print(netConfig.WiFi_SSID);
+            Serial.print(parseNetConfig(4));
             Serial.print("' using '");
-            Serial.print(netConfig.WiFi_PSK);
+            Serial.print(parseNetConfig(5));
             Serial.println("'.");
 
         int i = 0;
         WiFi.mode(WIFI_STA);
+        
+        // For some reason, parseNetConfig() mus be called prior to extracting data from the netConfig struct.
+        // I have no idea why (yet)
         WiFi.begin(netConfig.WiFi_SSID, netConfig.WiFi_PSK);
 
         while (WiFi.status() != WL_CONNECTED) {
@@ -209,7 +213,7 @@ void taskFSMount(void* parameter) {
 
     // Get all information of SPIFFS
     // Taken from: https://diyprojects.io/esp32-get-started-spiff-library-read-write-modify-files/
-    Serial.println("===== File system info =====");
+    Serial.println(F("[i] FS: Filesystem info:"));
     Serial.print("Total space:      ");
     Serial.print(LITTLEFS.totalBytes());
     Serial.println(" bytes");
@@ -219,9 +223,6 @@ void taskFSMount(void* parameter) {
     Serial.println(" bytes");
 
     Serial.println();
-
-    // Open dir folder
-    File dir = LITTLEFS.open("/");
 
     vTaskDelete(NULL);
 }
