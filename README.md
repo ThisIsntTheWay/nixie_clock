@@ -51,5 +51,5 @@ Software-wise, the following features have been implemented so far:
  - [x] Implement nixie logic.
    - [ ] Test said implementation.
  - [ ] Implement nixie config in webGUI.
- - [ ] Store SSID and PSK in config files.
+ - [X] Store SSID and PSK in config files.
  - [ ] Change network settings from webGUI.
