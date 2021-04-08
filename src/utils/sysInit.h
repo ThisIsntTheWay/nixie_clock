@@ -11,6 +11,7 @@
 */
 
 #include "WiFi.h"
+#include <WiFiClientSecure.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -30,38 +31,110 @@
 bool FlashFSready = false;
 bool WiFiReady = false;
 
+struct netConfigStruct {
+    char Mode[7];
+    char SSID[64];
+    char PSK[64];
+    char IP[16];
+    char Netmask[16];
+    char Gateway[16];
+    char DNS[16];
+};
+
+struct netConfigStruct netConfig;
+
 //  ---------------------
 //  TASKS
 //  ---------------------
 
 void taskWiFi(void* parameter) {
-    const char* SSID = "Alter Eggstutz";
-    const char* PSK  = "Fischer1";
+    const char* AP_SSID = "ESP32 - Nixie clock";
+    const char* AP_PSK  = "NixieClock2021";
 
-    // Connect to WiFi
-    Serial.println(F("[T] WiFi: Begin."));
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(SSID, PSK);
-    Serial.println(F("[T] WiFi: Trying to connect..."));
+    // Check for net config file
+    while (!FlashFSready) { vTaskDelay(1000); }
+    if (!(LITTLEFS.exists("/config/netConfig.json"))) {
+        Serial.println(F("[T] WiFi: No config found."));
+        
+        if (!LITTLEFS.exists("/config"))
+            LITTLEFS.mkdir("/config");
 
-    int i = 0;
-    while (WiFi.status() != WL_CONNECTED) {
-        if (i > 15) {
-            Serial.println("[X] WiFi: Retry timeout.");
-            vTaskDelete(NULL);
-        }
+        File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "w");
 
-        vTaskDelay(1000);
+        // Construct JSON
+        StaticJsonDocument<250> cfgNet;
 
-        Serial.println("[T] WiFi: Not connected yet!");
-        i++;
+        cfgNet["Mode"] = "AP";
+        cfgNet["SSID"] = AP_SSID;
+        cfgNet["PSK"] = AP_PSK;
+        cfgNet["IP"] = 0;
+        cfgNet["Netmask"] = 0;
+        cfgNet["Gateway"] = 0;
+        cfgNet["DNS"] = 0;
+
+        // Write netConfig.cfg
+        if (!(serializeJson(cfgNet, netConfigF)))
+            Serial.println(F("[X] WiFi: Config write failure."));
+
+        netConfigF.close();
+
+        // Set time on RTC
+        Serial.println(F("[>] WiFi: Config created."));
     }
 
-    Serial.println(F("[T] WiFi: Connected successfully."));
+    // Parse net config file
+    // Read file
+    File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "r");
 
-    WiFiReady = true;
-    Serial.print("[T] WiFi: IP: ");
-        Serial.println(WiFi.localIP());
+    // Parse JSON
+    StaticJsonDocument<250> cfgNet;
+    DeserializationError error = deserializeJson(cfgNet, netConfigF);
+    if (error)
+        Serial.println(F("[X] WiFi: Could not deserialize JSON."));
+        
+    strlcpy(netConfig.Mode, cfgNet["Mode"], sizeof(netConfig.Mode));
+    strlcpy(netConfig.SSID, cfgNet["SSID"], sizeof(netConfig.SSID));
+    strlcpy(netConfig.PSK, cfgNet["PSK"], sizeof(netConfig.PSK));
+    
+    netConfigF.close();
+
+    // Start WiFi AP or client based on config file params
+    if (netConfig.Mode == "AP") {
+        Serial.println("[i] WiFi: Starting AP.");
+
+        WiFi.softAP(netConfig.SSID, netConfig.PSK);
+        Serial.print("[i] WiFi: AP IP address: ");
+            Serial.println(WiFi.softAPIP());
+
+        WiFiReady = true;
+
+    } else {
+        Serial.println("[i] WiFi: Starting client.");
+        Serial.print("[i] WiFi: Trying to connect to: ");
+            Serial.println(netConfig.SSID);
+
+        int i = 0;
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(netConfig.SSID, netConfig.PSK);
+
+        while (WiFi.status() != WL_CONNECTED) {
+            if (i > 15) {
+                Serial.println("[X] WiFi: Retry timeout.");
+                vTaskDelete(NULL);
+            }
+
+            vTaskDelay(1000);
+
+            Serial.println("[T] WiFi: Connecting...");
+            i++;
+        }
+
+        Serial.println(F("[T] WiFi: Connected successfully."));
+
+        WiFiReady = true;
+        Serial.print("[T] WiFi: IP: ");
+            Serial.println(WiFi.localIP());
+    }
 
     vTaskDelete(NULL);
 }
