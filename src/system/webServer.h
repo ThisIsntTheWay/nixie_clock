@@ -403,7 +403,7 @@ void webServerStartup() {
       int e = 0;
       if (data.containsKey("mode")) {
         if (data["mode"] == "AP" || data["mode"] == "Client") {
-          tmpJSON["mode"] = rMode;
+          tmpJSON["Mode"] = rMode;
         } else {
             InputValid = false;
             errMsg = errMsg + String(" Mode not recognized.");
@@ -411,11 +411,11 @@ void webServerStartup() {
       }
       
       if (data.containsKey("wifi_ssid")) {
-        tmpJSON["wifi_ssid"] = rSSID;        
+        tmpJSON["WiFi_SSID"] = rSSID;        
       }
 
       if (data.containsKey("wifi_psk")) {
-        tmpJSON["wifi_psk"] = rPSK;        
+        tmpJSON["WiFi_PSK"] = rPSK;        
       }
 
       // Write to file based on request body
