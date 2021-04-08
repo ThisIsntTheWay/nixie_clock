@@ -32,4 +32,4 @@ The same principle as revision 1, this time with considerable changes though:
   - Reasons being less layout complexity and components cost.
   - Also added mounting holes for a TO-220 heatsink.  
 
-![PCB Rev2](https://i.imgur.com/CQF3Qro.png)
+![PCB Rev2](https://i.imgur.com/SypHGxR.png)
