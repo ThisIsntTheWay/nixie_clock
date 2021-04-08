@@ -92,7 +92,6 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
 }
 
 int getCryptoPrice(String ticker, String quote) {
-
     if (!WiFiReady)
         return 0;
 
