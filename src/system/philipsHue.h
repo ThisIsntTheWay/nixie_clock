@@ -74,24 +74,29 @@ int getHueLightIndex() {
 
     http.useHTTP10(true);
     http.begin(URI);
-    http.GET();
-
-    // Deserialize JSON response from HUE bridge
-    // Ref: https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
-    DynamicJsonDocument doc(3200);
-    deserializeJson(doc, http.getStream());
-    http.end();
-
-    JsonObject root = doc.as<JsonObject>();
-    
-    // Iterate through all root elements in JSON object
-    if (doc.containsKey("error")) {
-        Serial.println("[HUE] Could not determine light amount.");
-        return 99;
-    }
 
     int lightsAmount = 0;
-    for (JsonPair kv : root) { lightsAmount++; }
+
+    if (http.GET()) {
+        // Deserialize JSON response from HUE bridge
+        // Ref: https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
+        DynamicJsonDocument doc(3200);
+        deserializeJson(doc, http.getStream());
+        http.end();
+
+        JsonObject root = doc.as<JsonObject>();
+        
+        // Iterate through all root elements in JSON object
+        if (doc.containsKey("error")) {
+            Serial.println("[HUE] Could not determine light amount.");
+            return 99;
+        }
+
+        for (JsonPair kv : root) { lightsAmount++; }
+
+    } else {
+        Serial.println("[!] HUE: Cannot HTTP/GET lights index.");
+    }
 
     return lightsAmount;
 }
@@ -218,8 +223,8 @@ void taskMonitorHUE(void* parameter) {
         if (onH > time.hour() && onM > time.minute()  && !turnedOn) {
             Serial.println("[T] HUE: onTime triggered.");
 
-            //int l = getHueLightIndex();
-            //for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
+            int l = getHueLightIndex();
+            for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
 
             turnedOn = true;
             turnedOff = false;
@@ -233,8 +238,8 @@ void taskMonitorHUE(void* parameter) {
 
                 Serial.println("[T] HUE: offTime triggered.");
 
-                //int l = getHueLightIndex();
-                //for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
+                int l = getHueLightIndex();
+                for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
 
                 turnedOn = false;
                 turnedOff = true;
