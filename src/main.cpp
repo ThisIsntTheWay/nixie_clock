@@ -16,6 +16,7 @@
 
 TaskHandle_t TaskRTC_Handle;
 TaskHandle_t TaskNixie_Handle;
+TaskHandle_t TaskHUE_Handle;
 
 // https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2018/08/esp32-pinout-chip-ESP-WROOM-32.png
 // Factory reset button GPIO pin
@@ -41,6 +42,8 @@ void taskfactoryResetWDT(void* parameter) {
                 Serial.println("[!] Reset: Destroying perpetual tasks...");
                 vTaskDelete(TaskRTC_Handle);
                 vTaskDelete(TaskNixie_Handle);
+                vTaskDelete(TaskHUE_Handle);
+
                 server.end();
 
                 // Destroy config files
@@ -82,12 +85,13 @@ void setup() {
         xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
         xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
         xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
-        xTaskCreate(taskSetupWebserver, "Webserser start", 5500, NULL, 1, NULL);
+        xTaskCreate(taskSetupWebserver, "Webserver start", 5500, NULL, 1, NULL);
 
     // Perpetual tasks
         xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, &TaskRTC_Handle);
-        xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 1, &TaskNixie_Handle);
-        xTaskCreate(taskfactoryResetWDT, "FRST WDT", 2000, NULL, 1, NULL);
+        xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 2, &TaskNixie_Handle);
+        xTaskCreate(taskMonitorHUE, "FRST WDT", 3000, NULL, 3, &TaskHUE_Handle);
+        xTaskCreate(taskfactoryResetWDT, "HUE monitor", 2500, NULL, 1, NULL);
 
     Serial.print("[i] Free heap: ");
         Serial.println(ESP.getFreeHeap());
