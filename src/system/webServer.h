@@ -251,13 +251,7 @@ void webServerStartup() {
     const char* rUSR = data["apiuser"];
     const char* rON = data["ontime"];
     const char* rOFF = data["offtime"];
-
-    /*Serial.print(rOFF);
-      Serial.print(" ");
-      LEN = 0;
-      while (rON[LEN] != 0) LEN++;
-      Serial.println(LEN);*/
-
+    
     // Serialize JSON
     String response;
     serializeJson(data, response);
@@ -302,7 +296,7 @@ void webServerStartup() {
 
       if (data.containsKey("ontime")) {
         if (!(data["ontime"] == "NaN")) {
-          if (String(rON).length() < 4) { tmpJSON["toggleOnTime"] = rON; }
+          if (String(rON).length() < 5) { tmpJSON["toggleOnTime"] = rON; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOn bad format. ");
@@ -312,7 +306,7 @@ void webServerStartup() {
 
       if (data.containsKey("offtime")) {
         if (!(data["offtime"] == "NaN")) {
-          if (String(rON).length() < 4) { tmpJSON["toggleOffTime"] = rOFF; }
+          if (String(rON).length() < 5) { tmpJSON["toggleOffTime"] = rOFF; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOff bad format.");
