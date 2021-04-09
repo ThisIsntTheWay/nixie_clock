@@ -163,7 +163,7 @@ void taskWiFi(void* parameter) {
     } else {
         APmode = false;
         Serial.println("[i] WiFi: Starting client.");
-        Serial.print("[i] WiFi: Connecting to: '");
+        Serial.print("[i] WiFi: Connecting to '");
             Serial.print(parseNetConfig(4));
             Serial.print("' using '");
             Serial.print(parseNetConfig(5));
