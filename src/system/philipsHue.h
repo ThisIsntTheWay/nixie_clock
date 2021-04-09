@@ -72,31 +72,34 @@ int getHueLightIndex() {
     // Acquire JSON response from HUE bridge
     String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights";
 
-    http.useHTTP10(true);
-    http.begin(URI);
-
     int lightsAmount = 0;
 
-    if (http.GET()) {
-        // Deserialize JSON response from HUE bridge
-        // Ref: https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
-        DynamicJsonDocument doc(3200);
-        deserializeJson(doc, http.getStream());
-        http.end();
+    http.useHTTP10(true);
 
-        JsonObject root = doc.as<JsonObject>();
-        
-        // Iterate through all root elements in JSON object
-        if (doc.containsKey("error")) {
-            Serial.println("[HUE] Could not determine light amount.");
-            return 99;
+    if (http.begin(URI)) {
+        if (http.GET() > 0) {
+            // Deserialize JSON response from HUE bridge
+            // Ref: https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
+            DynamicJsonDocument doc(3200);
+            deserializeJson(doc, http.getStream());
+
+            JsonObject root = doc.as<JsonObject>();
+            
+            // Iterate through all root elements in JSON object
+            if (doc.containsKey("error")) {
+                Serial.println("[HUE] Could not determine light amount.");
+                return 99;
+            }
+
+            for (JsonPair kv : root) { lightsAmount++; }
+        } else {
+            Serial.println("[!] HUE: Cannot HTTP/GET lights index.");
         }
-
-        for (JsonPair kv : root) { lightsAmount++; }
-
     } else {
-        Serial.println("[!] HUE: Cannot HTTP/GET lights index.");
+        Serial.println("[!] HUE: Cannot init http for lights index.");
     }
+
+    http.end();
 
     return lightsAmount;
 }
@@ -224,7 +227,8 @@ void taskMonitorHUE(void* parameter) {
             Serial.println("[T] HUE: onTime triggered.");
 
             int l = getHueLightIndex();
-            for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
+            if (l != 0)
+                for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
 
             turnedOn = true;
             turnedOff = false;
@@ -239,7 +243,8 @@ void taskMonitorHUE(void* parameter) {
                 Serial.println("[T] HUE: offTime triggered.");
 
                 int l = getHueLightIndex();
-                for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
+                if (l != 0)
+                    for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
 
                 turnedOn = false;
                 turnedOff = true;
