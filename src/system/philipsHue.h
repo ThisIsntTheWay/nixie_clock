@@ -188,9 +188,8 @@ void taskMonitorHUE(void* parameter) {
     bool turnedOff = false;
 
     for (;;) {
-        // Copy strings into respective char arrays.
-        // First, declare char arrays of the length of the respective string.
-        // (The + 1 is required for the null-terminated char arrays.)
+        // Copy strings into char arrays.
+        // Add + 1 for length as char[] is null-terminated.
         int onTimeStrLength = (parseHUEconfig(3)).length() + 1;
         int offTimeStrLength = (parseHUEconfig(4)).length() + 1;
 
@@ -201,29 +200,19 @@ void taskMonitorHUE(void* parameter) {
         (parseHUEconfig(3)).toCharArray(onTime, onTimeStrLength);
         (parseHUEconfig(4)).toCharArray(offTime, offTimeStrLength);
 
-        // ------------
-        // Turn ON lights if ON time has bigger than HOUR and minutes
-        
-        /*
-        Serial.print("onTime: ");
-        Serial.print( 10*(onTime[0] - '0') + (onTime[1] - '0') );
-        Serial.println( 10*(onTime[2] - '0') + (onTime[3] - '0') );
-        Serial.print("ofTime: ");
-        Serial.print( 10*(offTime[0] - '0') + (offTime[1] - '0') );
-        Serial.println( 10*(offTime[2] - '0') + (offTime[3] - '0') );
-        Serial.println("------");*/
-
         // In order to compare against hours and minutes seperately, we need to split an int of 4 numbers into 2.
         // Because a char array saves stuff as ASCII characters, a typical int operation will lead to undesirable results.
-        // As such, '0' needs to be substracted from 'char_array[n]'.
-
+        // To retrieve the number, a char needs to be substracted with '0' - the null-terminator.
         int onH = 10*(onTime[0] - '0') + (onTime[1] - '0');
         int onM = 10*(onTime[2] - '0') + (onTime[3] - '0');
         int ofH = 10*(offTime[0] - '0') + (offTime[1] - '0');
         int ofM = 10*(offTime[2] - '0') + (offTime[3] - '0');
 
+        int nowHour = time.hour();
+        int nowMinute = time.minute();
+
         // Turn lights ON
-        if (onH > time.hour() && onM > time.minute()  && !turnedOn) {
+        if ((nowHour >= onH && nowHour < ofH) && !turnedOn) {
             Serial.println("[T] HUE: onTime triggered.");
 
             int l = getHueLightIndex();
@@ -234,24 +223,19 @@ void taskMonitorHUE(void* parameter) {
             turnedOff = false;
         }
         
-        // ------------
         // Turn lights OFF
-        if ( (ofH > time.hour() || ofH < time.hour()) && \
-             (ofM > time.minute() || ofM < time.minute()) \
-             && !turnedOff ) {
+        if ((nowHour >= ofH || nowHour < onH) && !turnedOff ) {
+            Serial.println("[T] HUE: offTime triggered.");
 
-                Serial.println("[T] HUE: offTime triggered.");
+            int l = getHueLightIndex();
+            if (l != 0)
+                for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
 
-                int l = getHueLightIndex();
-                if (l != 0)
-                    for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
-
-                turnedOn = false;
-                turnedOff = true;
+            turnedOn = false;
+            turnedOff = true;
         }
 
         vTaskDelay(2500);
-
     }
 
     vTaskDelete(NULL);
