@@ -28,66 +28,25 @@ byte data;
 //  FUNCTIONS
 //  ---------------------
 
+// Convert dec to BCD
+byte decToBCD(byte in) {
+    return( (in/16*10) + (in%16) );
+}
+
 // The following function was inspired by:
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
 void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     byte n1, n2, n3, n4;
-
-    switch (number_1) {
-        case 0: n1 = 0b0000; break;
-        case 1: n1 = 0b1000; break;
-        case 2: n1 = 0b0100; break;
-        case 3: n1 = 0b1100; break;
-        case 4: n1 = 0b0010; break;
-        case 5: n1 = 0b1010; break;
-        case 6: n1 = 0b0110; break;
-        case 7: n1 = 0b1110; break;
-        case 8: n1 = 0b0001; break;
-        case 9: n1 = 0b1001; break;
-    }
-
-    switch (number_2) {
-        case 0: n2 = 0b0000; break;
-        case 1: n2 = 0b1000; break;
-        case 2: n2 = 0b0100; break;
-        case 3: n2 = 0b1100; break;
-        case 4: n2 = 0b0010; break;
-        case 5: n2 = 0b1010; break;
-        case 6: n2 = 0b0110; break;
-        case 7: n2 = 0b1110; break;
-        case 8: n2 = 0b0001; break;
-        case 9: n2 = 0b1001; break;
-    }
-
-    switch (number_3) {
-        case 0: n3 = 0b0000; break;
-        case 1: n3 = 0b1000; break;
-        case 2: n3 = 0b0100; break;
-        case 3: n3 = 0b1100; break;
-        case 4: n3 = 0b0010; break;
-        case 5: n3 = 0b1010; break;
-        case 6: n3 = 0b0110; break;
-        case 7: n3 = 0b1110; break;
-        case 8: n3 = 0b0001; break;
-        case 9: n3 = 0b1001; break;
-    }
-
-    switch (number_4) {
-        case 0: n4 = 0b0000; break;
-        case 1: n4 = 0b1000; break;
-        case 2: n4 = 0b0100; break;
-        case 3: n4 = 0b1100; break;
-        case 4: n4 = 0b0010; break;
-        case 5: n4 = 0b1010; break;
-        case 6: n4 = 0b0110; break;
-        case 7: n4 = 0b1110; break;
-        case 8: n4 = 0b0001; break;
-        case 9: n4 = 0b1001; break;
-    }
+    
+    n1 = decToBCD(number_1);
+    n2 = decToBCD(number_2);
+    n3 = decToBCD(number_3);
+    n4 = decToBCD(number_4);
 
     // Push to shift registers
     digitalWrite(DS_PIN, LOW);
     shiftOut(ST_CP, SH_CP, LSBFIRST, (n1 << 4) | n2);
+    shiftOut(ST_CP, SH_CP, LSBFIRST, (n3 << 4) | n4);
     digitalWrite(DS_PIN, HIGH);
 }
 
