@@ -1,5 +1,5 @@
 # Overview
-Nixie clock using IN-14 tubes, based on an ESP32 and programmed with the arduino framework.<br/>
+Nixie clock using IN-16 tubes, based on an ESP32 and programmed with the arduino framework.<br/>
 Also an attempt to utilize FreeRTOS.
 
 This project aims to implement the following basic features:
