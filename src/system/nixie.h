@@ -22,8 +22,6 @@
 #define SH_CP 18    // Clock | SH_CP
 #define ST_CP 23    // Data  | DS
 
-byte data;
-
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
