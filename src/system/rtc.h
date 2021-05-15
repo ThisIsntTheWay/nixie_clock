@@ -29,7 +29,8 @@ const int   daylightOffset_sec = 3600;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Instances
-RTC_DS1307 rtc;
+//RTC_DS1307 rtc;
+RTC_DS3231 rtc;
 WiFiUDP ntpUDP;
 
 // Structs
@@ -69,7 +70,7 @@ String parseRTCconfig(int mode) {
     // 2: Return config mode
 
     if (!RTCready)
-        return "[RTC: not ready]";
+        return "[RTC: failure]";
 
     // Read file
     File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");
@@ -130,7 +131,8 @@ void taskSetupRTC (void* parameters) {
     } else { RTCready = true; }
     
     // Set RTC datetime if it hasn't been running yet
-    if (! rtc.isrunning()) {
+    // USE WITH DS1307 -> if (! rtc.isrunning()) {
+    if (rtc.lostPower()) {
         Serial.println("[i] RTC: Module offline, turning on...");
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
@@ -211,17 +213,19 @@ void taskUpdateRTC(void* parameter) {
                 long epochDiff = ntpTime - rtc.now().unixtime();
 
                 // Sync if epoch time differs too greatly from NTP and RTC
-                // Also ignore discrepancy if its difference is way too huge, indicating a bad NTP sync
+                // Also ignore discrepancy if its difference is way too huge, indicating corrupt NTP packets
                 if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
                     Serial.print("[T] RTC sync: Clearing Epoch discrepancy of: ");
                         Serial.println(epochDiff);
                     rtc.adjust(DateTime(ntpTime));
                 }
             } else {
+                // No sync if in AP mode as no internet connection is possible.
                 Serial.println("[X] RTC sync: ESP in AP mode.");
             }
         } else {
             Serial.println("[i] RTC sync: In manual mode.");
+
             // Terminate NTP client
             if (timeClientRunning)
                 timeClient.end();
