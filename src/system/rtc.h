@@ -53,7 +53,7 @@ String getTime() {
     // Assemble datetime string
 
     if (!RTCready) {
-        return String("RTC not ready.");
+        return String("<span style='color:red'>RTC failure</span>");
     } else {
         char buf1[20];
         DateTime now = rtc.now();
@@ -67,6 +67,9 @@ String parseRTCconfig(int mode) {
     // Mode param:
     // 1: Return NTP server
     // 2: Return config mode
+
+    if (!RTCready)
+        return "[RTC: not ready]";
 
     // Read file
     File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");
