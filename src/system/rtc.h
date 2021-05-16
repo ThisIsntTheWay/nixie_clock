@@ -180,12 +180,14 @@ void taskUpdateRTC(void* parameter) {
     while (!FlashFSready) { vTaskDelay(500); }
     while (!WiFiReady) {
         vTaskDelay(500);
+
         while (!WiFiReady) {
             if (i > 30) {
                 Serial.println("[X] RTC sync: Network timeout.");
                 vTaskDelete(NULL);
             }
             i++;
+            
             vTaskDelay(500);
         } 
     }
