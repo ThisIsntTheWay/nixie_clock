@@ -35,7 +35,16 @@ byte decToBCD(byte in) {
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
 void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     byte n1, n2, n3, n4;
-    
+
+    Serial.print("NUM INGRESS: ");
+        Serial.print(number_1);
+        Serial.print(" ");
+        Serial.print(number_2);
+        Serial.print(" : ");
+        Serial.print(number_3);
+        Serial.print(" ");
+        Serial.println(number_4);
+
     n1 = decToBCD(number_1);
     n2 = decToBCD(number_2);
     n3 = decToBCD(number_3);
@@ -43,8 +52,8 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
 
     // Push to shift registers
     digitalWrite(ST_CP, LOW);
-    shiftOut(DS_PIN, SH_CP, LSBFIRST, (n1 << 4) | n2);
-    shiftOut(DS_PIN, SH_CP, LSBFIRST, (n3 << 4) | n4);
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n3 << 4) | n4);
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n1 << 4) | n2);
     digitalWrite(ST_CP, HIGH);
 }
 
@@ -74,6 +83,8 @@ int getCryptoPrice(String ticker, String quote) {
 void taskUpdateNixie(void* parameter) {
     Serial.println("[T] Nixie: preparing nixie updater...");
     pinMode(DS_PIN, OUTPUT);
+    pinMode(SH_CP, OUTPUT);
+    pinMode(ST_CP, OUTPUT);
 
     while (!RTCready) { vTaskDelay(1000); }
     DateTime rtcDT = rtc.now();
@@ -84,21 +95,30 @@ void taskUpdateNixie(void* parameter) {
     Serial.println("[T] Nixie: Spawning nixie updater...");
     for (;;) {
         DateTime rtcDT = rtc.now();
+
+        // Save hour and minute as variables in order to have consistent data for further manipulation
+        int hour = rtcDT.hour();
+        int minute = rtcDT.minute();
+
+        // Split numbers
+        int hourD1   = hour / 10;
+        int hourD2   = hour % 10;
+        int minuteD1 = minute / 10;
+        int minuteD2 = minute % 10;
         
         // Periodically display time
         if (lastMinute != rtcDT.minute()) {
-            Serial.print("[T] Nixie: Updating minutes. ");
-            Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
+            Serial.println("[T] Nixie: Updating time:");
+            Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
+            Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
 
+            // Update last values
+            if (lastHour != rtcDT.hour()) {
+                lastHour = rtcDT.hour();
+            }
             lastMinute = rtcDT.minute();
-            displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
-        }
-        if (lastHour != rtcDT.hour()) {
-            Serial.print("[T] Nixie: Updating hours. ");
-            Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
-            
-            lastHour = rtcDT.hour();
-            displayNumber(rtcDT.hour(), rtcDT.minute(), 0, 0);
+
+            displayNumber(hourD1, hourD2, minuteD1, minuteD2);
         }
 
         vTaskDelay(1500);
