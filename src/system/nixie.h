@@ -99,7 +99,7 @@ void taskUpdateNixie(void* parameter) {
     Serial.print("lastHour: "); Serial.println(lastHour);
     Serial.print("lastMinute: "); Serial.println(lastMinute);
     
-    Serial.println("[T] Nixie: Starting ning nixie updater...");
+    Serial.println("[T] Nixie: Starting nixie updater...");
     for (;;) {
         // Check if nixies should update manually or automatically
         if (nixieAutonomous) {
