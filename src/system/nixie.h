@@ -18,9 +18,9 @@
 //  ---------------------
 
 // Bitshift pins
-#define DS_PIN 19   // Latch | ST_CP
-#define SH_CP 18    // Clock | SH_CP
-#define ST_CP 23    // Data  | DS
+#define DS_PIN  27   // Data
+#define SH_CP   26   // Clock
+#define ST_CP   25   // Latch
 
 //  ---------------------
 //  FUNCTIONS
@@ -42,10 +42,10 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     n4 = decToBCD(number_4);
 
     // Push to shift registers
-    digitalWrite(DS_PIN, LOW);
-    shiftOut(ST_CP, SH_CP, LSBFIRST, (n1 << 4) | n2);
-    shiftOut(ST_CP, SH_CP, LSBFIRST, (n3 << 4) | n4);
-    digitalWrite(DS_PIN, HIGH);
+    digitalWrite(ST_CP, LOW);
+    shiftOut(DS_PIN, SH_CP, LSBFIRST, (n1 << 4) | n2);
+    shiftOut(DS_PIN, SH_CP, LSBFIRST, (n3 << 4) | n4);
+    digitalWrite(ST_CP, HIGH);
 }
 
 int getCryptoPrice(String ticker, String quote) {
