@@ -214,11 +214,11 @@ void taskFSMount(void* parameter) {
     // Get all information of SPIFFS
     // Taken from: https://diyprojects.io/esp32-get-started-spiff-library-read-write-modify-files/
     Serial.println(F("[i] FS: Filesystem info:"));
-    Serial.print("Total space:      ");
+    Serial.print(" > Total space:      ");
     Serial.print(LITTLEFS.totalBytes());
     Serial.println(" bytes");
 
-    Serial.print("Total space used: ");
+    Serial.print(" > Total space used: ");
     Serial.print(LITTLEFS.usedBytes());
     Serial.println(" bytes");
 
