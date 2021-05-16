@@ -1,62 +1,55 @@
+// Bitshift pins
+#define DS_PIN  27   // Data
+#define SH_CP   26   // Clock
+#define ST_CP   25   // Latch
 
-#define DS_PIN 19   // Latch | ST_CP
-#define SH_CP 18    // Clock | SH_CP
-#define ST_CP 23    // Data  | DS
+int loopNum = 0;
 
-int i = 0;
+// Convert dec to BCD
+byte decToBCD(byte in) {
+    return( (in/16*10) + (in%16) );
+}
 
-void displayNumber(int number_1, int number_2) {//, int number_3, int number_4) {
+// The following function was inspired by:
+// https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
+void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     byte n1, n2, n3, n4;
+    
+    Serial.print("NUM INGRESS: ");
+        Serial.print(number_1);
+        Serial.print(" ");
+        Serial.print(number_2);
+        Serial.print(" ");
+        Serial.print(number_3);
+        Serial.print(" ");
+        Serial.println(number_4);
 
-    switch (number_1) {
-        case 0: n1 = 0b0000; break;
-        case 1: n1 = 0b1000; break;
-        case 2: n1 = 0b0100; break;
-        case 3: n1 = 0b1100; break;
-        case 4: n1 = 0b0010; break;
-        case 5: n1 = 0b1010; break;
-        case 6: n1 = 0b0110; break;
-        case 7: n1 = 0b1110; break;
-        case 8: n1 = 0b0001; break;
-        case 9: n1 = 0b1001; break;
-    }
-
-    switch (number_2) {
-        case 0: n2 = 0b0000; break;
-        case 1: n2 = 0b1000; break;
-        case 2: n2 = 0b0100; break;
-        case 3: n2 = 0b1100; break;
-        case 4: n2 = 0b0010; break;
-        case 5: n2 = 0b1010; break;
-        case 6: n2 = 0b0110; break;
-        case 7: n2 = 0b1110; break;
-        case 8: n2 = 0b0001; break;
-        case 9: n2 = 0b1001; break;
-    }
+    n1 = decToBCD(number_1);
+    n2 = decToBCD(number_2);
+    n3 = decToBCD(number_3);
+    n4 = decToBCD(number_4);
 
     // Push to shift registers
-    digitalWrite(DS_PIN, LOW);
-    shiftOut(ST_CP, SH_CP, MSBFIRST, (n1 << 4) | n2);
-    //shiftOut(ST_CP, SH_CP, LSBFIRST, n2);
-    digitalWrite(DS_PIN, HIGH);
+    digitalWrite(ST_CP, LOW);
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n3 << 4) | n4);  // REG1 [Hours]
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n1 << 4) | n2);  // REG2 [Minutes]
+    digitalWrite(ST_CP, HIGH);
 }
 
 void setup() {
   Serial.begin(115200);
+
   pinMode(DS_PIN, OUTPUT);
   pinMode(SH_CP, OUTPUT);
   pinMode(ST_CP, OUTPUT);
 }
 
 void loop() {
-  i++;
-  
-  if (i > 9)
-    i = 0;
+  loopNum++;
+  Serial.println(loopNum);
 
-  Serial.println(i);
-  
-  displayNumber(i,i+1);
-
-  delay(2000);
+  for (int i = 0; i < 10; i++) {
+   displayNumber(i,i,i,i);
+   delay(2550);
+  }
 }
