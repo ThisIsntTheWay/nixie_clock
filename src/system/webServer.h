@@ -12,6 +12,7 @@
 
 #include <system/rtc.h>
 #include <system/philipsHue.h>
+#include <system/nixie.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -238,6 +239,48 @@ void webServerStartup() {
   server.addHandler(rtchandler);
 
   // ============
+  // NIXIE ENDPOINT
+  
+  AsyncCallbackJsonWebHandler *nixiehandler = new AsyncCallbackJsonWebHandler("/api/nixieControl", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    // Construct JSON
+    StaticJsonDocument<200> data;
+    if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
+    else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
+    
+    // Save JSON response as variables
+    // Update them if required
+    int nNum1 = 10;
+    int nNum2 = 10;
+    int nNum3 = 10;
+    int nNum4 = 10;
+    bool manual = false;
+
+    if (data.containsKey("nNum1")) nNum1 = data["nNum1"]; manual = true;
+    if (data.containsKey("nNum2")) nNum2 = data["nNum2"]; manual = true;
+    if (data.containsKey("nNum3")) nNum3 = data["nNum3"]; manual = true;
+    if (data.containsKey("nNum4")) nNum4 = data["nNum4"]; manual = true;
+    
+    // Serialize JSON
+    String response;
+    serializeJson(data, response);
+    
+    // Update nixie display
+    if (manual) {
+      nixieAutonomous = false;
+      displayNumber(nNum1, nNum2, nNum3, nNum4);
+
+      request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies have been updated.\"}");
+
+    } else {
+      nixieAutonomous = true;
+      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");
+    }
+
+    Serial.println(response);
+  });
+  server.addHandler(nixiehandler);
+
+  // ============
   // HUE ENDPOINT
   
   AsyncCallbackJsonWebHandler *huehandler = new AsyncCallbackJsonWebHandler("/api/HUEendpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
@@ -444,9 +487,16 @@ void webServerStartup() {
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
   });
 
-  server.on("/debug/enforceReset", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/debug/queueReset", HTTP_GET, [](AsyncWebServerRequest *request) {
     EnforceFactoryReset = true;
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Initiated reset!\"}");
+  });
+  
+  server.on("/debug/forceRestart", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Rebooting...\"}");
+    delay(1000);
+
+    ESP.restart();
   });
 
   // ----------------------------
@@ -456,7 +506,7 @@ void webServerStartup() {
   // Error pages
   server.onNotFound([](AsyncWebServerRequest *request){
     Serial.println(F("[T] WebServer: GET - 404."));
-    request->send(404, "text/html", "<center><h1>Content not found.</center</h1>");
+    request->send(404, "text/html", "Error: 404");
   });
 
   // Start the webserver
