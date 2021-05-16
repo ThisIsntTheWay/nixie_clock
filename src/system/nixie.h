@@ -22,6 +22,8 @@
 #define SH_CP   26   // Clock
 #define ST_CP   25   // Latch
 
+bool nixieAutonomous = true;
+
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
@@ -87,41 +89,62 @@ void taskUpdateNixie(void* parameter) {
     pinMode(ST_CP, OUTPUT);
 
     while (!RTCready) { vTaskDelay(1000); }
+    Serial.println("[T] Nixie: RTC ready.");
+
     DateTime rtcDT = rtc.now();
 
     int lastMinute = rtcDT.minute();
     int lastHour = rtcDT.hour();
+
+    Serial.print("lastHour: "); Serial.println(lastHour);
+    Serial.print("lastMinute: "); Serial.println(lastMinute);
     
-    Serial.println("[T] Nixie: Spawning nixie updater...");
+    Serial.println("[T] Nixie: Starting ning nixie updater...");
     for (;;) {
-        DateTime rtcDT = rtc.now();
+        // Check if nixies should update manually or automatically
+        if (nixieAutonomous) {
 
-        // Save hour and minute as variables in order to have consistent data for further manipulation
-        int hour = rtcDT.hour();
-        int minute = rtcDT.minute();
+            DateTime rtcDT = rtc.now();
 
-        // Split numbers
-        int hourD1   = hour / 10;
-        int hourD2   = hour % 10;
-        int minuteD1 = minute / 10;
-        int minuteD2 = minute % 10;
-        
-        // Periodically display time
-        if (lastMinute != rtcDT.minute()) {
-            Serial.println("[T] Nixie: Updating time:");
-            Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
-            Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
+            bool timeIsValid = true;
 
-            // Update last values
-            if (lastHour != rtcDT.hour()) {
-                lastHour = rtcDT.hour();
+            // Save hour and minute as variables in order to have consistent data for further manipulation
+            int hour = rtcDT.hour();
+            int minute = rtcDT.minute();
+            //Serial.print("hour: "); Serial.println(hour);
+            //Serial.print("minute: "); Serial.println(minute);
+
+            // Verify numbers
+            if (hour > 23 || minute > 59)
+                timeIsValid = false;
+
+            // Update nixies if valid numbers are valid
+            if (timeIsValid) {
+                // Split numbers
+                int hourD1   = hour / 10;
+                int hourD2   = hour % 10;
+                int minuteD1 = minute / 10;
+                int minuteD2 = minute % 10;
+                
+                // Periodically display time
+                if (lastMinute != rtcDT.minute()) {
+                    Serial.println("[T] Nixie: Updating time:");
+                    Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
+                    Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
+                    Serial.print(" > Epoch: "); Serial.println(rtcDT.unixtime());
+
+                    // Update last values
+                    if (lastHour != rtcDT.hour()) {
+                        lastHour = rtcDT.hour();
+                    }
+                    lastMinute = rtcDT.minute();
+
+                    displayNumber(hourD1, hourD2, minuteD1, minuteD2);
+                }
             }
-            lastMinute = rtcDT.minute();
-
-            displayNumber(hourD1, hourD2, minuteD1, minuteD2);
         }
 
-        vTaskDelay(1500);
+        vTaskDelay(500);
     }
 }
 
