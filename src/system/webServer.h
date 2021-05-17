@@ -55,8 +55,8 @@ String processor(const String& var) {
   else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
-  else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()); }   // WiFi network dbi/RSSI
-  else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " . " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
+  else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "dbm"; }   // WiFi network dbi/RSSI
+  else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
     if (nixieAutonomous && !cycleNixies) return "Clock";
     if (!nixieAutonomous && cycleNixies) return "Cycling...";
