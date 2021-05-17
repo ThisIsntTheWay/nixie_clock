@@ -91,19 +91,13 @@ void taskUpdateNixie(void* parameter) {
     while (!RTCready) { vTaskDelay(1000); }
     Serial.println("[T] Nixie: RTC ready.");
 
-    DateTime rtcDT = rtc.now();
+    int lastMinute = 0;
+    int lastHour = 0;
 
-    int lastMinute = rtcDT.minute();
-    int lastHour = rtcDT.hour();
-
-    Serial.print("lastHour: "); Serial.println(lastHour);
-    Serial.print("lastMinute: "); Serial.println(lastMinute);
-    
     Serial.println("[T] Nixie: Starting nixie updater...");
     for (;;) {
         // Check if nixies should update manually or automatically
         if (nixieAutonomous) {
-
             DateTime rtcDT = rtc.now();
 
             bool timeIsValid = true;
@@ -127,7 +121,7 @@ void taskUpdateNixie(void* parameter) {
                 int minuteD2 = minute % 10;
                 
                 // Periodically display time
-                if (lastMinute != rtcDT.minute()) {
+                if (lastMinute != rtcDT.minute() || lastHour != rtcDT.hour()) {
                     Serial.println("[T] Nixie: Updating time:");
                     Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
                     Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
@@ -143,7 +137,7 @@ void taskUpdateNixie(void* parameter) {
                 }
             }
         }
-
+        
         vTaskDelay(500);
     }
 }
