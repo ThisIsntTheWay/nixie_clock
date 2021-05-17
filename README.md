@@ -54,7 +54,7 @@ Software-wise, the following features have been implemented so far:
  - [ ] Implement proper manual time control.
  - [x] Implement nixie logic.
    - [X] Test said implementation.
- - [ ] Implement nixie config in webGUI.
+ - [X] Implement nixie config in webGUI.
  - [X] Store SSID and PSK in config files.
  - [X] Change WiFi settings from webGUI..
  - [ ] Change network settings from webGUI.
