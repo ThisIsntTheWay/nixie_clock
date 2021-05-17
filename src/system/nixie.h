@@ -23,6 +23,13 @@
 #define ST_CP   25   // Latch
 
 bool nixieAutonomous = true;
+bool cycleNixies = false;
+
+// Nixie digits
+char tube1Digit = 0;
+char tube2Digit = 0;
+char tube3Digit = 0;
+char tube4Digit = 0;
 
 //  ---------------------
 //  FUNCTIONS
@@ -38,14 +45,20 @@ byte decToBCD(byte in) {
 void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     byte n1, n2, n3, n4;
 
-    Serial.print("NUM INGRESS: ");
+    // Save digits in global vars
+    if (number_1 < 10) { tube1Digit = number_1+'0'; } else { tube1Digit = 'X'; };
+    if (number_2 < 10) { tube2Digit = number_2+'0'; } else { tube2Digit = 'X'; };
+    if (number_3 < 10) { tube3Digit = number_3+'0'; } else { tube3Digit = 'X'; };
+    if (number_4 < 10) { tube4Digit = number_4+'0'; } else { tube4Digit = 'X'; };
+
+    /*Serial.print("Displaying numbers: ");
         Serial.print(number_1);
         Serial.print(" ");
         Serial.print(number_2);
         Serial.print(" - ");
         Serial.print(number_3);
         Serial.print(" ");
-        Serial.println(number_4);
+        Serial.println(number_4);*/
 
     n1 = decToBCD(number_1);
     n2 = decToBCD(number_2);
@@ -94,10 +107,13 @@ void taskUpdateNixie(void* parameter) {
     int lastMinute = 0;
     int lastHour = 0;
 
+    bool forceUpdate = true;
+    cycleNixies = true;
+
     Serial.println("[T] Nixie: Starting nixie updater...");
     for (;;) {
         // Check if nixies should update manually or automatically
-        if (nixieAutonomous) {
+        if (nixieAutonomous && !cycleNixies) {
             DateTime rtcDT = rtc.now();
 
             bool timeIsValid = true;
@@ -113,7 +129,7 @@ void taskUpdateNixie(void* parameter) {
                 timeIsValid = false;
 
             // Update nixies if valid numbers are valid
-            if (timeIsValid) {
+            if (timeIsValid || forceUpdate) {
                 // Split numbers
                 int hourD1   = hour / 10;
                 int hourD2   = hour % 10;
@@ -121,7 +137,7 @@ void taskUpdateNixie(void* parameter) {
                 int minuteD2 = minute % 10;
                 
                 // Periodically display time
-                if (lastMinute != rtcDT.minute() || lastHour != rtcDT.hour()) {
+                if (lastMinute != rtcDT.minute() || lastHour != rtcDT.hour() || forceUpdate) {
                     Serial.println("[T] Nixie: Updating time:");
                     Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
                     Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
@@ -135,8 +151,29 @@ void taskUpdateNixie(void* parameter) {
                     lastMinute = rtcDT.minute();
 
                     displayNumber(hourD1, hourD2, minuteD1, minuteD2);
+
+                    // Revert force update
+                    if (forceUpdate) forceUpdate = false;
                 }
             }
+        } else if (cycleNixies) {
+            Serial.println("[T] Nixie: Cycling nixies...");
+
+            // Cycle all nixies, first incrementing then decrementing them
+            for (int i = 0; i < 10; i++) {
+                displayNumber(i,i,i,i);
+                vTaskDelay(65);
+            }
+
+            for (int i = 9; i > -1; i--) {
+                displayNumber(i,i,i,i);
+                vTaskDelay(65);
+            }
+
+            // Reset nixies
+            nixieAutonomous = true;
+            cycleNixies = false;
+            forceUpdate = true;
         }
 
         vTaskDelay(500);
