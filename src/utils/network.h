@@ -50,8 +50,33 @@ struct netConfigStruct netConfig;
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
-String parseNetConfig(int mode) {
 
+void listFilesInDir(File dir, int numTabs) {
+  while (true) {
+ 
+    File entry =  dir.openNextFile();
+    if (! entry) {
+      // no more files in the folder
+      break;
+    }
+    for (uint8_t i = 0; i < numTabs; i++) {
+      Serial.print('\t');
+    }
+    Serial.print(entry.name());
+    if (entry.isDirectory()) {
+      Serial.println("/");
+      listFilesInDir(entry, numTabs + 1);
+    } else {
+      // display zise for file, nothing for directory
+      Serial.print("\t\t");
+      Serial.println(entry.size(), DEC);
+    }
+    entry.close();
+  }
+}
+
+
+String parseNetConfig(int mode) {
     // Read file
     File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "r");
 
@@ -223,6 +248,11 @@ void taskFSMount(void* parameter) {
     Serial.println(" bytes");
 
     Serial.println();
+
+    /* Open dir folder
+    File dir = SPIFFS.open("/");
+    // List file at root
+    listFilesInDir(dir, 0);*/
 
     vTaskDelete(NULL);
 }
