@@ -77,6 +77,17 @@ void taskfactoryResetWDT(void* parameter) {
 void setup() {
     Serial.begin(115200);
 
+    // Shift registers
+    pinMode(DS_PIN, OUTPUT);
+    pinMode(SH_CP, OUTPUT);
+    pinMode(ST_CP, OUTPUT);
+
+    // Clear nixies
+    digitalWrite(ST_CP, LOW);
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, 0b11111111);
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, 0b11111111);
+    digitalWrite(ST_CP, HIGH);
+
     // FreeRTOS tasks
     Serial.println(F("[i] Spawning tasks..."));
 
