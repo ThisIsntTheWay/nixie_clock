@@ -55,7 +55,7 @@ String processor(const String& var) {
   else if (var == "AP_SSID")                { return parseNetConfig(2); }   // ESP32 AP SSID
   else if (var == "AP_PSK")                 { return parseNetConfig(3); }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4); }   // WiFi Client SSID
-  else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " | " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
+  else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " . " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
     if (nixieAutonomous && !cycleNixies) return "Clock";
     if (!nixieAutonomous && cycleNixies) return "Cycling...";
@@ -260,11 +260,14 @@ void webServerStartup() {
     int nNum4 = 10;
     bool manual = false;
 
+    // Populate new numbers
     if (data.containsKey("nNum1")) nNum1 = data["nNum1"]; manual = true;
     if (data.containsKey("nNum2")) nNum2 = data["nNum2"]; manual = true;
     if (data.containsKey("nNum3")) nNum3 = data["nNum3"]; manual = true;
     if (data.containsKey("nNum4")) nNum4 = data["nNum4"]; manual = true;
-    if (data.containsKey("manual") && data["manual"] == "true") manual = true; else manual = false;
+
+    // Mode switches
+    if (data.containsKey("manual") && data["manual"] == "true" || manual) manual = true; else manual = false;
     if (data.containsKey("tumbler") && data["tumbler"] == "true") cycleNixies = true;
     
     // Serialize JSON
@@ -275,17 +278,20 @@ void webServerStartup() {
     if (manual && !cycleNixies) {
       nixieAutonomous = false;
       displayNumber(nNum1, nNum2, nNum3, nNum4);
-
       request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies have been updated.\"}");
 
     } else if (cycleNixies) {
       nixieAutonomous = false;
       request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Cycling nixies...\"}");
 
+    } else if (!manual) {
+      nixieAutonomous = true;
+      request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Set back to autonomous mode.\"}");
+
     } else {
       request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");
 
-    }
+    } 
 
     Serial.println(response);
   });
