@@ -131,13 +131,14 @@ void taskUpdateNixie(void* parameter) {
                     if (lastHour != rtcDT.hour()) {
                         lastHour = rtcDT.hour();
                     }
+                    
                     lastMinute = rtcDT.minute();
 
                     displayNumber(hourD1, hourD2, minuteD1, minuteD2);
                 }
             }
         }
-        
+
         vTaskDelay(500);
     }
 }
