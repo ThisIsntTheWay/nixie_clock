@@ -44,24 +44,28 @@ String parseHUEconfig(int mode) {
 
     // > Deserialize
     DeserializationError error = deserializeJson(cfgHUE, hueConfig);
-    if (error)
-        Serial.println("[X] HUE parser: Could not deserialize JSON.");
+    if (error) {
+        String err = error.c_str();
 
-    // Populate config struct
-    strlcpy(hueConfigStr.IP, cfgHUE["IP"], sizeof(hueConfigStr.IP));
-    strlcpy(hueConfigStr.username, cfgHUE["user"], sizeof(hueConfigStr.username));
-    hueConfigStr.toggleOnTime = cfgHUE["toggleOnTime"];
-    hueConfigStr.toggleOffTime = cfgHUE["toggleOffTime"];
+        Serial.print("[X] HUE parser: Deserialization fault: "); Serial.println(err);
+        return "[Deserialization fault: " + err + "]";
+    } else {
+        // Populate config struct
+        strlcpy(hueConfigStr.IP, cfgHUE["IP"], sizeof(hueConfigStr.IP));
+        strlcpy(hueConfigStr.username, cfgHUE["user"], sizeof(hueConfigStr.username));
+        hueConfigStr.toggleOnTime = cfgHUE["toggleOnTime"];
+        hueConfigStr.toggleOffTime = cfgHUE["toggleOffTime"];
 
-    hueConfig.close();
+        hueConfig.close();
 
-    // Determine what variable to return
-    switch (mode) {
-        case 1: return hueConfigStr.IP; break;
-        case 2: return hueConfigStr.username; break;
-        case 3: return String(hueConfigStr.toggleOnTime); break;
-        case 4: return String(hueConfigStr.toggleOffTime); break;
-        default: return "[HUE: unknown mode]";
+        // Determine what variable to return
+        switch (mode) {
+            case 1: return hueConfigStr.IP; break;
+            case 2: return hueConfigStr.username; break;
+            case 3: return String(hueConfigStr.toggleOnTime); break;
+            case 4: return String(hueConfigStr.toggleOffTime); break;
+            default: return "[HUE: unknown mode]";
+        }
     }
 
     return String();
