@@ -213,7 +213,7 @@ void taskWiFi(void* parameter) {
             i++;
         }
 
-        Serial.println(F("[T] WiFi: Connected successfully."));
+        Serial.print(F("[T] WiFi: Connected. RSSI: ")); Serial.println(WiFi.RSSI());
 
         WiFiReady = true;
         Serial.print("[T] WiFi: IP: ");

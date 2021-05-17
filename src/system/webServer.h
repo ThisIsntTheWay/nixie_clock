@@ -42,19 +42,20 @@ String processor(const String& var) {
 
   // Unfortunately, var can only be handled withlots of if conditions:
   // A switch..case statement cannot be used with datatype "string".
-  if (var == "TIME" || var == "RTC_TIME")   { return getTime(); }           // Current Time
-  else if (var == "NTP_SOURCE")             { return parseRTCconfig(1); }   // Current NTP server
-  else if (var == "TIME_MODE")              { return parseRTCconfig(2); }   // Current time source
-  else if (var == "GMT_VAL")                { return parseRTCconfig(3); }   // Current GMT
-  else if (var == "DST_VAL")                { return parseRTCconfig(4); }   // Current DST
-  else if (var == "HUE_BRIDGE")             { return parseHUEconfig(1); }   // HUE bridge IP
-  else if (var == "HUE_API_USER")           { return "* * *"; }             // HUE API User
-  else if (var == "HUE_TOGGLEON_TIME")      { return parseHUEconfig(3); }   // HUE toggle ON time return
-  else if (var == "HUE_TOGGLEOFF_TIME")     { return parseHUEconfig(4); }   // HUE toggle OFF time
-  else if (var == "NET_MODE")               { return parseNetConfig(1); }   // Connectivity mode
-  else if (var == "AP_SSID")                { return parseNetConfig(2); }   // ESP32 AP SSID
-  else if (var == "AP_PSK")                 { return parseNetConfig(3); }   // ESP32 AP PSK
-  else if (var == "WIFI_SSID")              { return parseNetConfig(4); }   // WiFi Client SSID
+  if (var == "TIME" || var == "RTC_TIME")   { return getTime();           }   // Current Time
+  else if (var == "NTP_SOURCE")             { return parseRTCconfig(1);   }   // Current NTP server
+  else if (var == "TIME_MODE")              { return parseRTCconfig(2);   }   // Current time source
+  else if (var == "GMT_VAL")                { return parseRTCconfig(3);   }   // Current GMT
+  else if (var == "DST_VAL")                { return parseRTCconfig(4);   }   // Current DST
+  else if (var == "HUE_BRIDGE")             { return parseHUEconfig(1);   }   // HUE bridge IP
+  else if (var == "HUE_API_USER")           { return "* * *";             }   // HUE API User
+  else if (var == "HUE_TOGGLEON_TIME")      { return parseHUEconfig(3);   }   // HUE toggle ON time return
+  else if (var == "HUE_TOGGLEOFF_TIME")     { return parseHUEconfig(4);   }   // HUE toggle OFF time
+  else if (var == "NET_MODE")               { return parseNetConfig(1);   }   // Connectivity mode
+  else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
+  else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
+  else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
+  else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()); }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " . " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
     if (nixieAutonomous && !cycleNixies) return "Clock";
