@@ -40,12 +40,12 @@ String parseHUEconfig(int mode) {
     File hueConfig = LITTLEFS.open(F("/config/hueConfig.json"), "r");
 
     // Parse JSON
-    StaticJsonDocument<150> cfgHUE;
+    StaticJsonDocument<200> cfgHUE;
 
     // > Deserialize
     DeserializationError error = deserializeJson(cfgHUE, hueConfig);
     if (error)
-        //Serial.println("[X] HUE parser: Could not deserialize JSON.");
+        Serial.println("[X] HUE parser: Could not deserialize JSON.");
 
     // Populate config struct
     strlcpy(hueConfigStr.IP, cfgHUE["IP"], sizeof(hueConfigStr.IP));
@@ -91,6 +91,7 @@ int getHueLightIndex() {
                 return 99;
             }
 
+            // Increment lightsAmount by amount of elements in 'root'
             for (JsonPair kv : root) { lightsAmount++; }
         } else {
             Serial.println("[!] HUE: Cannot HTTP/GET lights index.");
