@@ -339,7 +339,7 @@ void webServerStartup() {
 
       if (data.containsKey("ontime")) {
         if (!(data["ontime"] == "NaN")) {
-          if (String(rON).length() > 5) { tmpJSON["toggleOnTime"] = rON; }
+          if (String(rON).length() < 5) { tmpJSON["toggleOnTime"] = rON; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOn bad format. ");
@@ -349,7 +349,7 @@ void webServerStartup() {
 
       if (data.containsKey("offtime")) {
         if (!(data["offtime"] == "NaN")) {
-          if (String(rON).length() > 5) { tmpJSON["toggleOffTime"] = rOFF; }
+          if (String(rON).length() < 5) { tmpJSON["toggleOffTime"] = rOFF; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOff bad format.");
