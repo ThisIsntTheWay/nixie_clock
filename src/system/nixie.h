@@ -97,9 +97,6 @@ int getCryptoPrice(String ticker, String quote) {
 
 void taskUpdateNixie(void* parameter) {
     Serial.println("[T] Nixie: preparing nixie updater...");
-    pinMode(DS_PIN, OUTPUT);
-    pinMode(SH_CP, OUTPUT);
-    pinMode(ST_CP, OUTPUT);
 
     while (!RTCready) { vTaskDelay(1000); }
     Serial.println("[T] Nixie: RTC ready.");
