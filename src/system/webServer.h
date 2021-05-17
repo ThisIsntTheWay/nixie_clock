@@ -319,7 +319,7 @@ void webServerStartup() {
       int e = 0;
       if (data.containsKey("bridgeip")) {
         if (!(data["bridgeip"] == "NaN")) {
-          if (String(rIP).length() < 7) { tmpJSON["IP"] = rIP; }
+          if (String(rIP).length() > 7) { tmpJSON["IP"] = rIP; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rIP bad format. ");
@@ -329,7 +329,7 @@ void webServerStartup() {
       
       if (data.containsKey("apiuser")) {
         if (!(data["apiuser"] == "NaN")) {
-          if (String(rUSR).length() < 7) { tmpJSON["user"] = rUSR; }
+          if (String(rUSR).length() > 7) { tmpJSON["user"] = rUSR; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rUSR bad format. ");
@@ -339,7 +339,7 @@ void webServerStartup() {
 
       if (data.containsKey("ontime")) {
         if (!(data["ontime"] == "NaN")) {
-          if (String(rON).length() < 5) { tmpJSON["toggleOnTime"] = rON; }
+          if (String(rON).length() > 5) { tmpJSON["toggleOnTime"] = rON; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOn bad format. ");
@@ -349,7 +349,7 @@ void webServerStartup() {
 
       if (data.containsKey("offtime")) {
         if (!(data["offtime"] == "NaN")) {
-          if (String(rON).length() < 5) { tmpJSON["toggleOffTime"] = rOFF; }
+          if (String(rON).length() > 5) { tmpJSON["toggleOffTime"] = rOFF; }
           else {
             InputValid = false;
             errMsg = errMsg + String(" rOff bad format.");
