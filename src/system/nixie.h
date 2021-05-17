@@ -42,7 +42,7 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
         Serial.print(number_1);
         Serial.print(" ");
         Serial.print(number_2);
-        Serial.print(" : ");
+        Serial.print(" - ");
         Serial.print(number_3);
         Serial.print(" ");
         Serial.println(number_4);
@@ -131,7 +131,7 @@ void taskUpdateNixie(void* parameter) {
                     if (lastHour != rtcDT.hour()) {
                         lastHour = rtcDT.hour();
                     }
-                    
+
                     lastMinute = rtcDT.minute();
 
                     displayNumber(hourD1, hourD2, minuteD1, minuteD2);
