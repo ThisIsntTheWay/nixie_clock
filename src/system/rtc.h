@@ -217,16 +217,20 @@ void taskUpdateRTC(void* parameter) {
                 // Sync if epoch time differs too greatly from NTP and RTC
                 // Also ignore discrepancy if its difference is way too huge, indicating corrupt NTP packets
                 if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
-                    Serial.print("[T] RTC sync: Clearing Epoch discrepancy of: ");
+                    Serial.print("[T] RTC sync: Clearing epoch difference of ");
                         Serial.println(epochDiff);
                     rtc.adjust(DateTime(ntpTime));
                 }
             } else {
                 // No sync if in AP mode as no internet connection is possible.
-                Serial.println("[X] RTC sync: ESP in AP mode.");
+                Serial.println("[X] RTC sync: AP mode is active.");
+                
+                // Terminate NTP client
+                if (timeClientRunning)
+                    timeClient.end();
             }
         } else {
-            Serial.println("[i] RTC sync: In manual mode.");
+            Serial.println("[i] RTC sync: Manual mode is active.");
 
             // Terminate NTP client
             if (timeClientRunning)
