@@ -76,30 +76,34 @@ String parseRTCconfig(int mode) {
     File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");
 
     // Parse JSON
-    StaticJsonDocument<200> cfgRTC;
+    StaticJsonDocument<250> cfgRTC;
 
     // > Deserialize
     DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
-    if (error)
-        Serial.println(F("[X] RTC_P: Could not deserialize JSON."));
+    if (error) {
+        String err = error.c_str();
 
-    // Populate config struct
-    strlcpy(config.NTP, cfgRTC["NTP"], sizeof(config.NTP));
-    strlcpy(config.Mode, cfgRTC["Mode"], sizeof(config.Mode));
-    config.GMT = cfgRTC["GMT"];
-    config.DST = cfgRTC["DST"];
+        Serial.print("[X] RTC parser: Deserialization fault: "); Serial.println(err);
+        return "[Deserialization fault: " + err + "]";
+    } else {
+        // Populate config struct
+        strlcpy(config.NTP, cfgRTC["NTP"], sizeof(config.NTP));
+        strlcpy(config.Mode, cfgRTC["Mode"], sizeof(config.Mode));
+        config.GMT = cfgRTC["GMT"];
+        config.DST = cfgRTC["DST"];
 
-    String gmt = String(config.GMT);
-    String dst = String(config.DST);
-    
-    rtcConfig.close();
+        String gmt = String(config.GMT);
+        String dst = String(config.DST);
+        
+        rtcConfig.close();
 
-    switch (mode) {
-        case 1: return config.NTP; break;
-        case 2: return config.Mode; break;
-        case 3: return gmt; break;
-        case 4: return dst; break;
-        default: return "[RTC: unknown mode]";
+        switch (mode) {
+            case 1: return config.NTP; break;
+            case 2: return config.Mode; break;
+            case 3: return gmt; break;
+            case 4: return dst; break;
+            default: return "[RTC: unknown mode]";
+        }
     }
 
     return String();
@@ -224,7 +228,7 @@ void taskUpdateRTC(void* parameter) {
             } else {
                 // No sync if in AP mode as no internet connection is possible.
                 Serial.println("[X] RTC sync: AP mode is active.");
-                
+
                 // Terminate NTP client
                 if (timeClientRunning)
                     timeClient.end();
