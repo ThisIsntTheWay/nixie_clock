@@ -59,7 +59,4 @@ function wsQuery() {
 window.addEventListener('load', onLoad);
 function onLoad(event) {
     initWebSocket();
-
-    if (wsQueryInterval) clearInterval(wsQueryInterval);
-    wsQueryInterval = setInterval(() => {wsQuery()}, 1000);
 }

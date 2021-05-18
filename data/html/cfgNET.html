@@ -7,6 +7,10 @@
 
 		<script src="/js/websockets.js"></script>
 		<script src="/js/global.js"></script>
+		<script>   
+			if (wsQueryInterval) clearInterval(wsQueryInterval);
+			wsQueryInterval = setInterval(() => {wsQuery()}, 1000);
+		</script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
