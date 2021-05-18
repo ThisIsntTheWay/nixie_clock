@@ -24,7 +24,6 @@ function spinner() {
             }
         } else {
             if (spinnerIntervalSet) clearInterval(spinnerIntervalSet);
-            wsQuery();
         }
     }
 
