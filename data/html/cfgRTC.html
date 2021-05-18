@@ -88,14 +88,14 @@
 			<h1>RTC control</h1>
 		<div>
 			<h3>Change RTC settings</h3>
-			Current time: <b>%RTC_TIME%</b><br>
+			Current time: <b id="rtc_time">%RTC_TIME%</b><br>
 			(As of page load)<br>
 			<a href="#" onclick="forceSync()">Enforce sync</a><p>
 			
-			Current mode: <b>%TIME_MODE%</b><br>
-			NTP server: <b>%NTP_SOURCE%</b><br>
-			GMT value: <b>%GMT_VAL%</b><br>
-			DST value: <b>%DST_VAL%</b><br><br>
+			Current mode: <b id="rtc_mode">%TIME_MODE%</b><br>
+			NTP server: <b id="rtc_ntp">%NTP_SOURCE%</b><br>
+			GMT value: <b id="rtc_gmt">%GMT_VAL%</b><br>
+			DST value: <b id="rtc_dst">%DST_VAL%</b><br><br>
 			
 			Set time source:<br>
 			<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>

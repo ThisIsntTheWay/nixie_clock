@@ -55,7 +55,7 @@ String processor(const String& var) {
   else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
-  else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "dbm"; }   // WiFi network dbi/RSSI
+  else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
     if (nixieAutonomous && !cycleNixies) return "Clock";
@@ -76,16 +76,22 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
+    //Serial.printf("[T] WS got message: %s\n", (char*)data);   
 
-    // Decide what to send based on data ingress.
-    if (strcmp((char*)data, "getTime") == 0)          { }
-    if (strcmp((char*)data, "getNTPsource") == 0)     { }
-    if (strcmp((char*)data, "getGMTval") == 0)        { }
-    if (strcmp((char*)data, "getDSTval") == 0)        { }
-    if (strcmp((char*)data, "getWIFIssid") == 0)      { }
-    if (strcmp((char*)data, "getWIFIrssi") == 0)      { }
-    if (strcmp((char*)data, "getNixieDisplay") == 0)  { }
-    if (strcmp((char*)data, "getNixieMode") == 0)     { }
+    // Decide what to send based on message
+    if (strcmp((char*)data, "getTime") == 0)          { ws.textAll("SYS_TIME " + getTime());         }
+    if (strcmp((char*)data, "getRTCMode") == 0)       { ws.textAll("SYS_MODE " + parseRTCconfig(2)); }
+    if (strcmp((char*)data, "getNTPsource") == 0)     { ws.textAll("SYS_NTP " + parseRTCconfig(1));  }
+    if (strcmp((char*)data, "getGMTval") == 0)        { ws.textAll("SYS_GMT " + parseRTCconfig(3));  }
+    if (strcmp((char*)data, "getDSTval") == 0)        { ws.textAll("SYS_DST " + parseRTCconfig(4));  }
+    if (strcmp((char*)data, "getWIFIssid") == 0)      { ws.textAll("SYS_SSID " + parseNetConfig(4)); }
+    if (strcmp((char*)data, "getWIFIrssi") == 0)      { ws.textAll("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
+    if (strcmp((char*)data, "getNixieDisplay") == 0)  { ws.textAll("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
+    if (strcmp((char*)data, "getNixieMode") == 0)     {
+      if (nixieAutonomous && !cycleNixies) ws.textAll("SYS_DISMODE Clock");
+      if (!nixieAutonomous && cycleNixies) ws.textAll("SYS_DISMODE Cycling...");
+      if (!nixieAutonomous && !cycleNixies) ws.textAll("SYS_DISMODE Manual"); 
+    }
   }
 }
 
@@ -94,12 +100,13 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
  void *arg, uint8_t *data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
-      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      Serial.printf("[i] WS client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
       break;
     case WS_EVT_DISCONNECT:
-      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      Serial.printf("[i] WS client #%u disconnected\n", client->id());
       break;
     case WS_EVT_DATA:
+      //client->text("Message received.");
       eventHandlerWS(arg, data, len);
       break;
     case WS_EVT_PONG:
