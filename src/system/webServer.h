@@ -558,7 +558,7 @@ void webServerStartup() {
         if (i) json += ",";
         json += "{";
         json += "\"ssid\":\"" + WiFi.SSID(i) + "\"";
-        json += ",\"rssi\":\"" + String(WiFi.RSSI(i)) + "dbm\"";
+        json += ",\"rssi\":\"" + String(WiFi.RSSI(i)) + "db\"";
         json += ",\"mac\":\"" + WiFi.BSSIDstr(i) + "\"";
         json += ",\"channel\":" + String(WiFi.channel(i));
         json += ",\"security\":\"" + encryption + "\"";
