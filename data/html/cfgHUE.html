@@ -12,15 +12,11 @@
 			</style>
 		<title>Nixie clock - Philips HUE control</title>
 		<script src="/js/websockets.js"></script>
+		<script src="/js/global.js"></script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
 			var xhr = new XMLHttpRequest();
-
-			xhr.onload = (res) => {
-				message = res['target']['response'];
-				responseText.innerHTML = JSON.stringify(message, null, "<br>");
-			};
 
 			// functions
 			function submit() {				
@@ -34,11 +30,18 @@
 				if (bridge_user === "") { bridge_user = "NaN"; }
 				if (hue_ontime === "") { hue_ontime = "NaN"; }
 				if (hue_offtime === "") { hue_offtime = "NaN"; }
-				
-				xhr.open("POST", "/api/HUEendpoint", true);
-				xhr.setRequestHeader('Content-Type', 'application/json');
+
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+					} else {
+						spinner();
+					}
+				}
 				
 				// Dispatch POST request
+				xhr.open("POST", "/api/HUEendpoint", true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify({
 					"bridgeip": bridgeip,
 					"apiuser": bridge_user,

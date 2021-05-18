@@ -9,15 +9,11 @@
 			</style>
 		<title>Nixie clock - RTC control</title>
 		<script src="/js/websockets.js"></script>
+		<script src="/js/global.js"></script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
 			var xhr = new XMLHttpRequest();
-
-			xhr.onload = (res) => {
-				message = res['target']['response'];
-				responseText.innerHTML = JSON.stringify(message, null, "<br>");
-			};
 
 			window.onload = function() {			
 				document.getElementById("ntp_config").style.display = "none";
@@ -35,25 +31,33 @@
 				dvMAN.style.display = chMAN.checked ? "block" : "none";
 			}
 
-			function forceSync() {				
+			function forceSync() {
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+					} else {
+						spinner();
+					}
+				}
+				
 				xhr.open("GET", "/api/RTCsync", true);
-
 				xhr.send();
 			}
 			
 			function submit() {
-				var responseText = document.getElementById('response');
 				var xhr = new XMLHttpRequest();
+				
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+					} else {
+						spinner();
+					}
+				}
 				
 				// Form POST request
 				xhr.open("POST", "/api/RTCendpoint", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				
-				// Display server response at HTML element with ID 'response'
-				xhr.onload = (res) => {
-					message = res['target']['response'];
-					responseText.innerHTML = message;
-				};
 				
 				// Dispatch POST request
 				if(document.getElementById("ntp_control").checked) {
