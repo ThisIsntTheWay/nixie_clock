@@ -1,8 +1,9 @@
 var spinnerIntervalSet = null;
+var spinnerCount = 0;
 
 function spinner() {
     // Destroy timer if it exists already
-    if (spinnerIntervalSet) clearInterval(spinnerIntervalSet);
+    if (spinnerIntervalSet) clearInterval(spinnerIntervalSet); spinnerCount = 0;
 
     //&#x23F1; -> ⏱
     //&#x1f449; -> 👉
@@ -12,8 +13,14 @@ function spinner() {
     // Iterate through spinner
     function nextFrame() {
         if (xhr.readyState != 4 && xhr.status != 400) {
-            responseText.innerHTML = spinnerFrames[currFrame];
-            currFrame = (currFrame == spinnerFrames.length - 1) ? 0 : currFrame + 1;
+            spinnerCount++;
+
+            if (spinnerCount < 50) {
+                responseText.innerHTML = spinnerFrames[currFrame];
+                currFrame = (currFrame == spinnerFrames.length - 1) ? 0 : currFrame + 1;
+            } else {
+                responseText.innerHTML = "&#x274C;&#x23F1;"
+            }
         } else {
             if (spinnerIntervalSet) clearInterval(spinnerIntervalSet);
         }
