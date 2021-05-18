@@ -29,14 +29,36 @@ function spinner() {
     spinnerIntervalSet = setInterval(nextFrame, 250);
 }
 
-function tableFromJson(jsonTable) {
+function tableFromJson(jsonTable, mode) {
     data = JSON.parse(jsonTable);
     var table = "<table>";
 
-    for (let key in data) {
-        table += `<tr><td>${key}</td><td>${data[key]}</td></tr>`;
+    if (mode == 0) {
+        for (var key in data) {
+            console.log("Key" + key);
+            table += 
+            `<tr>
+                <th>SSID</th>
+                <th>MAC</th>
+                <th>RSSI</th>
+                <th>Security</th>
+            </tr>
+            <tr>
+                <td>${data[key]["ssid"]}</td>
+                <td>${data[key]["mac"]}\n${data[key]["channel"]}\n${data[key]["rssi"]}\n${data[key]["security"]}</td>
+            </tr>`;
+        }
+        table += "</table>";
+    } else if (mode == 1) {
+        for (var key in data) {
+            table += 
+            `<tr>
+                <td>${key}</td>
+                <td>${data[key]}</td>
+            </tr>`;
+        }
+        table += "</table>";
     }
-    table += "</table>";
 
     // Now, add the newly created table with json data, to a container.
     responseText.innerHTML = table;
