@@ -112,8 +112,8 @@ void setup() {
     // Perpetual tasks
     xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, &TaskRTC_Handle);
     xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 2, &TaskNixie_Handle);
-    xTaskCreate(taskMonitorHUE, "FRST WDT", 5500, NULL, 3, &TaskHUE_Handle);
-    xTaskCreate(taskfactoryResetWDT, "HUE monitor", 2500, NULL, 1, NULL);
+    xTaskCreate(taskMonitorHUE, "HUE monitor", 5500, NULL, 3, &TaskHUE_Handle);
+    xTaskCreate(taskfactoryResetWDT, "Master reset", 2500, NULL, 1, NULL);
 }
 
 void loop() {
