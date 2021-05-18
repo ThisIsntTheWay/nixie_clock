@@ -4,7 +4,9 @@ function spinner() {
     // Destroy timer if it exists already
     if (spinnerIntervalSet) clearInterval(spinnerIntervalSet);
 
-    spinnerFrames = ['.', 'o', 'O', 'o', '.'];
+    //&#x23F1; -> ⏱
+    //&#x1f449; -> 👉
+    spinnerFrames = ['&#x1f449;&#x23F1;', '&#x1f449; &#x23F1;', '&#x1f449;  &#x23F1;', '&#x1f449; &#x23F1;', '&#x1f449;&#x23F1;'];
     currFrame = 0;
 
     // Iterate through spinner
@@ -15,7 +17,7 @@ function spinner() {
         }
     }
 
-    spinnerIntervalSet = setInterval(nextFrame, 100);
+    spinnerIntervalSet = setInterval(nextFrame, 250);
 }
 
 function tableFromJson(jsonIngress) {
