@@ -30,12 +30,9 @@
 
 			function forceSync() {
     			responseText.innerHTML = "";
-				
 				xhr.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						tableFromJson(this.responseText);
-					} else if (this.status == 400 ) {
-						tableFromJson(this.responseText);
+					if (this.readyState == 4 && this.status == 200 || this.status == 400) {
+						tableFromJson(this.responseText, 0);
 					} else {
 						spinner();
 					}
@@ -47,12 +44,9 @@
 			
 			function submit() {
     			responseText.innerHTML = "";
-				
 				xhr.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						tableFromJson(this.responseText);
-					} else if (this.status == 400 ) {
-						tableFromJson(this.responseText);
+					if (this.readyState == 4 && this.status == 200 || this.status == 400) {
+						tableFromJson(this.responseText, 0);
 					} else {
 						spinner();
 					}

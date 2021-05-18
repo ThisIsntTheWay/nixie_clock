@@ -30,10 +30,8 @@
 
 			function startWiFiScan() {
 				xhr.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						tableFromJson(this.responseText);
-					} else if (this.status == 400 ) {
-						tableFromJson(this.responseText);
+					if (this.readyState == 4 && this.status == 200 || this.status == 400) {
+						tableFromJson(this.responseText, 0);
 					} else {
 						spinner();
 					}
@@ -62,8 +60,8 @@
 				if (wifi_psk) {obj.wifi_psk = wifi_psk}
 				
 				xhr.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						tableFromJson(this.responseText);
+					if (this.readyState == 4 && this.status == 200 || this.status == 400) {
+						tableFromJson(this.responseText, 0);
 					} else {
 						spinner();
 					}
