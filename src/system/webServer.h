@@ -191,6 +191,28 @@ void webServerStartup() {
       Serial.println("[X] WebServer: GET /network - No local ressource.");
     }      
   });
+
+  // Websockets JS
+  server.on("/js/websockets.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String f = "/js/websockets.js";
+
+    if(LITTLEFS.exists(f)) {
+      request->send(LITTLEFS, f);
+    } else {
+      Serial.println("[X] WebServer: GET /js/websockets - No local ressource.");
+    }      
+  });
+  
+  // Global JS
+  server.on("/js/global.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String f = "/js/global.js";
+
+    if(LITTLEFS.exists(f)) {
+      request->send(LITTLEFS, f);
+    } else {
+      Serial.println("[X] WebServer: GET /js/global - No local ressource.");
+    }      
+  });
   
   // Debug interface
   server.on("/debug", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -515,7 +537,8 @@ void webServerStartup() {
   // ============
   // WiFi scanner
 
-  server.on("/api/wifiScan", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/api/wifiScan", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println(F("[i] WebServer: Scanning for WiFi..."));
     String json = "[";
     int n = WiFi.scanComplete();
     if(n == -2){
@@ -532,6 +555,7 @@ void webServerStartup() {
         json += "}";
       }
       WiFi.scanDelete();
+
       if(WiFi.scanComplete() == -2){
         WiFi.scanNetworks(true);
       }
@@ -540,6 +564,8 @@ void webServerStartup() {
     json += "]";
     request->send(200, "application/json", json);
     json = String();
+    
+    Serial.println(F("[i] WebServer: WiFi scan done."));
   });
 
   server.on("/api/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
