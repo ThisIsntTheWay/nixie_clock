@@ -42,7 +42,7 @@ void taskfactoryResetWDT(void* parameter) {
             Serial.println("[!!!] FACTORY RESET INITIATED [!!!]");
 
             while (!FlashFSready) {
-                Serial.println("[F] Awaiting FS for reset...");
+                Serial.println("[!] Reset: Awaiting FS mount...");
                 vTaskDelay(500);
             }
 
@@ -83,6 +83,10 @@ void taskfactoryResetWDT(void* parameter) {
 
 void setup() {
     Serial.begin(115200);
+
+    // Initial scan for WiFi networks.
+    // This will prevent getting empty results on WiFi Scans in the WebGUI
+    WiFi.scanNetworks();
 
     // Shift registers
     pinMode(DS_PIN, OUTPUT);
