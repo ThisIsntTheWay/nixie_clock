@@ -34,19 +34,25 @@ function tableFromJson(jsonTable, mode) {
     var table = "<table>";
 
     if (mode == 0) {
-        for (var key in data) {
-            console.log("Key" + key);
-            table += 
+        table += 
             `<tr>
                 <th>SSID</th>
                 <th>MAC</th>
+                <th>Channel</th>
                 <th>RSSI</th>
                 <th>Security</th>
-            </tr>
-            <tr>
-                <td>${data[key]["ssid"]}</td>
-                <td>${data[key]["mac"]}\n${data[key]["channel"]}\n${data[key]["rssi"]}\n${data[key]["security"]}</td>
             </tr>`;
+
+        for (var key in data) {
+            console.log("Key" + key);
+            table += `
+                <tr>
+                    <td>${data[key]["ssid"]}</td>
+                    <td>${data[key]["mac"]}</td>
+                    <td>${data[key]["channel"]}</td>
+                    <td>${data[key]["rssi"]}</td>
+                    <td>${data[key]["security"]}</td>
+                </tr>`;
         }
         table += "</table>";
     } else if (mode == 1) {
