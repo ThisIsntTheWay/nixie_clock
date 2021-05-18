@@ -4,9 +4,11 @@ var websocket;
 function initWebSocket() {
     console.log('Trying to open a WebSocket connection...');
     websocket = new WebSocket(gateway);
+
+    // Determine functions to call on specific events
     websocket.onopen    = onOpen;
     websocket.onclose   = onClose;
-    websocket.onmessage = onMessage; // <-- add this line
+    websocket.onmessage = onMessage;
 }
 
 function onOpen(event) {
@@ -21,12 +23,12 @@ function onClose(event) {
 
 // Message handling
 function onMessage(event) {
-    var state;
-    if (event.data == "1") { state = "ON"; }
-    else { state = "OFF"; }
+    let evData = event.data;
 
-    // Manipulate 
-    document.getElementById('state').innerHTML = state;
+    
+    
+    // Manipulate DOM, but first check if element exists
+    if (!!document.getElementById('state'))     document.getElementById('state').innerHTML = state;
 }
 
 // Start websockets connection on page load

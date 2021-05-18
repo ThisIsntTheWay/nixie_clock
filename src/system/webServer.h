@@ -30,7 +30,6 @@
 
 // Create webserver instances
 AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
 
 bool EnforceFactoryReset = false;
 
@@ -70,21 +69,27 @@ String processor(const String& var) {
 //  ---------------------
 //  Websockets
 //  ---------------------
-void notifyClients(char info) {
-  ws.textAll(String(info));
-}
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+AsyncWebSocket ws("/ws");
+
+void eventHandlerWS(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
-    if (strcmp((char*)data, "TOGGLE CONDITION") == 0) {
-      // Code to run
-      notifyClients(0);
-    }
+
+    // Decide what to send based on data ingress.
+    if (strcmp((char*)data, "getTime") == 0)          { }
+    if (strcmp((char*)data, "getNTPsource") == 0)     { }
+    if (strcmp((char*)data, "getGMTval") == 0)        { }
+    if (strcmp((char*)data, "getDSTval") == 0)        { }
+    if (strcmp((char*)data, "getWIFIssid") == 0)      { }
+    if (strcmp((char*)data, "getWIFIrssi") == 0)      { }
+    if (strcmp((char*)data, "getNixieDisplay") == 0)  { }
+    if (strcmp((char*)data, "getNixieMode") == 0)     { }
   }
 }
 
+// RTC WS endpoint
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
  void *arg, uint8_t *data, size_t len) {
   switch (type) {
@@ -95,7 +100,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
       break;
     case WS_EVT_DATA:
-      handleWebSocketMessage(arg, data, len);
+      eventHandlerWS(arg, data, len);
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
@@ -507,16 +512,15 @@ void webServerStartup() {
   });
   server.addHandler(nethandler);
 
-  // ----------------------------
-  // Endpoints
-  // ----------------------------
+  // ============
+  // WiFi scanner
 
-  server.on("/debug/scan", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/api/wifiScan", HTTP_GET, [](AsyncWebServerRequest *request){
     String json = "[";
     int n = WiFi.scanComplete();
     if(n == -2){
       WiFi.scanNetworks(true);
-    } else if(n){
+    } else if(n) {
       for (int i = 0; i < n; ++i){
         if(i) json += ",";
         json += "{";
@@ -532,6 +536,7 @@ void webServerStartup() {
         WiFi.scanNetworks(true);
       }
     }
+
     json += "]";
     request->send(200, "application/json", json);
     json = String();
