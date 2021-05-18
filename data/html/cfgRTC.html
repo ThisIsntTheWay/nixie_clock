@@ -43,7 +43,6 @@
 			}
 			
 			function submit() {
-				var xhr = new XMLHttpRequest();
     			responseText.innerHTML = "";
 				
 				xhr.onreadystatechange = function() {
@@ -56,11 +55,8 @@
 					}
 				}
 				
-				// Form POST request
-				xhr.open("POST", "/api/RTCendpoint", true);
-				xhr.setRequestHeader('Content-Type', 'application/json');
-				
 				let obj = {};
+				
 				// Dispatch POST request
 				if(document.getElementById("ntp_control").checked) {
 					// Construct JSON object
@@ -83,6 +79,9 @@
 					obj.value = tmp;
 				}
 
+				// Form POST request
+				xhr.open("POST", "/api/RTCendpoint", true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify(obj));
 			}
 		</script>
