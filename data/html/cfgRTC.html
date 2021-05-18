@@ -32,6 +32,7 @@
 			}
 
 			function forceSync() {
+    			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
@@ -39,17 +40,18 @@
 						spinner();
 					}
 				}
-				
+
 				xhr.open("GET", "/api/RTCsync", true);
 				xhr.send();
 			}
 			
 			function submit() {
 				var xhr = new XMLHttpRequest();
+    			responseText.innerHTML = "";
 				
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+						responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
 					} else {
 						spinner();
 					}

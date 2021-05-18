@@ -34,7 +34,8 @@
 			function startWiFiScan() {
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+						tableFromJson(this.responseText)
+						//responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
 					} else {
 						spinner();
 					}
@@ -48,6 +49,7 @@
 				let responseText = document.getElementById('response');
 				var xhr = new XMLHttpRequest();
 				
+    			responseText.innerHTML = "";
 				
 				// Dispatch POST request
 				// Construct JSON object
@@ -63,7 +65,8 @@
 				
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+						tableFromJson(this.responseText)
+						//responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
 					} else {
 						spinner();
 					}

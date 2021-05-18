@@ -31,9 +31,10 @@
 				if (hue_ontime === "") { hue_ontime = "NaN"; }
 				if (hue_offtime === "") { hue_offtime = "NaN"; }
 
+    			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+						responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
 					} else {
 						spinner();
 					}

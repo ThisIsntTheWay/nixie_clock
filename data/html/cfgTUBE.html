@@ -42,9 +42,10 @@
 				if (d3) {obj.nNum3 = d3}
 				if (d4) {obj.nNum4 = d4}
 
+    			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+						responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
 					} else {
 						spinner();
 					}
