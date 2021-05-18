@@ -192,26 +192,26 @@ void webServerStartup() {
     }      
   });
 
+  // ----------------------------
+  // Supplementary
+  // ----------------------------
+
   // Websockets JS
   server.on("/js/websockets.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     String f = "/js/websockets.js";
-
-    if(LITTLEFS.exists(f)) {
-      request->send(LITTLEFS, f);
-    } else {
-      Serial.println("[X] WebServer: GET /js/websockets - No local ressource.");
-    }      
+    request->send(LITTLEFS, f);    
   });
   
   // Global JS
   server.on("/js/global.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     String f = "/js/global.js";
+    request->send(LITTLEFS, f);
+  });
 
-    if(LITTLEFS.exists(f)) {
-      request->send(LITTLEFS, f);
-    } else {
-      Serial.println("[X] WebServer: GET /js/global - No local ressource.");
-    }      
+  // Global css
+  server.on("/css/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String f = "/css/style.css";
+    request->send(LITTLEFS, f);
   });
   
   // Debug interface
