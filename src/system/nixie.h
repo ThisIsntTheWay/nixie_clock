@@ -159,23 +159,6 @@ void taskUpdateNixie(void* parameter) {
                     // Revert force update
                     if (forceUpdate) forceUpdate = false;
                 }
-            } else {
-                /* Blink nixies
-                oldDigit1 = tube1Digit;
-                oldDigit2 = tube2Digit;
-                oldDigit3 = tube3Digit;
-                oldDigit4 = tube4Digit;
-
-                displayNumber(10,10,10,10);
-                vTaskDelay(125);
-
-                displayNumber(oldDigit1, oldDigit2, oldDigit3, oldDigit4);
-                vTaskDelay(150);
-                
-                displayNumber(10,10,10,10);
-                vTaskDelay(125);
-
-                displayNumber(oldDigit1, oldDigit2, oldDigit3, oldDigit4);*/
             }
         } else if (cycleNixies) {
             Serial.println("[T] Nixie: Cycling nixies...");
