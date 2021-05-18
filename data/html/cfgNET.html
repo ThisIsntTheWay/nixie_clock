@@ -9,21 +9,11 @@
 			</style>
 		<title>Nixie clock - Network config</title>
 		<script src="/js/websockets.js"></script>
+		<script src="/js/global.js"></script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
 			var xhr = new XMLHttpRequest();
-
-			// Spinner
-			function spinner() {
-				while(xhr.status = 0) {
-					responseText.innerHTML = ".";
-					setTimeout(() => {responseText.innerHTML = "o";}, 1000);
-					setTimeout(() => {responseText.innerHTML = "O";}, 2000);
-					setTimeout(() => {responseText.innerHTML = "@";}, 3000);
-					setTimeout(() => {responseText.innerHTML = "*";}, 4000);
-				}
-			}
 
 			window.onload = function() {			
 				document.getElementById("ap_config").style.display = "none";
@@ -42,12 +32,13 @@
 			}
 
 			function startWiFiScan() {
-
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = this.responseText;
+						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+					} else {
+						spinner();
 					}
-				};
+				}
 			
 				xhr.open("GET", "/api/wifiScan", true);
         		xhr.send();
@@ -70,10 +61,13 @@
 				if (wifi_ssid) {obj.wifi_ssid = wifi_ssid}
 				if (wifi_psk) {obj.wifi_psk = wifi_psk}
 				
-				xhr.onload = (res) => {
-					message = res['target']['response'];
-					responseText.innerHTML = JSON.stringify(message, null, 2);
-				};
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						responseText.innerHTML = JSON.stringify(this.responseText, null, 2);
+					} else {
+						spinner();
+					}
+				}
 
 				// Form POST request
 				xhr.open("POST", "/api/NETendpoint", true);
@@ -111,8 +105,6 @@
 			<p id="response"></p>
 		</div>
 		</center>
-		<script>
-			var responseText = document.getElementById('response');
-		</script>
+		<script> var responseText = document.getElementById('response'); </script>
 	</body>
 </html>
