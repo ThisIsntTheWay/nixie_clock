@@ -4,7 +4,7 @@
 
 		<link rel="icon" type="image/png" href="/favicon.png"/>
 		<link href="/css/style.css" rel="stylesheet">
-		
+
 		<script src="/js/websockets.js"></script>
 		<script src="/js/global.js"></script>
 		<script type="text/javascript">
@@ -31,8 +31,9 @@
 			function startWiFiScan() {
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						tableFromJson(this.responseText)
-						//responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
+						tableFromJson(this.responseText);
+					} else if (this.status == 400 ) {
+						tableFromJson(this.responseText);
 					} else {
 						spinner();
 					}
@@ -62,8 +63,7 @@
 				
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						tableFromJson(this.responseText)
-						//responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
+						tableFromJson(this.responseText);
 					} else {
 						spinner();
 					}

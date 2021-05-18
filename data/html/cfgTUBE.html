@@ -4,7 +4,7 @@
 		
 		<link rel="icon" type="image/png" href="/favicon.png"/>
 		<link href="/css/style.css" rel="stylesheet">
-		
+
 		<script src="/js/websockets.js"></script>
 		<script src="/js/global.js"></script>
 		<script type="text/javascript">
@@ -42,7 +42,9 @@
     			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
+						tableFromJson(this.responseText);
+					} else if (this.status == 400 ) {
+						tableFromJson(this.responseText);
 					} else {
 						spinner();
 					}

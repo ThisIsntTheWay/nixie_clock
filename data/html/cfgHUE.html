@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Nixie clock - Philips HUE control</title>
-		
+
 		<link rel="icon" type="image/png" href="/favicon.png"/>
 		<link href="/css/style.css" rel="stylesheet">
 		
@@ -28,7 +28,9 @@
     			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
+						tableFromJson(this.responseText);
+					} else if (this.status == 400 ) {
+						tableFromJson(this.responseText);
 					} else {
 						spinner();
 					}

@@ -48,7 +48,9 @@
 				
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						responseText.innerHTML = JSON.stringify(this.responseText, null, '\n');
+						tableFromJson(this.responseText);
+					} else if (this.status == 400 ) {
+						tableFromJson(this.responseText);
 					} else {
 						spinner();
 					}
@@ -58,29 +60,30 @@
 				xhr.open("POST", "/api/RTCendpoint", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
 				
+				let obj = {};
 				// Dispatch POST request
 				if(document.getElementById("ntp_control").checked) {
 					// Construct JSON object
-					var obj = {mode: "ntp"};
+					obj.mode = "ntp";
 
-					var ntp_source = document.getElementById("ntp_source").value;
-					var gmt = document.getElementById("gmt").value;
-					var dst = document.getElementById("dst").value;
+					let ntp_source = document.getElementById("ntp_source").value;
+					let gmt = document.getElementById("gmt").value;
+					let dst = document.getElementById("dst").value;
 
 					// Only include non-empty values
 					if (ntp_source) {obj.value = ntp_source}
 					if (gmt) {obj.gmt = gmt}
 					if (dst) {obj.dst = dst}
 
-					xhr.send(JSON.stringify(obj));
 
 				} else if (chMAN = document.getElementById("manual_control").checked) {
-					var tmp = document.getElementById("manual_time").value;
-					xhr.send(JSON.stringify({
-						"mode": "manual",
-						"value": tmp
-					}));
+					let tmp = document.getElementById("manual_time").value;
+					
+					obj.mode = "manual";
+					obj.value = tmp;
 				}
+
+				xhr.send(JSON.stringify(obj));
 			}
 		</script>
 	</head>

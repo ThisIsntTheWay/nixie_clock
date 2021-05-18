@@ -11,9 +11,13 @@ function spinner() {
 
     // Iterate through spinner
     function nextFrame() {
-        if (xhr.readyState != 4) {
+        if (xhr.readyState != 4 && xhr.status != 400) {
+            console.log("Spinner(): readyState: " + xhr.readyState + " | status: " + xhr.status);
             responseText.innerHTML = spinnerFrames[currFrame];
             currFrame = (currFrame == spinnerFrames.length - 1) ? 0 : currFrame + 1;
+        } else {
+            console.log("Spinner(): readyState: " + xhr.readyState + " | status: " + xhr.status);
+            if (spinnerIntervalSet) clearInterval(spinnerIntervalSet);
         }
     }
 
@@ -21,6 +25,8 @@ function spinner() {
 }
 
 function tableFromJson(jsonIngress) {
+    jsonIngress = JSON.stringify(jsonIngress);
+
     // Extract value from table header. 
     var col = [];
     for (var i = 0; i < jsonIngress.length; i++) {
