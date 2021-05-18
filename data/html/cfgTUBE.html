@@ -14,10 +14,21 @@
 
 			// Functions
 			function tumble() {
+				
+    			responseText.innerHTML = "";
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						tableFromJson(this.responseText);
+					} else if (this.status == 400 ) {
+						tableFromJson(this.responseText);
+					} else {
+						spinner();
+					}
+				}
+
 				// Form POST request
 				xhr.open("POST", "/api/nixieControl", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-
 				xhr.send(JSON.stringify( {"tumbler": "true"} ));
 
 			}
