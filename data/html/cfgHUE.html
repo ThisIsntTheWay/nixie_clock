@@ -15,7 +15,6 @@
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
-			var responseText = document.getElementById('response');
 			var xhr = new XMLHttpRequest();
 
 			xhr.onload = (res) => {
@@ -77,5 +76,8 @@
 			<p id="response"></p>
 		</div>
 		</center>
+		<script>
+			var responseText = document.getElementById('response');
+		</script>
 	</body>
 </html>

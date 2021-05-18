@@ -8,17 +8,23 @@
 				h4 { padding-bottom: 0px; }
 			</style>
 		<title>Nixie clock - Network config</title>
+		<script src="/js/websockets.js"></script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
-			var responseText = document.getElementById('response');
 			var xhr = new XMLHttpRequest();
 
-			xhr.onload = (res) => {
-				message = res['target']['response'];
-				responseText.innerHTML = JSON.stringify(message, null, "<br>");
-			};
-			
+			// Spinner
+			function spinner() {
+				while(xhr.status = 0) {
+					responseText.innerHTML = ".";
+					setTimeout(() => {responseText.innerHTML = "o";}, 1000);
+					setTimeout(() => {responseText.innerHTML = "O";}, 2000);
+					setTimeout(() => {responseText.innerHTML = "@";}, 3000);
+					setTimeout(() => {responseText.innerHTML = "*";}, 4000);
+				}
+			}
+
 			window.onload = function() {			
 				document.getElementById("ap_config").style.display = "none";
 				document.getElementById("client_config").style.display = "none";
@@ -36,6 +42,13 @@
 			}
 
 			function startWiFiScan() {
+
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						responseText.innerHTML = this.responseText;
+					}
+				};
+			
 				xhr.open("GET", "/api/wifiScan", true);
         		xhr.send();
 			}
@@ -44,9 +57,6 @@
 				let responseText = document.getElementById('response');
 				var xhr = new XMLHttpRequest();
 				
-				// Form POST request
-				xhr.open("POST", "/api/NETendpoint", true);
-				xhr.setRequestHeader('Content-Type', 'application/json');
 				
 				// Dispatch POST request
 				// Construct JSON object
@@ -59,7 +69,15 @@
 				// Only include non-empty values
 				if (wifi_ssid) {obj.wifi_ssid = wifi_ssid}
 				if (wifi_psk) {obj.wifi_psk = wifi_psk}
+				
+				xhr.onload = (res) => {
+					message = res['target']['response'];
+					responseText.innerHTML = JSON.stringify(message, null, 2);
+				};
 
+				// Form POST request
+				xhr.open("POST", "/api/NETendpoint", true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify(obj));
 			}
 		</script>
@@ -93,5 +111,8 @@
 			<p id="response"></p>
 		</div>
 		</center>
+		<script>
+			var responseText = document.getElementById('response');
+		</script>
 	</body>
 </html>
