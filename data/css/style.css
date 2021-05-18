@@ -2,9 +2,9 @@
 body { font-family: 'Roboto', sans-serif; }
 h4 { padding-bottom: 0px; }
 
-table {
-    border-spacing: 5;
-}
+table { border-spacing: 5; }
+
+th { text-align: left; }
 
 .red { color: red; }
 .green { color: green; }
