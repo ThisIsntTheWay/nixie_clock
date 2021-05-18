@@ -27,11 +27,11 @@ void taskfactoryResetWDT(void* parameter) {
     unsigned long activeMillis;
     unsigned long currMillis;
 
-    bool initReset = false;
-
     pinMode(FACT_RST, INPUT_PULLDOWN);
 
     for (;;) {
+        vTaskDelete(NULL);
+
         // Check if factory reset button is pressed using some millis() math
         currMillis = millis();
         if (digitalRead(FACT_RST)) activeMillis = currMillis;
@@ -40,6 +40,11 @@ void taskfactoryResetWDT(void* parameter) {
         if ((currMillis - activeMillis >= 5000) || EnforceFactoryReset) {
             // Perform factory reset
             Serial.println("[!!!] FACTORY RESET INITIATED [!!!]");
+
+            while (!FlashFSready) {
+                Serial.println("[F] Awaiting FS for reset...");
+                vTaskDelay(500);
+            }
 
             // Destroy all tasks
             Serial.println("[!] Reset: Destroying perpetual tasks...");
