@@ -24,50 +24,52 @@ TaskHandle_t TaskHUE_Handle;
 
 // Task to monitor if a factory reset has been triggered.
 void taskfactoryResetWDT(void* parameter) {
-    unsigned long lastMillis = millis();
+    unsigned long activeMillis;
     unsigned long currMillis;
+
+    bool initReset = false;
 
     pinMode(FACT_RST, INPUT_PULLDOWN);
 
     for (;;) {
         // Check if factory reset button is pressed using some millis() math
         currMillis = millis();
-        if (digitalRead(FACT_RST)) {
-            // Trigger factory reset if pin is HIGH for at least 5 seconds
-            if ((currMillis > lastMillis + 5000) || EnforceFactoryReset) {
-                // Perform factory reset
-                Serial.println("[!!!] FACTORY RESET INITIATED [!!!]");
+        if (digitalRead(FACT_RST)) activeMillis = currMillis;
 
-                // Destroy all tasks
-                Serial.println("[!] Reset: Destroying perpetual tasks...");
-                vTaskDelete(TaskRTC_Handle);
-                vTaskDelete(TaskNixie_Handle);
-                vTaskDelete(TaskHUE_Handle);
+        // Trigger factory reset if pin is HIGH for at least 5 seconds
+        if ((currMillis - activeMillis >= 5000) || EnforceFactoryReset) {
+            // Perform factory reset
+            Serial.println("[!!!] FACTORY RESET INITIATED [!!!]");
 
-                server.end();
+            // Destroy all tasks
+            Serial.println("[!] Reset: Destroying perpetual tasks...");
+            vTaskDelete(TaskRTC_Handle);
+            vTaskDelete(TaskNixie_Handle);
+            vTaskDelete(TaskHUE_Handle);
 
-                // Destroy config files
-                Serial.println("[!] Reset: Nuking /config dir...");
-                File configDir = LITTLEFS.open("/config");
-                File configFile = configDir.openNextFile();
+            server.end();
 
-                while (configFile) {
-                    Serial.print(" > Destroying: ");
-                        Serial.println(configFile.name());
-                    
-                    LITTLEFS.remove(configFile.name());
+            // Destroy config files
+            Serial.println("[!] Reset: Nuking /config dir...");
+            File configDir = LITTLEFS.open("/config");
+            File configFile = configDir.openNextFile();
 
-                    configFile = configDir.openNextFile();
-                }
+            while (configFile) {
+                Serial.print(" > Destroying: ");
+                    Serial.println(configFile.name());
+                
+                LITTLEFS.remove(configFile.name());
 
-                // At last, restart ESP
-                Serial.println("[!] Reset: Restarting ESP...");
-                ESP.restart();
+                configFile = configDir.openNextFile();
             }
-        } else { lastMillis = millis(); }
 
-        vTaskDelay(100);
+            // At last, restart ESP
+            Serial.println("[!] Reset: Restarting ESP...");
+            ESP.restart();
+        }
     }
+
+    vTaskDelay(100);
 }
 
 //  ---------------------
@@ -89,23 +91,23 @@ void setup() {
     digitalWrite(ST_CP, HIGH);
 
     // FreeRTOS tasks
-    Serial.println(F("[i] Spawning tasks..."));
+    Serial.println(F("[i] Starting tasks..."));
 
     // One-time / setup tasks
-        xTaskCreate(taskWiFi, "WiFi initiator", 3500, NULL, 1, NULL);
-        xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
-        xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
-        xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
-        xTaskCreate(taskSetupWebserver, "Webserver start", 5500, NULL, 1, NULL);
+    xTaskCreate(taskWiFi, "WiFi initiator", 3500, NULL, 1, NULL);
+    xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
+    xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
+    xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
+    xTaskCreate(taskSetupWebserver, "Webserver start", 5500, NULL, 1, NULL);
 
     // Perpetual tasks
-        xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, &TaskRTC_Handle);
-        xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 2, &TaskNixie_Handle);
-        xTaskCreate(taskMonitorHUE, "FRST WDT", 5500, NULL, 3, &TaskHUE_Handle);
-        xTaskCreate(taskfactoryResetWDT, "HUE monitor", 2500, NULL, 1, NULL);
-
-    Serial.print("[i] Free heap: ");
-        Serial.println(ESP.getFreeHeap());
+    xTaskCreate(taskUpdateRTC, "RTC Sync", 3500, NULL, 1, &TaskRTC_Handle);
+    xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 2, &TaskNixie_Handle);
+    xTaskCreate(taskMonitorHUE, "FRST WDT", 5500, NULL, 3, &TaskHUE_Handle);
+    xTaskCreate(taskfactoryResetWDT, "HUE monitor", 2500, NULL, 1, NULL);
 }
 
-void loop() {}
+void loop() {
+
+    ws.cleanupClients();
+}

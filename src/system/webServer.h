@@ -28,8 +28,9 @@
 #ifndef webServer_h
 #define webServer_h
 
-// Init webserver
+// Create webserver instances
 AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
 
 bool EnforceFactoryReset = false;
 
@@ -64,6 +65,47 @@ String processor(const String& var) {
   }
 
   return String();
+}
+
+//  ---------------------
+//  Websockets
+//  ---------------------
+void notifyClients(char info) {
+  ws.textAll(String(info));
+}
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    if (strcmp((char*)data, "TOGGLE CONDITION") == 0) {
+      // Code to run
+      notifyClients(0);
+    }
+  }
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+ void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+  }
+}
+
+void initWebSocket() {
+  ws.onEvent(onEvent);
+  server.addHandler(&ws);
 }
 
 //  ---------------------
@@ -466,8 +508,34 @@ void webServerStartup() {
   server.addHandler(nethandler);
 
   // ----------------------------
-  // Executors
+  // Endpoints
   // ----------------------------
+
+  server.on("/debug/scan", HTTP_GET, [](AsyncWebServerRequest *request){
+    String json = "[";
+    int n = WiFi.scanComplete();
+    if(n == -2){
+      WiFi.scanNetworks(true);
+    } else if(n){
+      for (int i = 0; i < n; ++i){
+        if(i) json += ",";
+        json += "{";
+        json += "\"rssi\":"+String(WiFi.RSSI(i));
+        json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
+        json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
+        json += ",\"channel\":"+String(WiFi.channel(i));
+        json += ",\"secure\":"+String(WiFi.encryptionType(i));
+        json += "}";
+      }
+      WiFi.scanDelete();
+      if(WiFi.scanComplete() == -2){
+        WiFi.scanNetworks(true);
+      }
+    }
+    json += "]";
+    request->send(200, "application/json", json);
+    json = String();
+  });
 
   server.on("/api/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (parseRTCconfig(2) == "ntp") {
@@ -544,7 +612,9 @@ void taskSetupWebserver(void *parameter) {
     vTaskDelay(500);
   }
 
+  // Boot server and websockets
   webServerStartup();
+  initWebSocket();
 
   vTaskDelete(NULL);
 }
