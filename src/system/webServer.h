@@ -540,20 +540,31 @@ void webServerStartup() {
   server.on("/api/wifiScan", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println(F("[i] WebServer: Scanning for WiFi..."));
     String json = "[";
+
     int n = WiFi.scanComplete();
-    if(n == -2){
+    if (n == -2) {
       WiFi.scanNetworks(true);
-    } else if(n) {
-      for (int i = 0; i < n; ++i){
-        if(i) json += ",";
+    } else if (n) {
+      for (int i = 0; i < n; ++i) {
+        String encryption;
+        switch (WiFi.encryptionType(i)) {
+          case 2: encryption = "WPA"; break;
+          case 3: encryption = "WPA2"; break;
+          case 4: encryption = "WPA2"; break;
+          case 5: encryption = "WEP"; break;
+          default: encryption = "Unknown"; break;
+        }
+
+        if (i) json += ",";
         json += "{";
-        json += "\"rssi\":"+String(WiFi.RSSI(i));
-        json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
-        json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
-        json += ",\"channel\":"+String(WiFi.channel(i));
-        json += ",\"secure\":"+String(WiFi.encryptionType(i));
+        json += "\"ssid\":\"" + WiFi.SSID(i) + "\"";
+        json += ",\"rssi\":\"" + String(WiFi.RSSI(i)) + "dbm\"";
+        json += ",\"mac\":\"" + WiFi.BSSIDstr(i) + "\"";
+        json += ",\"channel\":" + String(WiFi.channel(i));
+        json += ",\"security\":\"" + encryption + "\"";
         json += "}";
       }
+
       WiFi.scanDelete();
 
       if(WiFi.scanComplete() == -2){
@@ -561,7 +572,7 @@ void webServerStartup() {
       }
     }
 
-    json += "]";
+    json = json + "]";
     request->send(200, "application/json", json);
     json = String();
     
