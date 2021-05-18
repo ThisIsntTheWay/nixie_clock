@@ -10,39 +10,31 @@
 		<title>Nixie clock - tube control</title>
 		<script src="/js/websockets.js"></script>
 		<script type="text/javascript">
+			// Global stuff
 			var message = null;
+			var responseText = document.getElementById('response');
+			var xhr = new XMLHttpRequest();
 
+			xhr.onload = (res) => {
+				message = res['target']['response'];
+				responseText.innerHTML = JSON.stringify(message, null, "<br>");
+			};
+
+			// Functions
 			function tumble() {
-				var responseText = document.getElementById('response');
-				var xhr = new XMLHttpRequest();
-				
 				// Form POST request
 				xhr.open("POST", "/api/nixieControl", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				
-				// Display server response at HTML element with ID 'response'
-				xhr.onload = (res) => {
-					message = res['target']['response'];
-					responseText.innerHTML = message;
-				};
 
 				xhr.send(JSON.stringify( {"tumbler": "true"} ));
 
 			}
 
-			function submit() {
-				var responseText = document.getElementById('response');
-				var xhr = new XMLHttpRequest();
-				
+			// Functions
+			function submit() {				
 				// Form POST request
 				xhr.open("POST", "/api/nixieControl", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				
-				// Display server response at HTML element with ID 'response'
-				xhr.onload = (res) => {
-					message = res['target']['response'];
-					responseText.innerHTML = message;
-				};
 				
 				// Dispatch POST request
 				var obj = {};

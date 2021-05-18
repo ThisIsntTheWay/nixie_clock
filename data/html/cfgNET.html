@@ -9,13 +9,22 @@
 			</style>
 		<title>Nixie clock - Network config</title>
 		<script type="text/javascript">
+			// Global stuff
 			var message = null;
+			var responseText = document.getElementById('response');
+			var xhr = new XMLHttpRequest();
+
+			xhr.onload = (res) => {
+				message = res['target']['response'];
+				responseText.innerHTML = JSON.stringify(message, null, "<br>");
+			};
 			
 			window.onload = function() {			
 				document.getElementById("ap_config").style.display = "none";
 				document.getElementById("client_config").style.display = "none";
 			}
 
+			// Functions
 			function showHideConfig() {
 				var chAP = document.getElementById("mode_AP");
 				var chClient = document.getElementById("mode_Client");
@@ -25,20 +34,19 @@
 				dvAP.style.display = chAP.checked ? "block" : "none";
 				dvClient.style.display = chClient.checked ? "block" : "none";
 			}
+
+			function startWiFiScan() {
+				xhr.open("GET", "/api/wifiScan", true);
+        		xhr.send();
+			}
 			
 			function submit() {
-				var responseText = document.getElementById('response');
+				let responseText = document.getElementById('response');
 				var xhr = new XMLHttpRequest();
 				
 				// Form POST request
 				xhr.open("POST", "/api/NETendpoint", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				
-				// Display server response at HTML element with ID 'response'
-				xhr.onload = (res) => {
-					message = res['target']['response'];
-					responseText.innerHTML = message;
-				};
 				
 				// Dispatch POST request
 				// Construct JSON object
@@ -78,6 +86,7 @@
 				WiFi signal strength: <b>%WIFI_RSSI%</b><br>
 				Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value=""/><br>
 				Set WiFi PSK: <input type="password" size="16" id="wifi_client_psk" value=""/><br>
+				<input type="button" value="Scan WiFi" onclick="startWiFiScan()"/>
 			</span>
 			<br>
 			<input type="submit" value="Apply" onclick="submit()"></input>

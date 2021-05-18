@@ -13,12 +13,18 @@
 		<title>Nixie clock - Philips HUE control</title>
 		<script src="/js/websockets.js"></script>
 		<script type="text/javascript">
-			var message = null;			
-			function submit() {
-				// Form POST request
-				var responseText = document.getElementById('response');
-				var xhr = new XMLHttpRequest();
-				
+			// Global stuff
+			var message = null;
+			var responseText = document.getElementById('response');
+			var xhr = new XMLHttpRequest();
+
+			xhr.onload = (res) => {
+				message = res['target']['response'];
+				responseText.innerHTML = JSON.stringify(message, null, "<br>");
+			};
+
+			// functions
+			function submit() {				
 				var bridgeip = document.getElementById('bridge_ip').value;
 				var bridge_user = document.getElementById('bridge_user').value;
 				var hue_ontime = document.getElementById('turnON').value;
@@ -32,13 +38,6 @@
 				
 				xhr.open("POST", "/api/HUEendpoint", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				
-				// Display server response at HTML element with ID 'response'
-				xhr.onload = (res) => {
-					console.log(res['target']['response']);
-					message = res['target']['response'];
-					responseText.innerHTML = message;
-				};
 				
 				// Dispatch POST request
 				xhr.send(JSON.stringify({

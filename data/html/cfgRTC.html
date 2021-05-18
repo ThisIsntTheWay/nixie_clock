@@ -10,13 +10,23 @@
 		<title>Nixie clock - RTC control</title>
 		<script src="/js/websockets.js"></script>
 		<script type="text/javascript">
+			// Global stuff
 			var message = null;
 			
+			var responseText = document.getElementById('response');
+			var xhr = new XMLHttpRequest();
+
+			xhr.onload = (res) => {
+				message = res['target']['response'];
+				responseText.innerHTML = JSON.stringify(message, null, "<br>");
+			};
+
 			window.onload = function() {			
 				document.getElementById("ntp_config").style.display = "none";
 				document.getElementById("manual_config").style.display = "none";
 			}
 			
+			// Functions
 			function showHideConfig() {
 				var chkNTP = document.getElementById("ntp_control");
 				var chMAN = document.getElementById("manual_control");
@@ -27,17 +37,8 @@
 				dvMAN.style.display = chMAN.checked ? "block" : "none";
 			}
 
-			function forceSync() {
-				var responseText = document.getElementById('response');	
-				var xhr = new XMLHttpRequest();
-				
+			function forceSync() {				
 				xhr.open("GET", "/api/RTCsync", true);
-				
-				// Display server response at HTML element with ID 'response'
-				xhr.onload = (res) => {
-					message = res['target']['response'];
-					responseText.innerHTML = message;
-				};
 
 				xhr.send();
 			}
