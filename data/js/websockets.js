@@ -2,6 +2,8 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var wsQueryInterval = null;
 var websocket;
 
+var wsQueryIntervalCycle = 750;
+
 function initWebSocket() {
     websocket = new WebSocket(gateway);
 
@@ -35,11 +37,11 @@ function onMessage(event) {
     if (evData.startsWith("SYS_RSSI")) document.getElementById('wifi_rssi').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_TUBES")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_DISMODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("SYS_CRYPTO")) document.getElementById('crypto_ticker').innerHTML = evData.replace(regex, '');
 }
 
 function wsQuery() {
     //console.debug("wsQuery fired.");
-
     if (websocket.readyState == 1) {
         // Send specific text to websocket server based on existing DOM
         if (!!document.getElementById('rtc_time')) websocket.send("getTime");
@@ -50,6 +52,7 @@ function wsQuery() {
         if (!!document.getElementById('wifi_rssi')) websocket.send("getWIFIrssi");
         if (!!document.getElementById('tubes_display')) websocket.send("getNixieDisplay");
         if (!!document.getElementById('tubes_mode')) websocket.send("getNixieMode");
+        if (!!document.getElementById('crypto_ticker')) websocket.send("getCryptoTicker");
     } else {
         console.warn("Cannot send msg to WS endpoint. Connection is in state " + websocket.readyState + ".");
     }
@@ -59,10 +62,6 @@ function wsQuery() {
 window.addEventListener('load', onLoad);
 function onLoad(event) {
     initWebSocket();
-
-    if (typeof wsQueryIntervalCycle === 'undefined' || wsQueryIntervalCycle === null) {
-        var wsQueryIntervalCycle = 1500;
-    }
 
     if (wsQueryInterval) clearInterval(wsQueryInterval);
     wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryIntervalCycle);
