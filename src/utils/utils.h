@@ -6,7 +6,7 @@
 String getSysMsg() {
     String msg;
 
-    if (APisFallback) msg = "<span style='color: red'>Attempting to connect to '" + parseNetConfig(4) + "' has failed.</span>";
+    if (APisFallback) msg = "<span style='color: red'>Attempting to connect to WiFi network '" + parseNetConfig(4) + "' has failed.</span>";
 
     return msg;
 }
