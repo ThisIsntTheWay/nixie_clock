@@ -139,7 +139,7 @@ void taskSetupRTC (void* parameters) {
     // Set RTC datetime if it hasn't been running yet
     // USE WITH DS1307 -> if (! rtc.isrunning()) {
     if (rtc.lostPower()) {
-        Serial.println("[i] RTC: Module offline, turning on...");
+        Serial.println("[i] RTC: Module not configured, setting compile time...");
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 
