@@ -92,10 +92,10 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)     {
+      if (crypto) client->text("SYS_DISMODE Crypto");
       if (nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Clock");
       if (!nixieAutonomous && cycleNixies) client->text("SYS_DISMODE Cycling...");
-      if (!nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Manual"); 
-      if (crypto) client->text("SYS_DISMODE Crypto"); 
+      if (!nixieAutonomous && !cycleNixies && !crypto) client->text("SYS_DISMODE Manual");  
     } else { client->text("Request unknown."); }
   }
 }
@@ -330,7 +330,7 @@ void webServerStartup() {
   
   AsyncCallbackJsonWebHandler *nixiehandler = new AsyncCallbackJsonWebHandler("/api/nixieControl", [](AsyncWebServerRequest *request, JsonVariant &json) {
     // Construct JSON
-    StaticJsonDocument<200> data;
+    StaticJsonDocument<325> data;
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
     else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
     
@@ -342,19 +342,21 @@ void webServerStartup() {
     int nNum4 = 10;
     bool manual = false;
     bool configUpdate = false;
-
+    
     // Populate new numbers
-    if (data.containsKey("nNum1")) nNum1 = data["nNum1"]; manual = true;
-    if (data.containsKey("nNum2")) nNum2 = data["nNum2"]; manual = true;
-    if (data.containsKey("nNum3")) nNum3 = data["nNum3"]; manual = true;
-    if (data.containsKey("nNum4")) nNum4 = data["nNum4"]; manual = true;
+    if (data.containsKey("nNum1")) nNum1 = data["nNum1"];
+    if (data.containsKey("nNum2")) nNum2 = data["nNum2"];
+    if (data.containsKey("nNum3")) nNum3 = data["nNum3"];
+    if (data.containsKey("nNum4")) nNum4 = data["nNum4"];
+
+    Serial.print("Manual is: "); Serial.println(manual);
 
     // Mode switches
     if (data.containsKey("mode")) {
-      if (data["mode"] == "manual" || manual) manual = true; else manual = false;
-      if (data["mode"] == "clock") manual = false;
-      if (data["mode"] == "tumbler") cycleNixies = true;
-      if (data["mode"] == "crypto") {
+      if (data["mode"] == "manual")           { manual = true; crypto = false; }
+      else if (data["mode"] == "clock")       { manual = false; crypto = false; }
+      else if (data["mode"] == "tumbler")     { manual = false; crypto = false; cycleNixies = true; }
+      else if (data["mode"] == "crypto") {
         configUpdate = true;
         crypto = true;
 
@@ -375,6 +377,7 @@ void webServerStartup() {
 
           request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"System error: Cannot deserialize JSON: " + err + "\"}");
         } else {
+          nixieConfig.close();
 
           if (data.containsKey("crypto_asset")) tmpJSON["crypto_asset"] = crypto_asset;
           if (data.containsKey("crypto_quote")) tmpJSON["crypto_quote"] = crypto_quote;
@@ -385,13 +388,16 @@ void webServerStartup() {
             Serial.println(F("[X] WebServer: Config write failure."));
             request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
           } else {
-            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Crypto config has been updated.\"}");
+            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in crypto mode.\"}");
           }
+
+          nixieConfig.close();
         }
       }
     }
 
     // Serialize JSON
+    Serial.print("Manual, cycleNixies, crypto: "); Serial.print(manual); Serial.print(cycleNixies); Serial.println(crypto);
     String response;
     serializeJson(data, response);
     if (!configUpdate) {
@@ -408,9 +414,6 @@ void webServerStartup() {
       } else if (!manual && !crypto) {
         nixieAutonomous = true;
         request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in autonomous mode.\"}");
-
-      } else if (crypto) {
-        request->send(200, "application/json", "{\"status\": \"error\", \"message\": \"Nixies now in crypto ticker mode.\"}");
 
       } else {
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");

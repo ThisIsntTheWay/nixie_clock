@@ -48,8 +48,7 @@
 			}
 
 			// Functions
-			function submit() {				
-				
+			function submit() {			
 				// Dispatch POST request
 				var obj = {};
 
@@ -65,10 +64,13 @@
 					var d4 = document.getElementById("digit4").value;
 
 					// Only include non-empty values
+					obj.mode = "manual";
+
 					if (d1) {obj.nNum1 = d1}
 					if (d2) {obj.nNum2 = d2}
 					if (d3) {obj.nNum3 = d3}
 					if (d4) {obj.nNum4 = d4}
+
 				} else if (chClock.checked) {
 					obj.mode = "clock";
 				} else {
@@ -110,7 +112,7 @@
 			<br>
 
 			Mode override:<br>
-			<input type="radio" id="mode_manual" name="r" onclick="toggleCryptoConfig()"/>Manual<br/>
+			<input type="radio" id="mode_manual" name="r" onclick="toggleCryptoConfig()" checked="1"/>Manual<br/>
 			<input type="radio" id="mode_clock" name="r" onclick="toggleCryptoConfig()"/>Clock<br/>
 			<input type="radio" id="mode_crypto" name="r" onclick="toggleCryptoConfig()"/>Crypto<br/><br/>
 
