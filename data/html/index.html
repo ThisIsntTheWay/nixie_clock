@@ -6,10 +6,6 @@
 		<link href="/css/style.css" rel="stylesheet">
 
 		<script src="/js/websockets.js"></script>
-		<script>   
-			if (wsQueryInterval) clearInterval(wsQueryInterval);
-			wsQueryInterval = setInterval(() => {wsQuery()}, 1000);
-		</script>
 	</head>
 	<body>
 		<center>
@@ -20,11 +16,11 @@
 			<b>The current time is: </b><span id="rtc_time">%TIME%</span><br>
 			<p></p>
 
-			Please specify an option:<br>
-			<a href="/rtc">Set RTC</a><br>
-			<a href="/tube">Set individual tube</a><br>
-			<a href="/hue">Set philips HUE config</a><br>
-			<a href="/network">Set network config</a><br>
+			Configuration menu:<br>
+			<a href="/rtc">RTC / Time</a><br>
+			<a href="/tube">Nixie tubes</a><br>
+			<a href="/hue">Philips HUE</a><br>
+			<a href="/network">Network</a><br>
 			</center>
 		</div>
 	</body>
