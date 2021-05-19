@@ -129,6 +129,10 @@ void taskSetupRTC (void* parameters) {
         vTaskDelay(500);
     }
 
+    // Set I2C clock speed
+    Wire.setClock(100000);
+
+    // Detect RTC
     if (!rtc.begin()) {
         Serial.println(F("[X] RTC: No module found."));
         Serial.println(F("[X] RTC: Aborting..."));
