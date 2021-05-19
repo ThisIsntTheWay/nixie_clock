@@ -5,12 +5,27 @@
 		<link rel="icon" type="image/png" href="/favicon.png"/>
 		<link href="/css/style.css" rel="stylesheet">
 
+		<script>
+			// Override wsQuery interval
+			var wsQueryIntervalCycle = 750;
+		</script>
 		<script src="/js/websockets.js"></script>
 		<script src="/js/global.js"></script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
 			var xhr = new XMLHttpRequest();
+
+			window.onload = function() {			
+				document.getElementById("crypto_config").style.display = "none";
+			}
+
+			function toggleCryptoConfig() {
+				let chCrypto = document.getElementById("mode_crypto");
+				let dvCrypto = document.getElementById("crypto_config");
+				
+				dvCrypto.style.display = chCrypto.checked ? "block" : "none";
+			}
 
 			// Functions
 			function tumble() {
@@ -28,7 +43,7 @@
 				// Form POST request
 				xhr.open("POST", "/api/nixieControl", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				xhr.send(JSON.stringify( {"tumbler": "true"} ));
+				xhr.send(JSON.stringify( {"mode": "tumbler"} ));
 
 			}
 
@@ -38,16 +53,28 @@
 				// Dispatch POST request
 				var obj = {};
 
-				var d1 = document.getElementById("digit1").value;
-				var d2 = document.getElementById("digit2").value;
-				var d3 = document.getElementById("digit3").value;
-				var d4 = document.getElementById("digit4").value;
+				let chClock = document.getElementById("mode_clock");
+				let chCrypto = document.getElementById("mode_crypto");
 
-				// Only include non-empty values
-				if (d1) {obj.nNum1 = d1}
-				if (d2) {obj.nNum2 = d2}
-				if (d3) {obj.nNum3 = d3}
-				if (d4) {obj.nNum4 = d4}
+				// Only incorporate tube numbers if they were checked
+				if (!chClock.checked && !chCrypto.checked) {
+					var d1 = document.getElementById("digit1").value;
+					var d2 = document.getElementById("digit2").value;
+					var d3 = document.getElementById("digit3").value;
+					var d4 = document.getElementById("digit4").value;
+
+					// Only include non-empty values
+					if (d1) {obj.nNum1 = d1}
+					if (d2) {obj.nNum2 = d2}
+					if (d3) {obj.nNum3 = d3}
+					if (d4) {obj.nNum4 = d4}
+				} else if (chClock.checked) {
+					obj.mode = "clock";
+				} else {
+					obj.mode = "crypto";
+					obj.asset = document.getElementById("crypto_asset").value;
+					obj.quote = document.getElementById("crypto_quote").value;
+				}
 
     			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
@@ -78,6 +105,20 @@
 			<input type="numeric" size="1" id="digit2" value="" maxlength="1" />
 			<input type="numeric" size="1" id="digit3" value="" maxlength="1" />
 			<input type="numeric" size="1" id="digit4" value="" maxlength="1" /><p>
+			<br>
+
+			Mode override:<br>
+			<input type="radio" id="mode_clock" name="r" onclick="toggleCryptoConfig()"/>Clock<br/>
+			<input type="radio" id="mode_crypto" name="r" onclick="toggleCryptoConfig()"/>Crypto<br/><br/>
+
+			<span id="crypto_config">
+				Current ticker: <b id="crypto_ticker">%CRYPTO_TICKER%</b><br>
+				Current price: <b id="crypto_price">%CRYPTO_PRICE%</b><br>
+				Set asset: <input type="text" size="5" id="crypto_asset" value=""/><br>
+				Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br>
+				<em>Pulling from Binance.</em><br>
+			</span><br>
+			
 				<input type="submit" value="Apply" onclick="submit()"></input>
 				<input type="submit" value="Tumbler" onclick="tumble()"></input>
 			<p id="response"></p>

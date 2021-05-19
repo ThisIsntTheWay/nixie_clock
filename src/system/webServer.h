@@ -336,6 +336,8 @@ void webServerStartup() {
     int nNum3 = 10;
     int nNum4 = 10;
     bool manual = false;
+    bool crypto = false;
+    bool configUpdate = false;
 
     // Populate new numbers
     if (data.containsKey("nNum1")) nNum1 = data["nNum1"]; manual = true;
@@ -344,31 +346,72 @@ void webServerStartup() {
     if (data.containsKey("nNum4")) nNum4 = data["nNum4"]; manual = true;
 
     // Mode switches
-    if (data.containsKey("manual") && data["manual"] == "true" || manual) manual = true; else manual = false;
-    if (data.containsKey("tumbler") && data["tumbler"] == "true") cycleNixies = true;
-    
+    if (data.containsKey("mode")) {
+      if (data["mode"] == "manual" || manual) manual = true; else manual = false;
+      if (data["mode"] == "tumbler") cycleNixies = true;
+      if (data["mode"] == "crypto") {
+        configUpdate = true;
+        crypto = true;
+
+        const char* crypto_asset = data["crypto_asset"];
+        const char* crypto_quote = data["crypto_quote"];
+
+        // Read file
+        StaticJsonDocument<200> tmpJSON;
+        File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "r");
+
+        String errMsg = "Failure!";
+
+        DeserializationError error = deserializeJson(tmpJSON, nixieConfig);
+        if (error) {
+          String err = error.c_str();
+          Serial.print(F("[X] NIXIE: Could not deserialize JSON:"));
+            Serial.println(err);
+
+          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"System error: Cannot deserialize JSON: " + err + "\"}");
+        } else {
+
+          tmpJSON["crypto_asset"] = crypto_asset;
+          tmpJSON["crypto_quote"] = crypto_quote;
+
+          // Write config.cfg
+          File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
+          if (!(serializeJson(tmpJSON, nixieConfig))) {
+            Serial.println(F("[X] WebServer: Config write failure."));
+            request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
+          } else {
+            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Crypto config has been updated.\"}");
+          }
+        }
+      }
+    }
+
     // Serialize JSON
     String response;
     serializeJson(data, response);
-    
-    // Handle conditions
-    if (manual && !cycleNixies) {
-      nixieAutonomous = false;
-      displayNumber(nNum1, nNum2, nNum3, nNum4);
-      request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies have been updated.\"}");
+    if (!configUpdate) {
+      // Handle conditions
+      if (manual && !cycleNixies && !crypto) {
+        nixieAutonomous = false;
+        displayNumber(nNum1, nNum2, nNum3, nNum4);
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies have been updated.\"}");
 
-    } else if (cycleNixies) {
-      nixieAutonomous = false;
-      request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Cycling nixies...\"}");
+      } else if (cycleNixies && !crypto) {
+        nixieAutonomous = false;
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Cycling nixies...\"}");
 
-    } else if (!manual) {
-      nixieAutonomous = true;
-      request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Set back to autonomous mode.\"}");
+      } else if (!manual && !crypto) {
+        nixieAutonomous = true;
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Set back to autonomous mode.\"}");
 
-    } else {
-      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");
+      } else if (crypto) {
+        request->send(200, "application/json", "{\"status\": \"error\", \"message\": \"Crypto ticker mode activated.\"}");
 
-    } 
+      } else {
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");
+
+      } 
+    }
 
     Serial.println(response);
   });
