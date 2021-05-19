@@ -53,11 +53,12 @@
 				// Dispatch POST request
 				var obj = {};
 
+				let chManual = document.getElementById("mode_manual");
 				let chClock = document.getElementById("mode_clock");
 				let chCrypto = document.getElementById("mode_crypto");
 
 				// Only incorporate tube numbers if they were checked
-				if (!chClock.checked && !chCrypto.checked) {
+				if (chManual.checked) {
 					var d1 = document.getElementById("digit1").value;
 					var d2 = document.getElementById("digit2").value;
 					var d3 = document.getElementById("digit3").value;
@@ -72,8 +73,9 @@
 					obj.mode = "clock";
 				} else {
 					obj.mode = "crypto";
-					obj.asset = document.getElementById("crypto_asset").value;
-					obj.quote = document.getElementById("crypto_quote").value;
+
+					if (document.getElementById("crypto_asset").value !== "") obj.asset = document.getElementById("crypto_asset").value;
+					if (document.getElementById("crypto_quote").value !== "") obj.asset = document.getElementById("crypto_quote").value;
 				}
 
     			responseText.innerHTML = "";
@@ -108,6 +110,7 @@
 			<br>
 
 			Mode override:<br>
+			<input type="radio" id="mode_manual" name="r" onclick="toggleCryptoConfig()"/>Manual<br/>
 			<input type="radio" id="mode_clock" name="r" onclick="toggleCryptoConfig()"/>Clock<br/>
 			<input type="radio" id="mode_crypto" name="r" onclick="toggleCryptoConfig()"/>Crypto<br/><br/>
 
