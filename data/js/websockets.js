@@ -51,7 +51,7 @@ function wsQuery() {
         if (!!document.getElementById('tubes_display')) websocket.send("getNixieDisplay");
         if (!!document.getElementById('tubes_mode')) websocket.send("getNixieMode");
     } else {
-        console.warn("Cannot send msg to WS endpoint. Connection has state " + websocket.readyState);
+        console.warn("Cannot send msg to WS endpoint. Connection is in state " + websocket.readyState + ".");
     }
 }
 
