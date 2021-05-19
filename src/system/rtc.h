@@ -58,7 +58,9 @@ String getTime() {
     } else {
         char buf1[20];
         DateTime now = rtc.now();
-        sprintf(buf1, "%02d:%02d:%02d %02d/%02d/%02d",  now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
+        //Serial.printf("[i] Free heap: %d\n", ESP.getFreeHeap());
+
+        snprintf(buf1, 20, "%02d:%02d:%02d %02d/%02d/%02d",  now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
 
         return buf1;
     }
