@@ -114,6 +114,8 @@ int getCryptoPrice(String ticker, String quote) {
 //  ---------------------
 
 void taskSetupNixie(void* parameter) {
+    while (!FlashFSready) { vTaskDelay(500); }
+
     if (!(LITTLEFS.exists("/config/nixieConfig.json"))) {
         Serial.println(F("[T] Nixie: No config found."));
         
