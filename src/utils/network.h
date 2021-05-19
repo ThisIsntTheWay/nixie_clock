@@ -203,13 +203,20 @@ void taskWiFi(void* parameter) {
 
         while (WiFi.status() != WL_CONNECTED) {
             if (i > 15) {
-                Serial.println("[X] WiFi: Connection timeout.");
+                Serial.println(F("[X] WiFi: Connection timeout."));
+
+                // Open up a WiFi AP instead
+                Serial.println(F("[i] WiFi: Starting AP as fallback..."));
+                WiFi.softAP(netConfig.AP_SSID, netConfig.AP_PSK);
+                Serial.print("[i] WiFi: AP IP address: ");
+                    Serial.println(WiFi.softAPIP());
+
                 vTaskDelete(NULL);
             }
 
             vTaskDelay(1000);
 
-            Serial.println("[T] WiFi: Connecting...");
+            Serial.println(F("[T] WiFi: Connecting..."));
             i++;
         }
 
