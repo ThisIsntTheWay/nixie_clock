@@ -24,6 +24,7 @@
 
 bool nixieAutonomous = true;
 bool cycleNixies = false;
+bool crypto = false;
 
 // Nixie digits
 char tube1Digit = 0;
@@ -43,9 +44,10 @@ struct nixieConfigStruct {
     char crypto_quote[8];
     int cathodeDepoisonTime;
     int cathodeDepoisonMode;
+    int cathodeDepoisonInterval;
 };
 
-struct rtcConfigStruct nixieConfig;
+struct nixieConfigStruct nixieConfigJSON;
 
 //  ---------------------
 //  FUNCTIONS
@@ -107,6 +109,42 @@ int getCryptoPrice(String ticker, String quote) {
     int price = doc["price"];
 
     return doc["price"];
+}
+
+String parseNixieConfig(int mode) {
+        // Read file
+    File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "r");
+
+    // Parse JSON
+    StaticJsonDocument<250> cfgNixie;
+
+    // > Deserialize
+    DeserializationError error = deserializeJson(cfgNixie, nixieConfig);
+    if (error) {
+        String err = error.c_str();
+
+        Serial.print("[X] Nixie parser: Deserialization fault: "); Serial.println(err);
+        return "[Deserialization fault: " + err + "]";
+    } else {
+        // Populate config struct
+        strlcpy(nixieConfigJSON.crypto_asset, cfgNixie["crypto_asset"], sizeof(nixieConfigJSON.crypto_asset));
+        strlcpy(nixieConfigJSON.crypto_quote, cfgNixie["crypto_quote"], sizeof(nixieConfigJSON.crypto_quote));
+        nixieConfigJSON.cathodeDepoisonTime = cfgNixie["cathodeDepoisonTime"];
+        nixieConfigJSON.cathodeDepoisonMode = cfgNixie["cathodeDepoisonMode"];
+        nixieConfigJSON.cathodeDepoisonInterval = cfgNixie["cathodeDepoisonInterval"];
+        
+        nixieConfig.close();
+
+        switch (mode) {
+            case 1: return String(String(nixieConfigJSON.crypto_asset) + "/" + String(nixieConfigJSON.crypto_quote)); break;
+            case 2: return String(nixieConfigJSON.cathodeDepoisonTime); break;
+            case 3: return String(nixieConfigJSON.cathodeDepoisonMode); break;
+            case 4: return String(nixieConfigJSON.cathodeDepoisonInterval); break;
+            default: return "[NIXIE: unknown mode]";
+        }
+    }
+
+    return String();
 }
 
 //  ---------------------
