@@ -37,6 +37,16 @@ int oldDigit2;
 int oldDigit3;
 int oldDigit4;
 
+// Structs
+struct nixieConfigStruct {
+    char crypto_asset[8];
+    char crypto_quote[8];
+    int cathodeDepoisonTime;
+    int cathodeDepoisonMode;
+};
+
+struct rtcConfigStruct nixieConfig;
+
 //  ---------------------
 //  FUNCTIONS
 //  ---------------------
@@ -94,12 +104,46 @@ int getCryptoPrice(String ticker, String quote) {
     if (doc.containsKey("error"))
         return 0;
 
+    int price = doc["price"];
+
     return doc["price"];
 }
 
 //  ---------------------
 //  TASKS
 //  ---------------------
+
+void taskSetupNixie(void* parameter) {
+    if (!(LITTLEFS.exists("/config/nixieConfig.json"))) {
+        Serial.println(F("[T] Nixie: No config found."));
+        
+        if (!LITTLEFS.exists("/config"))
+            LITTLEFS.mkdir("/config");
+
+        File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
+
+        // Construct JSON
+        StaticJsonDocument<200> cfgNixie;
+
+        cfgNixie["crypto_asset"] = "BTC";
+        cfgNixie["crypto_quote"] = "USD";
+        cfgNixie["cathodeDepoisonTime"] = 600;
+        cfgNixie["cathodeDepoisonMode"] = 1;
+
+        // Write rtcConfig.cfg
+        if (!(serializeJson(cfgNixie, nixieConfig)))
+            Serial.println(F("[X] Nixie: config write failure."));
+
+        nixieConfig.close();
+
+        // Set time on RTC
+        Serial.println(F("[>] Nixie: Config created."));
+    } else {
+        Serial.println(F("[T] Nixie: Config found."));
+    }
+
+    vTaskDelete(NULL);
+}
 
 void taskUpdateNixie(void* parameter) {
     Serial.println("[T] Nixie: preparing nixie updater...");
