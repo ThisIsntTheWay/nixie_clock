@@ -92,10 +92,10 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)     {
-      if (crypto) client->text("SYS_DISMODE Crypto");
-      if (nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Clock");
-      if (!nixieAutonomous && cycleNixies) client->text("SYS_DISMODE Cycling...");
-      if (!nixieAutonomous && !cycleNixies && !crypto) client->text("SYS_DISMODE Manual");  
+      if (crypto) { client->text("SYS_DISMODE Crypto"); }
+      else if (nixieAutonomous && !cycleNixies) { client->text("SYS_DISMODE Clock"); }
+      else if (!nixieAutonomous && cycleNixies) { client->text("SYS_DISMODE Cycling..."); }
+      else if (!nixieAutonomous && !cycleNixies && !crypto) { client->text("SYS_DISMODE Manual"); } 
     } else { client->text("Request unknown."); }
   }
 }
