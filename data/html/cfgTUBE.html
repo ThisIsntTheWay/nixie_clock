@@ -7,10 +7,6 @@
 
 		<script src="/js/websockets.js"></script>
 		<script src="/js/global.js"></script>
-		<script>   
-			if (wsQueryInterval) clearInterval(wsQueryInterval);
-			wsQueryInterval = setInterval(() => {wsQuery()}, 1000);
-		</script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
@@ -78,10 +74,10 @@
 			Current display mode: <b id="tubes_mode">%TUBES_MODE%</b><br><br>
 			
 			Change tube values:<br>
-			<input type="numeric" size="1" id="digit1" value="" maxlength="2" />
-			<input type="numeric" size="1" id="digit2" value="" maxlength="2" />
-			<input type="numeric" size="1" id="digit3" value="" maxlength="2" />
-			<input type="numeric" size="1" id="digit4" value="" maxlength="2" /><p>
+			<input type="numeric" size="1" id="digit1" value="" maxlength="1" />
+			<input type="numeric" size="1" id="digit2" value="" maxlength="1" />
+			<input type="numeric" size="1" id="digit3" value="" maxlength="1" />
+			<input type="numeric" size="1" id="digit4" value="" maxlength="1" /><p>
 				<input type="submit" value="Apply" onclick="submit()"></input>
 				<input type="submit" value="Tumbler" onclick="tumble()"></input>
 			<p id="response"></p>

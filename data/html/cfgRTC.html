@@ -7,10 +7,6 @@
 		
 		<script src="/js/websockets.js"></script>
 		<script src="/js/global.js"></script>
-		<script>   
-			if (wsQueryInterval) clearInterval(wsQueryInterval);
-			wsQueryInterval = setInterval(() => {wsQuery()}, 1000);
-		</script>
 		<script type="text/javascript">
 			// Global stuff
 			var message = null;
@@ -94,7 +90,6 @@
 		<div>
 			<h3>Change RTC settings</h3>
 			Current time: <b id="rtc_time">%RTC_TIME%</b><br>
-			(As of page load)<br>
 			<a href="#" onclick="forceSync()">Enforce sync</a><p>
 			
 			Current mode: <b id="rtc_mode">%TIME_MODE%</b><br>
