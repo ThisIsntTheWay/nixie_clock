@@ -52,15 +52,14 @@ bool RTCready = false;
 
 String getTime() {
     // Assemble datetime string
-
     if (!RTCready) {
         return String("<span style='color:red'>RTC failure</span>");
     } else {
-        char buf1[20];
+        char buf1[15];
         DateTime now = rtc.now();
         //Serial.printf("[i] Free heap: %d\n", ESP.getFreeHeap());
 
-        snprintf(buf1, 20, "%02d:%02d:%02d %02d/%02d/%02d",  now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
+        snprintf(buf1, sizeof(buf1), "%02d:%02d:%02d",  now.hour(), now.minute(), now.second());
 
         return buf1;
     }
