@@ -348,6 +348,7 @@ void webServerStartup() {
     // Mode switches
     if (data.containsKey("mode")) {
       if (data["mode"] == "manual" || manual) manual = true; else manual = false;
+      if (data["mode"] == "clock") manual = false;
       if (data["mode"] == "tumbler") cycleNixies = true;
       if (data["mode"] == "crypto") {
         configUpdate = true;
@@ -394,7 +395,7 @@ void webServerStartup() {
       if (manual && !cycleNixies && !crypto) {
         nixieAutonomous = false;
         displayNumber(nNum1, nNum2, nNum3, nNum4);
-        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies have been updated.\"}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in manual mode.\"}");
 
       } else if (cycleNixies && !crypto) {
         nixieAutonomous = false;
@@ -402,10 +403,10 @@ void webServerStartup() {
 
       } else if (!manual && !crypto) {
         nixieAutonomous = true;
-        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Set back to autonomous mode.\"}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in autonomous mode.\"}");
 
       } else if (crypto) {
-        request->send(200, "application/json", "{\"status\": \"error\", \"message\": \"Crypto ticker mode activated.\"}");
+        request->send(200, "application/json", "{\"status\": \"error\", \"message\": \"Nixies now in crypto ticker mode.\"}");
 
       } else {
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");
