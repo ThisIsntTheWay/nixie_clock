@@ -13,6 +13,7 @@
 #include <system/rtc.h>
 #include <system/philipsHue.h>
 #include <system/nixie.h>
+#include <utils/utils.h>
 
 // Switch to LittleFS if needed
 #define USE_LittleFS
@@ -82,7 +83,8 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     //Serial.printf("[T] WS got message: %s\n", (char*)data);   
 
     // Decide what to send based on message
-    if      (strcmp((char*)data, "getTime") == 0)          { client->text("SYS_TIME " + getTime());       }
+    if      (strcmp((char*)data, "getTime") == 0)          { client->text("SYS_TIME " + getTime());         }
+    else if (strcmp((char*)data, "getSysMsg") == 0)        { client->text("SYS_MSG " + getSysMsg());        }
     else if (strcmp((char*)data, "getRTCMode") == 0)       { client->text("SYS_MODE " + parseRTCconfig(2)); }
     else if (strcmp((char*)data, "getNTPsource") == 0)     { client->text("SYS_NTP " + parseRTCconfig(1));  }
     else if (strcmp((char*)data, "getGMTval") == 0)        { client->text("SYS_GMT " + parseRTCconfig(3));  }
@@ -379,8 +381,8 @@ void webServerStartup() {
         } else {
           nixieConfig.close();
 
-          if (data.containsKey("crypto_asset")) tmpJSON["crypto_asset"] = crypto_asset;
-          if (data.containsKey("crypto_quote")) tmpJSON["crypto_quote"] = crypto_quote;
+          if (data.containsKey("crypto_asset")) tmpJSON["crypto_asset"] = crypto_asset; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
+          if (data.containsKey("crypto_quote")) tmpJSON["crypto_quote"] = crypto_quote; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
 
           // Write config.cfg
           File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
@@ -556,7 +558,6 @@ void webServerStartup() {
       // Validate entries and change if needed
       // Skip empty data fields
       if (data.containsKey("mode")) {
-        Serial.println("Got mode.");
         if (data["mode"] == "AP" || data["mode"] == "Client") {
           tmpJSON["Mode"] = rMode;
         } else {
@@ -565,15 +566,8 @@ void webServerStartup() {
         }
       }
       
-      if (data.containsKey("wifi_ssid")) {
-        Serial.println("Got wifi_ssid.");
-        tmpJSON["WiFi_SSID"] = rSSID;        
-      }
-
-      if (data.containsKey("wifi_psk")) {
-        Serial.println("Got wifi_psk.");
-        tmpJSON["WiFi_PSK"] = rPSK;        
-      }
+      if (data.containsKey("wifi_ssid"))  tmpJSON["WiFi_SSID"] = rSSID;
+      if (data.containsKey("wifi_psk"))   tmpJSON["WiFi_PSK"] = rPSK;
 
       // Write to file based on request body
       // Produce error if \"e\" is equal to 4, InputValid is false or JSON could not get serialized
@@ -703,10 +697,10 @@ void webServerStartup() {
 void taskSetupWebserver(void *parameter) {
   int i = 0;
   while (!WiFiReady) {
-    if (i > 30) {
+    /*if (i > 30) {
       Serial.println("[X] WebServer: Network timeout.");
       vTaskDelete(NULL);
-    }
+    }*/
 
     i++;
     vTaskDelay(500);
