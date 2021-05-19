@@ -32,6 +32,7 @@
 bool FlashFSready = false;
 bool WiFiReady = false;
 bool APmode = true;
+bool APisFallback = false;
 
 struct netConfigStruct {
     char Mode[7];
@@ -202,7 +203,7 @@ void taskWiFi(void* parameter) {
         WiFi.begin(netConfig.WiFi_SSID, netConfig.WiFi_PSK);
 
         while (WiFi.status() != WL_CONNECTED) {
-            if (i > 15) {
+            if (i > 12) {
                 Serial.println(F("[X] WiFi: Connection timeout."));
 
                 // Open up a WiFi AP instead
@@ -210,6 +211,9 @@ void taskWiFi(void* parameter) {
                 WiFi.softAP(netConfig.AP_SSID, netConfig.AP_PSK);
                 Serial.print("[i] WiFi: AP IP address: ");
                     Serial.println(WiFi.softAPIP());
+
+                APisFallback = true;
+                WiFiReady = true;
 
                 vTaskDelete(NULL);
             }
