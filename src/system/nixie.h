@@ -69,15 +69,6 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     if (number_3 < 10) { tube3Digit = number_3+'0'; } else { tube3Digit = 'X'; };
     if (number_4 < 10) { tube4Digit = number_4+'0'; } else { tube4Digit = 'X'; };
 
-    /*Serial.print("Displaying numbers: ");
-        Serial.print(number_1);
-        Serial.print(" ");
-        Serial.print(number_2);
-        Serial.print(" - ");
-        Serial.print(number_3);
-        Serial.print(" ");
-        Serial.println(number_4);*/
-
     n1 = decToBCD(number_1);
     n2 = decToBCD(number_2);
     n3 = decToBCD(number_3);
@@ -213,7 +204,9 @@ void taskUpdateNixie(void* parameter) {
             //Serial.print("minute: "); Serial.println(minute);
 
             // Verify time
+            //Serial.printf("[i] hour: %d\n", hour);
             if (hour > 23 || minute > 59) timeIsValid = false;
+            if ((lastHour - hour) > 5 || (lastHour - hour) < -5) timeIsValid = false;
 
             // Update nixies if valid numbers are valid
             if (timeIsValid || forceUpdate) {
@@ -230,7 +223,7 @@ void taskUpdateNixie(void* parameter) {
                     Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
                     Serial.print(" > Epoch: "); Serial.println(rtcDT.unixtime());
 
-                    // Update last values
+                    // Update lastX values
                     if (lastHour != rtcDT.hour()) {
                         lastHour = rtcDT.hour();
                     }
