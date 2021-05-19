@@ -183,8 +183,7 @@ void taskSetupRTC (void* parameters) {
 }
 
 void taskUpdateRTC(void* parameter) {
-    // Wait for FS mount and WiFi to be connected
-    
+    // Wait for FS mount and WiFi to be connected    
     int i = 0;
     while (!FlashFSready) { vTaskDelay(500); }
     while (!WiFiReady) {
@@ -202,8 +201,10 @@ void taskUpdateRTC(void* parameter) {
     }
     Serial.println("[T] RTC sync: FS and WiFi both ready.");
 
+    bool initialSync = true;
+
     // Artificial delay to wait for network
-    vTaskDelay(1000);
+    vTaskDelay(5000);
 
     for (;;) {
         NTPClient timeClient(ntpUDP, config.NTP, config.GMT + config.DST);
@@ -214,21 +215,24 @@ void taskUpdateRTC(void* parameter) {
             if (!APmode) {
                 if (!timeClientRunning)
                     timeClient.begin();
-                    
-                timeClient.forceUpdate();
 
                 timeClientRunning = true;
+                if (timeClient.forceUpdate()) {
+                    // Check if NTP and RTC epochs are different
+                    long ntpTime = timeClient.getEpochTime();
+                    long epochDiff = ntpTime - rtc.now().unixtime();
 
-                // Check if NTP and RTC epochs are different
-                long ntpTime = timeClient.getEpochTime();
-                long epochDiff = ntpTime - rtc.now().unixtime();
+                    if (initialSync) rtc.adjust(DateTime(ntpTime));
 
-                // Sync if epoch time differs too greatly from NTP and RTC
-                // Also ignore discrepancy if its difference is way too huge, indicating corrupt NTP packets
-                if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
-                    Serial.print("[T] RTC sync: Clearing epoch difference of ");
-                        Serial.println(epochDiff);
-                    rtc.adjust(DateTime(ntpTime));
+                    // Sync if epoch time differs too greatly from NTP and RTC
+                    // Also ignore discrepancy if its difference is way too huge, indicating corrupt NTP packets
+                    if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
+                        Serial.print("[T] RTC sync: Clearing epoch difference of ");
+                            Serial.println(epochDiff);
+                        rtc.adjust(DateTime(ntpTime));
+                    }
+                } else {
+                    Serial.println(F("[X] RTC sync: NTP server unresponsive."));
                 }
             } else {
                 // No sync if in AP mode as no internet connection is possible.
