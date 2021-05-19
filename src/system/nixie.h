@@ -212,9 +212,8 @@ void taskUpdateNixie(void* parameter) {
             //Serial.print("hour: "); Serial.println(hour);
             //Serial.print("minute: "); Serial.println(minute);
 
-            // Verify numbers
-            if (hour > 23 || minute > 59)
-                timeIsValid = false;
+            // Verify time
+            if (hour > 23 || minute > 59) timeIsValid = false;
 
             // Update nixies if valid numbers are valid
             if (timeIsValid || forceUpdate) {
