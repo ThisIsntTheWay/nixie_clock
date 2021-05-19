@@ -106,6 +106,7 @@ void setup() {
     xTaskCreate(taskWiFi, "WiFi initiator", 3500, NULL, 1, NULL);
     xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
     xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
+    xTaskCreate(taskSetupNixie, "RTC Setup", 2500, NULL, 1, NULL);
     xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
     xTaskCreate(taskSetupWebserver, "Webserver start", 5500, NULL, 1, NULL);
 
