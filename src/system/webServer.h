@@ -55,12 +55,14 @@ String processor(const String& var) {
   else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
+  else if (var == "CRYPTO_TICKER")          { return parseNixieConfig(1); }   // Cryptocurrency ticker
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
     if (nixieAutonomous && !cycleNixies) return "Clock";
     if (!nixieAutonomous && cycleNixies) return "Cycling...";
     if (!nixieAutonomous && !cycleNixies) return "Manual";
+    if (crypto) return "Crypto";
   }
 
   return String();
@@ -72,6 +74,7 @@ String processor(const String& var) {
 
 AsyncWebSocket ws("/ws");
 
+// Websocket ingress message handler
 void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
@@ -84,6 +87,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getNTPsource") == 0)     { client->text("SYS_NTP " + parseRTCconfig(1));  }
     else if (strcmp((char*)data, "getGMTval") == 0)        { client->text("SYS_GMT " + parseRTCconfig(3));  }
     else if (strcmp((char*)data, "getDSTval") == 0)        { client->text("SYS_DST " + parseRTCconfig(4));  }
+    else if (strcmp((char*)data, "getCryptoTicker") == 0)  { client->text("SYS_CRYPTO " + parseNixieConfig(1));  }
     else if (strcmp((char*)data, "getWIFIssid") == 0)      { client->text("SYS_SSID " + parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
@@ -91,6 +95,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
       if (nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Clock");
       if (!nixieAutonomous && cycleNixies) client->text("SYS_DISMODE Cycling...");
       if (!nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Manual"); 
+      if (crypto) client->text("SYS_DISMODE Crypto"); 
     } else { client->text("Request unknown."); }
   }
 }
@@ -336,7 +341,6 @@ void webServerStartup() {
     int nNum3 = 10;
     int nNum4 = 10;
     bool manual = false;
-    bool crypto = false;
     bool configUpdate = false;
 
     // Populate new numbers
@@ -372,8 +376,8 @@ void webServerStartup() {
           request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"System error: Cannot deserialize JSON: " + err + "\"}");
         } else {
 
-          tmpJSON["crypto_asset"] = crypto_asset;
-          tmpJSON["crypto_quote"] = crypto_quote;
+          if (data.containsKey("crypto_asset")) tmpJSON["crypto_asset"] = crypto_asset;
+          if (data.containsKey("crypto_quote")) tmpJSON["crypto_quote"] = crypto_quote;
 
           // Write config.cfg
           File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
