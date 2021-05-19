@@ -2,8 +2,6 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var wsQueryInterval = null;
 var websocket;
 
-var wsQueryInterval = 1500;
-
 function initWebSocket() {
     websocket = new WebSocket(gateway);
 
@@ -62,6 +60,10 @@ window.addEventListener('load', onLoad);
 function onLoad(event) {
     initWebSocket();
 
+    if (typeof wsQueryIntervalCycle === 'undefined' || wsQueryIntervalCycle === null) {
+        var wsQueryIntervalCycle = 1500;
+    }
+
     if (wsQueryInterval) clearInterval(wsQueryInterval);
-    wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryInterval);
+    wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryIntervalCycle);
 }
