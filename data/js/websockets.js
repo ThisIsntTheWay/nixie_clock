@@ -38,6 +38,7 @@ function onMessage(event) {
     if (evData.startsWith("SYS_TUBES")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_DISMODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_CRYPTO")) document.getElementById('crypto_ticker').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("SYS_MSG")) document.getElementById('sys_msg').innerHTML = evData.replace(regex, '');
 }
 
 function wsQuery() {
@@ -53,6 +54,7 @@ function wsQuery() {
         if (!!document.getElementById('tubes_display')) websocket.send("getNixieDisplay");
         if (!!document.getElementById('tubes_mode')) websocket.send("getNixieMode");
         if (!!document.getElementById('crypto_ticker')) websocket.send("getCryptoTicker");
+        if (!!document.getElementById('sys_msg')) websocket.send("getSysMsg");
     } else {
         console.warn("Cannot send msg to WS endpoint. Connection is in state " + websocket.readyState + ".");
     }
