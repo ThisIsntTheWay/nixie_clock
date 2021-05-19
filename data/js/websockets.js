@@ -2,6 +2,8 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var wsQueryInterval = null;
 var websocket;
 
+var wsQueryInterval = 1500;
+
 function initWebSocket() {
     websocket = new WebSocket(gateway);
 
@@ -38,7 +40,7 @@ function onMessage(event) {
 }
 
 function wsQuery() {
-    console.debug("wsQuery fired.");
+    //console.debug("wsQuery fired.");
 
     if (websocket.readyState == 1) {
         // Send specific text to websocket server based on existing DOM
@@ -51,7 +53,7 @@ function wsQuery() {
         if (!!document.getElementById('tubes_display')) websocket.send("getNixieDisplay");
         if (!!document.getElementById('tubes_mode')) websocket.send("getNixieMode");
     } else {
-        console.warn("Could not send ws msg because connection is in state " + websocket.readyState);
+        console.warn("Cannot send msg to WS endpoint. Connection has state " + websocket.readyState);
     }
 }
 
@@ -59,4 +61,7 @@ function wsQuery() {
 window.addEventListener('load', onLoad);
 function onLoad(event) {
     initWebSocket();
+
+    if (wsQueryInterval) clearInterval(wsQueryInterval);
+    wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryInterval);
 }
