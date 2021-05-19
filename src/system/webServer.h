@@ -72,26 +72,26 @@ String processor(const String& var) {
 
 AsyncWebSocket ws("/ws");
 
-void eventHandlerWS(void *arg, uint8_t *data, size_t len) {
+void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
     //Serial.printf("[T] WS got message: %s\n", (char*)data);   
 
     // Decide what to send based on message
-    if (strcmp((char*)data, "getTime") == 0)          { ws.textAll("SYS_TIME " + getTime());         }
-    if (strcmp((char*)data, "getRTCMode") == 0)       { ws.textAll("SYS_MODE " + parseRTCconfig(2)); }
-    if (strcmp((char*)data, "getNTPsource") == 0)     { ws.textAll("SYS_NTP " + parseRTCconfig(1));  }
-    if (strcmp((char*)data, "getGMTval") == 0)        { ws.textAll("SYS_GMT " + parseRTCconfig(3));  }
-    if (strcmp((char*)data, "getDSTval") == 0)        { ws.textAll("SYS_DST " + parseRTCconfig(4));  }
-    if (strcmp((char*)data, "getWIFIssid") == 0)      { ws.textAll("SYS_SSID " + parseNetConfig(4)); }
-    if (strcmp((char*)data, "getWIFIrssi") == 0)      { ws.textAll("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
-    if (strcmp((char*)data, "getNixieDisplay") == 0)  { ws.textAll("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
-    if (strcmp((char*)data, "getNixieMode") == 0)     {
-      if (nixieAutonomous && !cycleNixies) ws.textAll("SYS_DISMODE Clock");
-      if (!nixieAutonomous && cycleNixies) ws.textAll("SYS_DISMODE Cycling...");
-      if (!nixieAutonomous && !cycleNixies) ws.textAll("SYS_DISMODE Manual"); 
-    }
+    if      (strcmp((char*)data, "getTime") == 0)          { client->text("SYS_TIME " + getTime());       }
+    else if (strcmp((char*)data, "getRTCMode") == 0)       { client->text("SYS_MODE " + parseRTCconfig(2)); }
+    else if (strcmp((char*)data, "getNTPsource") == 0)     { client->text("SYS_NTP " + parseRTCconfig(1));  }
+    else if (strcmp((char*)data, "getGMTval") == 0)        { client->text("SYS_GMT " + parseRTCconfig(3));  }
+    else if (strcmp((char*)data, "getDSTval") == 0)        { client->text("SYS_DST " + parseRTCconfig(4));  }
+    else if (strcmp((char*)data, "getWIFIssid") == 0)      { client->text("SYS_SSID " + parseNetConfig(4)); }
+    else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
+    else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
+    else if (strcmp((char*)data, "getNixieMode") == 0)     {
+      if (nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Clock");
+      if (!nixieAutonomous && cycleNixies) client->text("SYS_DISMODE Cycling...");
+      if (!nixieAutonomous && !cycleNixies) client->text("SYS_DISMODE Manual"); 
+    } else { client->text("Request unknown."); }
   }
 }
 
@@ -107,7 +107,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       break;
     case WS_EVT_DATA:
       //client->text("Message received.");
-      eventHandlerWS(arg, data, len);
+      eventHandlerWS(arg, data, len, client);
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
