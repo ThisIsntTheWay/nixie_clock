@@ -16,15 +16,16 @@
 			var message = null;
 			var xhr = new XMLHttpRequest();
 
-			window.onload = function() {			
-				document.getElementById("crypto_config").style.display = "none";
-			}
-
-			function toggleCryptoConfig() {
+			function toggleConfigSpans() {
 				let chCrypto = document.getElementById("mode_crypto");
+				let selDepConf = document.getElementById("dep_mode_sel");
 				let dvCrypto = document.getElementById("crypto_config");
+				let dvDepIntConf = document.getElementById("interval_config");
+				let dvDepSchConf = document.getElementById("schedule_config");
 				
 				dvCrypto.style.display = chCrypto.checked ? "block" : "none";
+				dvDepIntConf.style.display = (selDepConf.value == 2) ? "block" : "none";
+				dvDepSchConf.style.display = (selDepConf.value == 3) ? "block" : "none";
 			}
 
 			// Functions
@@ -80,6 +81,18 @@
 					if (document.getElementById("crypto_quote").value !== "") obj.asset = document.getElementById("crypto_quote").value;
 				}
 
+				// Cathode depoisoning things
+				let selDepConf = document.getElementById("dep_mode_sel");
+				obj.dep_mode = selDepConf.value;
+
+				switch (selDepConf.value) {
+					case 2: obj.dep_interval = document.getElementById("depoison_interval").value; break;
+					case 3: 
+						obj.dep_schedBegin = document.getElementById("dep_sched_1").value; break;
+						obj.dep_schedEnd = document.getElementById("dep_sched_2").value; break;
+				}
+
+				// Prepare request
     			responseText.innerHTML = "";
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200 || this.status == 400) {
@@ -109,23 +122,41 @@
 			<input type="numeric" size="1" id="digit2" value="" maxlength="1" />
 			<input type="numeric" size="1" id="digit3" value="" maxlength="1" />
 			<input type="numeric" size="1" id="digit4" value="" maxlength="1" /><p>
-			<br>
 
 			Mode override:<br>
-			<input type="radio" id="mode_manual" name="r" onclick="toggleCryptoConfig()" checked="1"/>Manual<br/>
-			<input type="radio" id="mode_clock" name="r" onclick="toggleCryptoConfig()"/>Clock<br/>
-			<input type="radio" id="mode_crypto" name="r" onclick="toggleCryptoConfig()"/>Crypto<br/><br/>
+			<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()" checked="1"/>Manual<br/>
+			<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/>
+			<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/><br/>
 
-			<span id="crypto_config">
+			<span id="crypto_config" style="display: none;">
 				Current ticker: <b id="crypto_ticker">%CRYPTO_TICKER%</b><br>
 				Current price: <b id="crypto_price">%CRYPTO_PRICE%</b><br>
 				Set asset: <input type="text" size="5" id="crypto_asset" value=""/><br>
 				Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br>
-				<em>Pulling from Binance.</em><br>
-			</span><br>
-			
-				<input type="submit" value="Apply" onclick="submit()"></input>
-				<input type="submit" value="Tumbler" onclick="tumble()"></input>
+				<em>Prices pulled from binance.</em><br>
+			<br></span>
+
+			<b>Cathode depoisoning</b><br>
+			Current mode: <b id="depoison_mode">%DEPOISON_MODE%</b><br>
+			Interval: <b id="depoison_interval">%DEPOISON_INTERVAL%</b><br>
+			Schedule: <b id="depoison_schedule">%DEPOISON_SCHEDULE%</b><br><br>
+			<label for="dep_mode_sel">Mode selection:</label>
+				<select name="dep_mode_sel" id="dep_mode_sel" onchange="toggleConfigSpans()">
+					<option value="1" onselect="toggleConfigSpans()">On hour change</option>
+					<option value="2">Interval</option>
+					<option value="3">On schedule</option>
+				</select>
+			<br><br>
+			<span id="interval_config" style="display: none;">
+				Set interval (in minutes): <input type="text" size="6" id="depoison_interval" value=""/><br>
+			<br></span>
+			<span id="schedule_config" style="display: none;">
+				Between: <input type="text" size="4" id="dep_sched_1" value=""/> to <input type="text" size="4" id="dep_sched_2" value=""/><br>
+				<em>Executed on interval as defined by user.</em><br>
+			<br></span><br>
+
+			<input type="submit" value="Apply" onclick="submit()"></input>
+			<input type="submit" value="Tumbler" onclick="tumble()"></input>
 			<p id="response"></p>
 		</div>
 		</center>
