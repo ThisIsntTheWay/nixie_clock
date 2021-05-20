@@ -86,10 +86,13 @@
 				obj.dep_mode = selDepConf.value;
 
 				switch (selDepConf.value) {
-					case 2: obj.dep_interval = document.getElementById("depoison_interval").value; break;
+					case 2:
+						obj.dep_interval = document.getElementById("depoison_interval").value;
+						break;
 					case 3: 
-						obj.dep_schedBegin = document.getElementById("dep_sched_1").value; break;
-						obj.dep_schedEnd = document.getElementById("dep_sched_2").value; break;
+						obj.dep_schedBegin = document.getElementById("dep_sched_1").value;
+						obj.dep_schedEnd = document.getElementById("dep_sched_2").value;
+						break;
 				}
 
 				// Prepare request
