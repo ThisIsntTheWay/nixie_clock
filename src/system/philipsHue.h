@@ -195,68 +195,71 @@ void taskMonitorHUE(void* parameter) {
         DateTime time = rtc.now();
         bool timeIsValid = true;
 
-        // Copy strings into char arrays.
-        // Add + 1 for length as char[] is null-terminated.
-        int onTimeStrLength = (parseHUEconfig(3)).length() + 1;
-        int offTimeStrLength = (parseHUEconfig(4)).length() + 1;
-
-        char onTime[onTimeStrLength];
-        char offTime[offTimeStrLength];
-        
-        // Then, copy said string into char array.
-        (parseHUEconfig(3)).toCharArray(onTime, onTimeStrLength);
-        (parseHUEconfig(4)).toCharArray(offTime, offTimeStrLength);
-
-        // In order to compare against hours and minutes seperately, we need to split an int of 4 numbers into 2.
-        // Because a char array saves stuff as ASCII characters, a typical int operation will lead to undesirable results.
-        // To retrieve the number, a char needs to be substracted with '0' - the null-terminator.
-        int onH = 10*(onTime[0] - '0') + (onTime[1] - '0');
-        int onM = 10*(onTime[2] - '0') + (onTime[3] - '0');
-        int offH = 10*(offTime[0] - '0') + (offTime[1] - '0');
-        int offM = 10*(offTime[2] - '0') + (offTime[3] - '0');
-
+        // Acquire onTime and offTime
+        int onTime = parseHUEconfig(3).toInt();
+        int offTime = parseHUEconfig(4).toInt();
         int nowHour = time.hour();
         int nowMinute = time.minute();
 
+        int nowTime = ((nowHour * 100) + nowMinute);
+
         // Verify time
         //Serial.printf("[i] hour: %d\n", hour);
-        if (nowHour > 23 || nowMinute > 59) timeIsValid = false;
-
-        Serial.printf("nowHour:nowMinute, onH|onM: %d:%d, %d|%d %d|%d \n", nowHour, nowMinute, onH, onM, offH, offM);
+        if (time.hour() > 23 || time.minute() > 59) timeIsValid = false;
         
         // Turn lights ON if inbetween onH/onM and offH/offM
         if (timeIsValid) {
-            if ((nowHour >= onH && nowHour < offH)) {
-                Serial.printf("[T] HUE: onTime triggered. (%d | %d)\n", nowHour, onH);
+        
+        #ifdef DEBUG
+            Serial.printf("nowHour:nowMinute, onTime|offTime: %d:%d, %d|%d\n", nowHour, nowMinute, onTime, offTime);
+        #endif
+
+            if (nowTime > onTime && nowTime < offTime) {
+                #ifdef DEBUG
+                    Serial.printf("[T] HUE: onTime triggered. (%d | %d)\n", nowTime, onTime);
+                #endif
 
                 if (!turnedOn) {
                     int l = getHueLightIndex();
-                    if (l != 0)
+                    if (l != 0) {
                         for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
+                    }
                 }
 
                 turnedOn = true;
                 turnedOff = false;
-            } else {
-                Serial.printf("HUE: skipping onTime [%d,%d] \n", turnedOn, turnedOff);
-            }
+            } 
+            #ifdef DEBUG
+                else {
+                    Serial.printf("HUE: skipping onTime [%d,%d] \n", turnedOn, turnedOff);
+                }
+            #endif
             
             // Turn lights OFF
-            if ((nowHour >= offH) || (nowHour <= onH)) {
-                Serial.printf("[T] HUE: offTime triggered. (%d | %d)\n", nowHour, offH);
+            if (nowTime > offTime || nowTime < onTime) {
+                #ifdef DEBUG
+                    Serial.printf("[T] HUE: offTime triggered. (%d | %d)\n", nowTime, offTime);
+                #endif
 
                 if (!turnedOff) {
                     int l = getHueLightIndex();
-                    if (l != 0)
+                    if (l != 0) {
                         for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, false); }
+                    }
                 }
 
                 turnedOn = false;
                 turnedOff = true;
-            } else {
-                Serial.printf("HUE: skipping offTime [%d,%d] \n", turnedOn, turnedOff);
             }
-        } else { Serial.printf("[T] HUE: Time invalid: %d\n", nowHour);}
+            #ifdef DEBUG
+                else {
+                    Serial.printf("HUE: skipping offTime [%d,%d] \n", turnedOn, turnedOff);
+                }
+            #endif
+        }
+        #ifdef DEBUG
+            else { Serial.printf("[T] HUE: Time invalid: %d\n", nowHour);}
+        #endif
 
         vTaskDelay(2500);
     }
