@@ -39,9 +39,9 @@ function onMessage(event) {
     if (evData.startsWith("HUE_OFF_SCHED")) document.getElementById('hue_off_time').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_RSSI")) document.getElementById('wifi_rssi').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DISPLAY")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("NIXIE_DEP_TIME")) document.getElementById('depoison_interval').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_DEP_INTERVAL")) document.getElementById('depoison_interval').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DEP_TIME")) document.getElementById('depoison_schedule').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("NIXIE_DEP_INTERVAL")) document.getElementById('depoison_mode').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_DEP_MODE")) document.getElementById('depoison_mode').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_MODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_CRYPTO")) document.getElementById('crypto_ticker').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_MSG")) document.getElementById('sys_msg').innerHTML = evData.replace(regex, '');

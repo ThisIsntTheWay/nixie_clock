@@ -96,14 +96,24 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getWIFIssid") == 0)      { client->text("SYS_SSID " + parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getDepoisonTime") == 0)  { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
-    else if (strcmp((char*)data, "getDepoisonMode") == 0)  { client->text("NIXIE_DEP_MODE " + parseNixieConfig(3)); }
     else if (strcmp((char*)data, "getDepoisonInt") == 0)   { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)     {
       if (crypto) { client->text("NIXIE_MODE Crypto"); }
       else if (nixieAutonomous && !cycleNixies) { client->text("NIXIE_MODE Clock"); }
       else if (!nixieAutonomous && cycleNixies) { client->text("NIXIE_MODE Cycling..."); }
-      else if (!nixieAutonomous && !cycleNixies && !crypto) { client->text("NIXIE_MODE Manual"); } 
+      else if (!nixieAutonomous && !cycleNixies && !crypto) { client->text("NIXIE_MODE Manual"); } }
+    else if (strcmp((char*)data, "getDepoisonMode") == 0)  {
+      String msg;
+      
+      switch (nixieConfigJSON.cathodeDepoisonMode) {
+        case 1: msg = "On hour change"; break;
+        case 2: msg = "Interval"; break;
+        case 3: msg = "On schedule"; break;
+        default: msg = "Mode unknown"; break;
+      }
+
+      client->text("NIXIE_DEP_MODE " + msg); 
     } else { client->text("Request unknown."); }
   }
 }
