@@ -47,7 +47,7 @@ function wsQuery() {
         // Send specific text to websocket server based on existing DOM
         if (!!document.getElementById('rtc_time')) websocket.send("getTime");
         if (!!document.getElementById('rtc_mode') && xhr.state == 200) websocket.send("getRTCMode");
-        if (!!document.getElementById('rtc_ntp') && xhr.state == 200) websocket.send("getNTPsource");
+        if (!!document.getElementById('rtc_ntp')) websocket.send("getNTPsource");
         if (!!document.getElementById('rtc_gmt') && xhr.state == 200) websocket.send("getGMTval");
         if (!!document.getElementById('rtc_dst') && xhr.state == 200) websocket.send("getDSTval");
         if (!!document.getElementById('wifi_rssi')) websocket.send("getWIFIrssi");
