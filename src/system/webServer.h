@@ -89,7 +89,10 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getNTPsource") == 0)     { client->text("SYS_NTP " + parseRTCconfig(1));  }
     else if (strcmp((char*)data, "getGMTval") == 0)        { client->text("SYS_GMT " + parseRTCconfig(3));  }
     else if (strcmp((char*)data, "getDSTval") == 0)        { client->text("SYS_DST " + parseRTCconfig(4));  }
-    else if (strcmp((char*)data, "getCryptoTicker") == 0)  { client->text("SYS_CRYPTO " + parseNixieConfig(1));  }
+    else if (strcmp((char*)data, "getHUEip") == 0)         { client->text("HUE_IP " + parseHUEconfig(1)); }
+    else if (strcmp((char*)data, "getHUEon") == 0)         { client->text("HUE_ON_SCHED " + parseHUEconfig(3)); }
+    else if (strcmp((char*)data, "getHUEoff") == 0)        { client->text("HUE_OFF_SCHED " + parseHUEconfig(4)); }
+    else if (strcmp((char*)data, "getCryptoTicker") == 0)  { client->text("SYS_CRYPTO " + parseNixieConfig(1)); }
     else if (strcmp((char*)data, "getWIFIssid") == 0)      { client->text("SYS_SSID " + parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }

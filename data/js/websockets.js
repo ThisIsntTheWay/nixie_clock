@@ -34,6 +34,9 @@ function onMessage(event) {
     if (evData.startsWith("SYS_NTP")) document.getElementById('rtc_ntp').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_GMT")) document.getElementById('rtc_gmt').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_DST")) document.getElementById('rtc_dst').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("HUE_IP")) document.getElementById('hue_ip').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("HUE_ON_SCHED")) document.getElementById('hue_on_time').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("HUE_OFF_SCHED")) document.getElementById('hue_off_time').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_RSSI")) document.getElementById('wifi_rssi').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_TUBES")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_DISMODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
@@ -55,6 +58,9 @@ function wsQuery() {
         if (!!document.getElementById('tubes_mode')) websocket.send("getNixieMode");
         if (!!document.getElementById('crypto_ticker')) websocket.send("getCryptoTicker");
         if (!!document.getElementById('sys_msg')) websocket.send("getSysMsg");
+        if (!!document.getElementById('hue_on_time')) websocket.send("getHUEon");
+        if (!!document.getElementById('hue_off_time')) websocket.send("getHUEoff");
+        if (!!document.getElementById('hue_ip')) websocket.send("getHUEip");
     } else {
         console.warn("Cannot send msg to WS endpoint. Connection is in state " + websocket.readyState + ".");
     }
