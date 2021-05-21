@@ -247,7 +247,7 @@ void taskFSMount(void* parameter) {
         //ESP.restart();
 	}
 
-    // Get all information of SPIFFS
+    // Acquire info from SPIFFS
     // Taken from: https://diyprojects.io/esp32-get-started-spiff-library-read-write-modify-files/
     Serial.println(F("[i] FS: Filesystem info:"));
     Serial.print(" > Total space:      ");
@@ -260,10 +260,10 @@ void taskFSMount(void* parameter) {
 
     Serial.println();
 
-    /* Open dir folder
+    // Open dir folder
     File dir = SPIFFS.open("/");
     // List file at root
-    listFilesInDir(dir, 0);*/
+    listFilesInDir(dir, 0);
 
     vTaskDelete(NULL);
 }
