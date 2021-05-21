@@ -11,12 +11,6 @@
 			// Global stuff
 			var message = null;
 			var xhr = new XMLHttpRequest();
-
-			window.onload = function() {			
-				document.getElementById("ntp_config").style.display = "none";
-				document.getElementById("manual_config").style.display = "none";
-			}
-			
 			// Functions
 			function showHideConfig() {
 				var chkNTP = document.getElementById("ntp_control");
@@ -102,12 +96,12 @@
 			<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual<br>
 			<br>
 			
-			<span id="ntp_config">
+			<span id="ntp_config" style="display: none;">
 				Set NTP server: <input type="numeric" size="16" id="ntp_source" value=""/><br>
 				GMT offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
 				DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>	
 			</span>
-			<span id="manual_config">
+			<span id="manual_config" style="display: none;">
 				Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>
 			</span>
 			<br>

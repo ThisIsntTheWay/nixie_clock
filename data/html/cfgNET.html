@@ -12,11 +12,6 @@
 			var message = null;
 			var xhr = new XMLHttpRequest();
 
-			window.onload = function() {			
-				document.getElementById("ap_config").style.display = "none";
-				document.getElementById("client_config").style.display = "none";
-			}
-
 			// Functions
 			function showHideConfig() {
 				var chAP = document.getElementById("mode_AP");
@@ -85,11 +80,11 @@
 			<input type="radio" id="mode_Client" name="r" onclick="showHideConfig()"/>WiFi client<br>
 			<br>
 			
-			<span id="ap_config">
+			<span id="ap_config" style="display: none;">
 				AP SSID: <b>%AP_SSID%</b><br>
 				AP PSK: <b>%AP_PSK%</b><br>
 			</span>
-			<span id="client_config">
+			<span id="client_config" style="display: none;">
 				Current WiFi SSID: <b>%WIFI_SSID%</b><br>
 				WiFi signal strength: <b id="wifi_rssi">%WIFI_RSSI%</b><br>
 				Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value=""/><br>
