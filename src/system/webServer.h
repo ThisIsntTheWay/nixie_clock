@@ -95,12 +95,15 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getCryptoTicker") == 0)  { client->text("SYS_CRYPTO " + parseNixieConfig(1)); }
     else if (strcmp((char*)data, "getWIFIssid") == 0)      { client->text("SYS_SSID " + parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
-    else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("SYS_TUBES " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
+    else if (strcmp((char*)data, "getDepoisonTime") == 0)  { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
+    else if (strcmp((char*)data, "getDepoisonMode") == 0)  { client->text("NIXIE_DEP_MODE " + parseNixieConfig(3)); }
+    else if (strcmp((char*)data, "getDepoisonInt") == 0)   { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
+    else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)     {
-      if (crypto) { client->text("SYS_DISMODE Crypto"); }
-      else if (nixieAutonomous && !cycleNixies) { client->text("SYS_DISMODE Clock"); }
-      else if (!nixieAutonomous && cycleNixies) { client->text("SYS_DISMODE Cycling..."); }
-      else if (!nixieAutonomous && !cycleNixies && !crypto) { client->text("SYS_DISMODE Manual"); } 
+      if (crypto) { client->text("NIXIE_MODE Crypto"); }
+      else if (nixieAutonomous && !cycleNixies) { client->text("NIXIE_MODE Clock"); }
+      else if (!nixieAutonomous && cycleNixies) { client->text("NIXIE_MODE Cycling..."); }
+      else if (!nixieAutonomous && !cycleNixies && !crypto) { client->text("NIXIE_MODE Manual"); } 
     } else { client->text("Request unknown."); }
   }
 }
