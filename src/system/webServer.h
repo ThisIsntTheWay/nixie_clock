@@ -399,7 +399,7 @@ void webServerStartup() {
     }
 
     // Serialize JSON
-    Serial.print("Manual, cycleNixies, crypto: "); Serial.print(manual); Serial.print(cycleNixies); Serial.println(crypto);
+    //Serial.print("Manual, cycleNixies, crypto: "); Serial.print(manual); Serial.print(cycleNixies); Serial.println(crypto);
     String response;
     serializeJson(data, response);
     if (!configUpdate) {
