@@ -93,6 +93,8 @@
 						obj.dep_schedBegin = document.getElementById("dep_sched_1").value;
 						obj.dep_schedEnd = document.getElementById("dep_sched_2").value;
 						break;
+					default:
+						consol.warn("Unhandled value in 'dep_mode_sel' selection element.");
 				}
 
 				// Prepare request
