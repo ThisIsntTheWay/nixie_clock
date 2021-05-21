@@ -38,8 +38,11 @@ function onMessage(event) {
     if (evData.startsWith("HUE_ON_SCHED")) document.getElementById('hue_on_time').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("HUE_OFF_SCHED")) document.getElementById('hue_off_time').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_RSSI")) document.getElementById('wifi_rssi').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("SYS_TUBES")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("SYS_DISMODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_DISPLAY")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_DEP_TIME")) document.getElementById('depoison_interval').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_DEP_TIME")) document.getElementById('depoison_schedule').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_DEP_INTERVAL")) document.getElementById('depoison_mode').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_MODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_CRYPTO")) document.getElementById('crypto_ticker').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_MSG")) document.getElementById('sys_msg').innerHTML = evData.replace(regex, '');
 }
@@ -61,6 +64,9 @@ function wsQuery() {
         if (!!document.getElementById('hue_on_time')) websocket.send("getHUEon");
         if (!!document.getElementById('hue_off_time')) websocket.send("getHUEoff");
         if (!!document.getElementById('hue_ip')) websocket.send("getHUEip");
+        if (!!document.getElementById('depoison_interval')) websocket.send("getDepoisonInt");
+        if (!!document.getElementById('depoison_schedule')) websocket.send("getDepoisonTime");
+        if (!!document.getElementById('depoison_mode')) websocket.send("getDepoisonMode");
     } else {
         console.warn("Cannot send msg to WS endpoint. Connection is in state " + websocket.readyState + ".");
     }
