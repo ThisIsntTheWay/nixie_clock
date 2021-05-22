@@ -367,7 +367,9 @@ void webServerStartup() {
     if (data.containsKey("nNum3")) nNum3 = data["nNum3"];
     if (data.containsKey("nNum4")) nNum4 = data["nNum4"];
 
-    Serial.print("Manual is: "); Serial.println(manual);
+    #ifdef DEBUG
+      Serial.print("Manual is: "); Serial.println(manual);
+    #endif
 
     // Mode switches
     if (data.containsKey("mode")) {
@@ -380,6 +382,8 @@ void webServerStartup() {
 
         const char* crypto_asset = data["crypto_asset"];
         const char* crypto_quote = data["crypto_quote"];
+        const char* depMode = data["dep_mode"];
+        const char* depInterval = data["dep_interval"];
 
         // Read file
         StaticJsonDocument<200> tmpJSON;
@@ -400,16 +404,34 @@ void webServerStartup() {
           if (data.containsKey("crypto_asset")) tmpJSON["crypto_asset"] = crypto_asset; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
           if (data.containsKey("crypto_quote")) tmpJSON["crypto_quote"] = crypto_quote; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
 
-          // Write config.cfg
-          File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
-          if (!(serializeJson(tmpJSON, nixieConfig))) {
-            Serial.println(F("[X] WebServer: Config write failure."));
-            request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
-          } else {
-            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in crypto mode.\"}");
-          }
+          bool InputValid = true;
+          // Depoison
+          if (data.containsKey("dep_mode")) {
+            Serial.println("Got depmode");
+            // Verify that depoison mode is valid
+            if (!(data["dep_mode"] == "1") || !(data["dep_mode"] == "2") || !(data["dep_mode"] == "3")) {
+              request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown mode specified.\"}");
+              InputValid = false;
+            } else {
+              tmpJSON["cathodeDepoisonMode"] = depMode;
+              Serial.println("[i] Webserver: Writing cathodeDepoisonMode");
+            }
+          } 
+        
+          if (data.containsKey("dep_interval")) tmpJSON["cathodeDepoisonInterval"] = depInterval; 
 
-          nixieConfig.close();
+          if (InputValid) {
+            // Write config.cfg
+            File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
+            if (!(serializeJson(tmpJSON, nixieConfig))) {
+              Serial.println(F("[X] WebServer: Config write failure."));
+              request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
+            } else {
+              request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
+            }
+
+            nixieConfig.close();
+          }
         }
       }
     }
@@ -427,7 +449,7 @@ void webServerStartup() {
 
       } else if (cycleNixies && !crypto) {
         nixieAutonomous = false;
-        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Cycling nixies...\"}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies are now cycling...\"}");
 
       } else if (!manual && !crypto) {
         nixieAutonomous = true;
