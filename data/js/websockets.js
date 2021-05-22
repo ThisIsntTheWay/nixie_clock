@@ -2,7 +2,7 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var wsQueryInterval = null;
 var websocket;
 
-var wsQueryIntervalCycle = 750;
+var wsQueryIntervalCycle = 1500;
 
 function initWebSocket() {
     websocket = new WebSocket(gateway);
