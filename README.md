@@ -33,13 +33,10 @@ Theoretically, any cylindrical 13 pin IN tube could be used.<br/>
 However, the PCB will be designed with the dimensions of the IN-14.
 
 ## Power
-The circuit has an intake of 12VDC, which is used for the following purposes:
+The circuit has an intake of 5VDC, which is used for the following purposes:
  - Step-up to 170VDC to power all nixie tubes. 
- - Step-down to 5VDC to power all ICs.
-   - This 5VDC is further decreased to 3.3VDC to power the MCU and RTC.
-
-The reason for 12VDC versus 5VDC is for a much stabler generation of 170V.  
-Whilst it is possible to step-up said voltage from just 5VDC as well, it is very taxing on those components.  
+ - Step-down to 3.3VDC to power all ICs.
+   - Exception for the K155D1s as they are not CMOS-based.
 
 :information_source: The step-up circuit for the 170VDC is not included in the schematic.<br/>
 
