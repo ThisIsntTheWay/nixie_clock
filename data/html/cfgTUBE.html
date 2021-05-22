@@ -91,7 +91,7 @@
 
 				switch (selDepConf.value) {
 					case "2":
-						obj.dep_interval = document.getElementById("depoison_interval").value;
+						obj.dep_interval = document.getElementById("depoison_interval_val").value;
 						break;
 					case "3": 
 						obj.dep_schedBegin = document.getElementById("dep_sched_1").value;
@@ -161,7 +161,7 @@
 				</select>
 			<br><br>
 			<span id="interval_config" style="display: none;">
-				Set interval (in minutes): <input type="text" size="6" id="depoison_interval" value=""/><br>
+				Set interval (in minutes): <input type="text" size="6" id="depoison_interval_val" value=""/><br>
 			<br></span>
 			<span id="schedule_config" style="display: none;">
 				Between: <input type="text" size="4" id="dep_sched_1" value=""/> to <input type="text" size="4" id="dep_sched_2" value=""/><br>
