@@ -376,17 +376,16 @@ void webServerStartup() {
       if (data["mode"] == "manual")           { manual = true; crypto = false; }
       else if (data["mode"] == "clock")       { manual = false; crypto = false; }
       else if (data["mode"] == "tumbler")     { manual = false; crypto = false; cycleNixies = true; }
-      else if (data["mode"] == "crypto") {
+      else if (data["mode"] == "crypto" || data["mode"] == "depoison") {
         configUpdate = true;
-        crypto = true;
 
-        const char* crypto_asset = data["crypto_asset"];
-        const char* crypto_quote = data["crypto_quote"];
         const char* depMode = data["dep_mode"];
         const char* depInterval = data["dep_interval"];
 
+        Serial.printf("depMode, depInterval: %s . %s \n" , depMode, depInterval);
+
         // Read file
-        StaticJsonDocument<200> tmpJSON;
+        StaticJsonDocument<250> tmpJSON;
         File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "r");
 
         String errMsg = "Failure!";
@@ -400,25 +399,32 @@ void webServerStartup() {
           request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"System error: Cannot deserialize JSON: " + err + "\"}");
         } else {
           nixieConfig.close();
+          
+          if (data["mode"] == crypto) {
+            crypto = true;
+            const char* crypto_asset = data["crypto_asset"];
+            const char* crypto_quote = data["crypto_quote"];
 
-          if (data.containsKey("crypto_asset")) tmpJSON["crypto_asset"] = crypto_asset; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
-          if (data.containsKey("crypto_quote")) tmpJSON["crypto_quote"] = crypto_quote; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
+            if (data.containsKey("crypto_asset")) crypto_asset = tmpJSON["crypto_asset"]; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
+            if (data.containsKey("crypto_quote")) crypto_quote = tmpJSON["crypto_quote"]; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
+          }
 
           bool InputValid = true;
+
           // Depoison
-          if (data.containsKey("dep_mode")) {
+          if (depMode) {
             Serial.println("Got depmode");
             // Verify that depoison mode is valid
             if (!(data["dep_mode"] == "1") || !(data["dep_mode"] == "2") || !(data["dep_mode"] == "3")) {
               request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown mode specified.\"}");
               InputValid = false;
             } else {
-              tmpJSON["cathodeDepoisonMode"] = depMode;
+              depMode = tmpJSON["cathodeDepoisonMode"];
               Serial.println("[i] Webserver: Writing cathodeDepoisonMode");
             }
           } 
         
-          if (data.containsKey("dep_interval")) tmpJSON["cathodeDepoisonInterval"] = depInterval; 
+          if (data.containsKey("dep_interval")) depInterval = tmpJSON["cathodeDepoisonInterval"]; 
 
           if (InputValid) {
             // Write config.cfg
