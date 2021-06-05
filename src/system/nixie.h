@@ -76,8 +76,8 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
 
     // Push to shift registers
     digitalWrite(ST_CP, LOW);
-    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n3 << 4) | n4);
     shiftOut(DS_PIN, SH_CP, MSBFIRST, (n1 << 4) | n2);
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n3 << 4) | n4);
     digitalWrite(ST_CP, HIGH);
 }
 
