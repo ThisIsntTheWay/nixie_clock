@@ -368,8 +368,8 @@ void webServerStartup() {
     bool InputValid = true;
     bool configUpdate = false;
 
-    const char* depMode;
-    const char* depInterval;
+    int depMode;
+    int depInterval;
     
     // Populate new numbers
     if (!data["nNum1"].isNull()) nNum1 = data["nNum1"];
@@ -396,8 +396,12 @@ void webServerStartup() {
         depMode = data["dep_mode"];
         depInterval = data["dep_interval"];
 
-        Serial.print("depMode, depInterval: "); Serial.println(depMode); Serial.println(depInterval);
+        Serial.print("depMode, depInterval: "); Serial.print(depMode); Serial.println(depInterval);
       }
+    } else {
+      // Preserve current modes
+      if (!nixieAutonomous && !crypto) { manual = true; }
+      else if (crypto) { manual = true; }
     }
 
     // Read file
@@ -427,9 +431,9 @@ void webServerStartup() {
 
       // Depoison
       if (!data["dep_mode"].isNull()) {
-        Serial.println("Got depmode");
+        Serial.println("Got depmode!");
         // Verify that depoison mode is valid
-        if (!(data["dep_mode"] == "1") || !(data["dep_mode"] == "2") || !(data["dep_mode"] == "3")) {
+        if (depMode > 3 || depMode < 0) {
           request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown depoison mode specified.\"}");
           InputValid = false;
         } else {
@@ -442,15 +446,15 @@ void webServerStartup() {
         int bright = (brightness * 255) / 100;
         tmpJSON["anodePWM"] = bright;
       } else if (brightness > 100 && data["brightness"].isNull()) {
-          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Brightness value is out of bounds.\"}");
-          InputValid = false;
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Brightness value is out of bounds.\"}");
+        InputValid = false;
       }
     
       if (data.containsKey("dep_interval")) depInterval = tmpJSON["cathodeDepoisonInterval"]; 
     }
 
     // Write config.cfg
-    if (InputValid && configUpdate) {
+    if (InputValid) {
       File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
       if (!(serializeJson(tmpJSON, nixieConfig))) {
         Serial.println(F("[X] WebServer: Config write failure."));
@@ -458,7 +462,9 @@ void webServerStartup() {
       } else {
         if (crypto) nixieAutonomous = false;
 
-        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
+        // Only send request if config was actually updated.
+        if (configUpdate)
+          request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
       }
 
       nixieConfig.close();
