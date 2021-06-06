@@ -16,6 +16,7 @@
 
 TaskHandle_t TaskRTC_Handle;
 TaskHandle_t TaskNixie_Handle;
+TaskHandle_t TaskBright_Handle;
 TaskHandle_t TaskHUE_Handle;
 
 // https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2018/08/esp32-pinout-chip-ESP-WROOM-32.png
@@ -117,7 +118,8 @@ void setup() {
 
     // Perpetual tasks
     xTaskCreate(taskUpdateRTC, "RTC Sync", 5500, NULL, 1, &TaskRTC_Handle);
-    xTaskCreate(taskUpdateNixie, "Nixie updater", 5500, NULL, 2, &TaskNixie_Handle);
+    xTaskCreate(taskUpdateNixie, "Nixie updater", 6000, NULL, 2, &TaskNixie_Handle);
+    xTaskCreate(taskUpdateNixieBrightness, "Nixie brightness", 2000, NULL, 2, &TaskBright_Handle);
     xTaskCreate(taskMonitorHUE, "HUE monitor", 6000, NULL, 3, &TaskHUE_Handle);
     xTaskCreate(taskfactoryResetWDT, "Master reset", 2500, NULL, 1, NULL);
 }
