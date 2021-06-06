@@ -21,8 +21,10 @@ String getSysMsg() {
             switch (rtc_get_reset_reason(0)) {
                 case 12 : msg = "System rebooted due to core panic."; bigError = true; isError = true; break;
                 case 15 : msg = "Brownout detector triggered; power supply possibly unstable."; bigError = true; isError = true; break;
-                default : msg = "";
+                default : msg = ""; isError = false;
             }
+        } else {
+            bigError = false;
         }
     }
 
