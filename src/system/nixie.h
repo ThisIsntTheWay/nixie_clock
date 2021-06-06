@@ -162,11 +162,12 @@ String parseNixieConfig(int mode) {
         nixieConfig.close();
 
         switch (mode) {
-            case 1: return String(String(nixieConfigJSON.crypto_asset) + "/" + String(nixieConfigJSON.crypto_quote)); break;
+            case 1: return String(nixieConfigJSON.crypto_asset) + "/" + String(nixieConfigJSON.crypto_quote); break;
             case 2: return String(nixieConfigJSON.cathodeDepoisonTime); break;
             case 3: return String(nixieConfigJSON.cathodeDepoisonMode); break;
             case 4: return String(nixieConfigJSON.cathodeDepoisonInterval); break;
             case 5: return String(nixieConfigJSON.anodePWM); break;
+            case 6: return String((nixieConfigJSON.anodePWM * 100) / 255); break;   //anodePWM as a % of 255
             default: return "[NIXIE: unknown mode]";
         }
     }

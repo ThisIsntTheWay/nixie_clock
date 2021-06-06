@@ -57,7 +57,7 @@ String processor(const String& var) {
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
   else if (var == "CRYPTO_TICKER")          { return parseNixieConfig(1); }   // Cryptocurrency ticker
-  else if (var == "TUBES_BRIGHTNESS")       { return String((parseNixieConfig(5).toInt() / 255) * 100);} // Tube brightness
+  else if (var == "TUBES_BRIGHTNESS")       { return parseNixieConfig(6); } // Tube brightness
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
@@ -99,7 +99,8 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getWIFIrssi") == 0)         { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
     else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
-    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + ((parseNixieConfig(5).toInt() / 255) * 100)); }
+    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + parseNixieConfig(6)); 
+    }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)     { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)        {
       if (crypto) { client->text("NIXIE_MODE Crypto"); }
@@ -380,6 +381,9 @@ void webServerStartup() {
       Serial.print("Manual is: "); Serial.println(manual);
     #endif
 
+    if (!data["brightness"].isNull())
+      brightness = data["brightness"];
+
     // Mode switches
     if (data.containsKey("mode")) {
       if (data["mode"] == "manual")           { manual = true; crypto = false; }
@@ -393,8 +397,6 @@ void webServerStartup() {
 
         Serial.printf("depMode, depInterval: %s . %s \n" , depMode, depInterval);       
       }
-    } else if (!data["brightness"].isNull()) {
-      brightness = data["brightness"];
     }
 
     // Read file
