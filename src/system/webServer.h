@@ -385,11 +385,11 @@ void webServerStartup() {
       brightness = data["brightness"];
 
     // Mode switches
-    if (data.containsKey("mode")) {
+    if (!data["mode"].isNull()) {
       if (data["mode"] == "manual")         { manual = true; crypto = false; }
       else if (data["mode"] == "clock")     { manual = false; crypto = false; }
       else if (data["mode"] == "tumbler")   { manual = false; crypto = false; cycleNixies = true; }
-      else if (data["mode"] == "crypto")    { manual = false; crypto = true; configUpdate = true; }
+      else if (data["mode"] == "crypto")    { manual = true; crypto = true; configUpdate = true; }
       else if (data["mode"] == "depoison")  {
         configUpdate = true;
 
@@ -417,13 +417,12 @@ void webServerStartup() {
     } else {
       nixieConfig.close();
       
-      if (data["mode"] == crypto) {
-        crypto = true;
+      if (data["mode"] == "crypto") {
         const char* crypto_asset = data["crypto_asset"];
         const char* crypto_quote = data["crypto_quote"];
 
-        if (!data["crypto_asset"].isNull()) crypto_asset = tmpJSON["crypto_asset"]; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
-        if (!data["crypto_quote"].isNull()) crypto_quote = tmpJSON["crypto_quote"]; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
+        if (!data["crypto_asset"].isNull()) tmpJSON["crypto_asset"] = crypto_asset; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
+        if (!data["crypto_quote"].isNull()) tmpJSON["crypto_quote"] = crypto_quote; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
       }
 
       // Depoison
@@ -457,6 +456,8 @@ void webServerStartup() {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
+        if (crypto) nixieAutonomous = false;
+        
         request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
       }
 

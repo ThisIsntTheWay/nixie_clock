@@ -86,8 +86,8 @@
 				} else if (chCrypto.checked) {
 					obj.mode = "crypto";
 
-					if (document.getElementById("crypto_asset").value !== "") obj.asset = document.getElementById("crypto_asset").value;
-					if (document.getElementById("crypto_quote").value !== "") obj.asset = document.getElementById("crypto_quote").value;
+					if (document.getElementById("crypto_asset").value !== "") obj.crypto_asset = document.getElementById("crypto_asset").value;
+					if (document.getElementById("crypto_quote").value !== "") obj.crypto_quote = document.getElementById("crypto_quote").value;
 				} else if (chDep.checked) {
 					obj.mode = "depoison";
 
@@ -157,7 +157,6 @@
 
 			<span id="crypto_config" style="display: none;">
 				Current ticker: <b id="crypto_ticker">%CRYPTO_TICKER%</b><br>
-				Current price: <b id="crypto_price">%CRYPTO_PRICE%</b><br>
 				Set asset: <input type="text" size="5" id="crypto_asset" value=""/><br>
 				Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br>
 				<em>Prices pulled from binance.</em>

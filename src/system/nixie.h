@@ -88,56 +88,71 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     digitalWrite(ST_CP, HIGH);
 }
 
-int getCryptoPrice(String ticker, String quote) {
+int displayCryptoPrice(String ticker, String quote) {
     if (!WiFiReady)
         return 0;
 
     // Obtain ticker price from binance
     http.useHTTP10(true);
     http.begin("https://api.binance.com/api/v3/ticker/price?symbol=" + ticker + quote);
+
     http.GET();
 
-    StaticJsonDocument<100> doc;
-    deserializeJson(doc, http.getStream());
-    http.end();
-    
-    if (doc.containsKey("error"))
-        return 0;
+    if (http.connected()) {
+        DynamicJsonDocument doc(1024);
+        DeserializationError error = deserializeJson(doc, http.getStream());
+        
+        http.end();
 
-    int price = doc["price"];
+        if (error) {
+            Serial.print(F("[X] Crypto: Could not deserialize JSON: "));
+            Serial.println(error.c_str());
 
-    // Trim price if it is greater than 10'000$
-    if (price > 9999) price = price * 0.1;
+            return 0;
+        } else {
+            if (doc.containsKey("error"))
+                return 0;
 
-    // Split price into four digits
-    int p1 = 10;
-    int p2 = 10;
-    int p3 = 10;
-    int p4 = 10;
+            int price = doc["price"];
 
-    if (price > 999) {              // 1000
-        p1 = (price / 1000) % 10;
-        p2 = (price / 100) % 10;
-        p3 = (price / 10) % 10;
-        p4 = price % 10;        
-    } else if (price > 99) {        // 100
-        p2 = (price / 100) % 10;
-        p3 = (price / 10) % 10;
-        p4 = price % 10;
-    } else if (price > 9) {         // 10
-        p3 = price / 10;
-        p4 = price % 10;
-    } else {                        // 1
-        p4 = price;
+            // Trim price if it is greater than 10'000$
+            if (price > 9999) price = price * 0.1;
+
+            // Split price into four digits
+            int p1 = 10;
+            int p2 = 10;
+            int p3 = 10;
+            int p4 = 10;
+
+            if (price > 999) {              // 1000
+                p1 = (price / 1000) % 10;
+                p2 = (price / 100) % 10;
+                p3 = (price / 10) % 10;
+                p4 = price % 10;        
+            } else if (price > 99) {        // 100
+                p2 = (price / 100) % 10;
+                p3 = (price / 10) % 10;
+                p4 = price % 10;
+            } else if (price > 9) {         // 10
+                p3 = price / 10;
+                p4 = price % 10;
+            } else {                        // 1
+                p4 = price;
+            }
+            
+            displayNumber(p1, p2, p3, p4);
+
+            return price;
+        }
+    } else {
+        Serial.println("[X] Crypto: Connection to the server failed.");
     }
-    
-    displayNumber(p1, p2, p3, p4);
 
-    return doc["price"];
+    return 0;
 }
 
 String parseNixieConfig(int mode) {
-        // Read file
+    // Read file
     File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "r");
 
     // Parse JSON
@@ -241,9 +256,6 @@ void taskUpdateNixie(void* parameter) {
 
     Serial.println("[T] Nixie: Starting nixie updater...");
     for (;;) {
-        // Set brightness of nixies
-        ledcWrite(1, parseNixieConfig(5).toInt());
-
         // Check if nixies should update manually or automatically
         if (nixieAutonomous && !cycleNixies) {
             DateTime rtcDT = rtc.now();
@@ -307,9 +319,22 @@ void taskUpdateNixie(void* parameter) {
             nixieAutonomous = true;
             cycleNixies = false;
             forceUpdate = true;
+        } else if (crypto && !cycleNixies) {
+            Serial.println("[T] Nixie: Displaying crypto price...");
+            displayCryptoPrice(String(nixieConfigJSON.crypto_asset), String(nixieConfigJSON.crypto_quote));
         }
 
         vTaskDelay(400);
+    }
+}
+
+void taskUpdateNixieBrightness(void* parameter) {
+    while (!FlashFSready) { vTaskDelay(500); }
+    for (;;) {
+        // Set brightness of nixies
+        ledcWrite(1, parseNixieConfig(5).toInt());
+
+        vTaskDelay(20);
     }
 }
 
