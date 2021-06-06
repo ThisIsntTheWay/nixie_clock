@@ -28,7 +28,7 @@ String getSysMsg() {
         }
     }
 
-    if (isError) msg = "<span style='color: red'>" + msg + "</span>";
+    if (isError) msg = "<span id='error_message' style='color: red'>" + msg + "</span>";
 
     return msg;
 }

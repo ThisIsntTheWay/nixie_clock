@@ -82,3 +82,8 @@ function onLoad(event) {
     if (wsQueryInterval) clearInterval(wsQueryInterval);
     wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryIntervalCycle);
 }
+
+let errorMessage = document.getElementById("error_message");
+element.onclick = function(event) {
+  websocket.send("ackError");
+}
