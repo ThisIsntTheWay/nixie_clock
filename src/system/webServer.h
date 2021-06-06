@@ -83,24 +83,24 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     //Serial.printf("[T] WS got message: %s\n", (char*)data);   
 
     // Decide what to send based on message
-    if      (strcmp((char*)data, "ackError") == 0)         { client->text("System error acknowledged."); globalErrorOverride = true; }
-    else if (strcmp((char*)data, "getTime") == 0)          { client->text("SYS_TIME " + getTime());         }
-    else if (strcmp((char*)data, "getSysMsg") == 0)        { client->text("SYS_MSG " + getSysMsg());        }
-    else if (strcmp((char*)data, "getRTCMode") == 0)       { client->text("SYS_MODE " + parseRTCconfig(2)); }
-    else if (strcmp((char*)data, "getNTPsource") == 0)     { client->text("SYS_NTP " + parseRTCconfig(1));  }
-    else if (strcmp((char*)data, "getGMTval") == 0)        { client->text("SYS_GMT " + parseRTCconfig(3));  }
-    else if (strcmp((char*)data, "getDSTval") == 0)        { client->text("SYS_DST " + parseRTCconfig(4));  }
-    else if (strcmp((char*)data, "getHUEip") == 0)         { client->text("HUE_IP " + parseHUEconfig(1)); }
-    else if (strcmp((char*)data, "getHUEon") == 0)         { client->text("HUE_ON_SCHED " + parseHUEconfig(3)); }
-    else if (strcmp((char*)data, "getHUEoff") == 0)        { client->text("HUE_OFF_SCHED " + parseHUEconfig(4)); }
-    else if (strcmp((char*)data, "getCryptoTicker") == 0)  { client->text("SYS_CRYPTO " + parseNixieConfig(1)); }
-    else if (strcmp((char*)data, "getWIFIssid") == 0)      { client->text("SYS_SSID " + parseNetConfig(4)); }
-    else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
-    else if (strcmp((char*)data, "getDepoisonTime") == 0)  { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
-    else if (strcmp((char*)data, "getDepoisonInt") == 0)   { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
-    else if (strcmp((char*)data, "getTubesBrightness") == 0)   { client->text("NIXIE_BRIGHTNESS " + ((parseNixieConfig(5).toInt() / 255) * 100)); }
-    else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
-    else if (strcmp((char*)data, "getNixieMode") == 0)     {
+    if      (strcmp((char*)data, "ackError") == 0)            { client->text("System error acknowledged."); globalErrorOverride = true; }
+    else if (strcmp((char*)data, "getTime") == 0)             { client->text("SYS_TIME " + getTime()); }
+    else if (strcmp((char*)data, "getSysMsg") == 0)           { client->text("SYS_MSG " + getSysMsg()); }
+    else if (strcmp((char*)data, "getRTCMode") == 0)          { client->text("SYS_MODE " + parseRTCconfig(2)); }
+    else if (strcmp((char*)data, "getNTPsource") == 0)        { client->text("SYS_NTP " + parseRTCconfig(1)); }
+    else if (strcmp((char*)data, "getGMTval") == 0)           { client->text("SYS_GMT " + parseRTCconfig(3)); }
+    else if (strcmp((char*)data, "getDSTval") == 0)           { client->text("SYS_DST " + parseRTCconfig(4)); }
+    else if (strcmp((char*)data, "getHUEip") == 0)            { client->text("HUE_IP " + parseHUEconfig(1)); }
+    else if (strcmp((char*)data, "getHUEon") == 0)            { client->text("HUE_ON_SCHED " + parseHUEconfig(3)); }
+    else if (strcmp((char*)data, "getHUEoff") == 0)           { client->text("HUE_OFF_SCHED " + parseHUEconfig(4)); }
+    else if (strcmp((char*)data, "getCryptoTicker") == 0)     { client->text("SYS_CRYPTO " + parseNixieConfig(1)); }
+    else if (strcmp((char*)data, "getWIFIssid") == 0)         { client->text("SYS_SSID " + parseNetConfig(4)); }
+    else if (strcmp((char*)data, "getWIFIrssi") == 0)         { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
+    else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
+    else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
+    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + ((parseNixieConfig(5).toInt() / 255) * 100)); }
+    else if (strcmp((char*)data, "getNixieDisplay") == 0)     { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
+    else if (strcmp((char*)data, "getNixieMode") == 0)        {
       if (crypto) { client->text("NIXIE_MODE Crypto"); }
       else if (nixieAutonomous && !cycleNixies) { client->text("NIXIE_MODE Clock"); }
       else if (!nixieAutonomous && cycleNixies) { client->text("NIXIE_MODE Cycling..."); }
