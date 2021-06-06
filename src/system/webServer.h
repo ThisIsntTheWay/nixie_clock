@@ -697,6 +697,7 @@ void webServerStartup() {
       timeClient.begin();
       
       if (timeClient.forceUpdate()) {
+        NTPisValid = true;
         long ntpTime = timeClient.getEpochTime();
         rtc.adjust(DateTime(ntpTime));
 
