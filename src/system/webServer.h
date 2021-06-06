@@ -57,13 +57,14 @@ String processor(const String& var) {
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
   else if (var == "CRYPTO_TICKER")          { return parseNixieConfig(1); }   // Cryptocurrency ticker
+  else if (var == "TUBES_BRIGHTNESS")       { return String((parseNixieConfig(5).toInt() / 255) * 100);} // Tube brightness
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
-    if (nixieAutonomous && !cycleNixies) return "Clock";
-    if (!nixieAutonomous && cycleNixies) return "Cycling...";
-    if (!nixieAutonomous && !cycleNixies) return "Manual";
-    if (crypto) return "Crypto";
+    if (nixieAutonomous && !cycleNixies) { return "Clock"; }
+    else if (!nixieAutonomous && cycleNixies) { return "Cycling..."; }
+    else if (!nixieAutonomous && !cycleNixies) { return "Manual"; }
+    else if (crypto) { return "Crypto"; }
   }
 
   return String();
@@ -366,7 +367,7 @@ void webServerStartup() {
     bool configUpdate = false;
     bool InputValid = true;
 
-    const char* depMode;
+    const char* depMode = "false";
     const char* depInterval;
     
     // Populate new numbers
@@ -424,11 +425,11 @@ void webServerStartup() {
       }
 
       // Depoison
-      if (strcmp(depMode, "true") == 0) {
+      if (!data["dep_mode"].isNull()) {
         Serial.println("Got depmode");
         // Verify that depoison mode is valid
         if (!(data["dep_mode"] == "1") || !(data["dep_mode"] == "2") || !(data["dep_mode"] == "3")) {
-          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown mode specified.\"}");
+          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown depoison mode specified.\"}");
           InputValid = false;
         } else {
           depMode = tmpJSON["cathodeDepoisonMode"];
@@ -698,6 +699,7 @@ void webServerStartup() {
       
       if (timeClient.forceUpdate()) {
         NTPisValid = true;
+
         long ntpTime = timeClient.getEpochTime();
         rtc.adjust(DateTime(ntpTime));
 
