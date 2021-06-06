@@ -106,6 +106,33 @@ int getCryptoPrice(String ticker, String quote) {
 
     int price = doc["price"];
 
+    // Trim price if it is greater than 10'000$
+    if (price > 9999) price = price * 0.1;
+
+    // Split price into four digits
+    int p1 = 10;
+    int p2 = 10;
+    int p3 = 10;
+    int p4 = 10;
+
+    if (price > 999) {              // 1000
+        p1 = (price / 1000) % 10;
+        p2 = (price / 100) % 10;
+        p3 = (price / 10) % 10;
+        p4 = price % 10;        
+    } else if (price > 99) {        // 100
+        p2 = (price / 100) % 10;
+        p3 = (price / 10) % 10;
+        p4 = price % 10;
+    } else if (price > 9) {         // 10
+        p3 = price / 10;
+        p4 = price % 10;
+    } else {                        // 1
+        p4 = price;
+    }
+    
+    displayNumber(p1, p2, p3, p4);
+
     return doc["price"];
 }
 
