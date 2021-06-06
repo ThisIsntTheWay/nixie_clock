@@ -45,6 +45,7 @@ struct rtcConfigStruct {
 struct rtcConfigStruct config;
 
 bool RTCready = false;
+bool NTPisValid = true;
 
 //  ---------------------
 //  FUNCTIONS
@@ -218,6 +219,8 @@ void taskUpdateRTC(void* parameter) {
 
                 timeClientRunning = true;
                 if (timeClient.forceUpdate()) {
+                    NTPisValid = true;
+
                     // Check if NTP and RTC epochs are different
                     long ntpTime = timeClient.getEpochTime();
                     long epochDiff = ntpTime - rtc.now().unixtime();
@@ -233,6 +236,7 @@ void taskUpdateRTC(void* parameter) {
                     }
                 } else {
                     Serial.println(F("[X] RTC sync: NTP server unresponsive."));
+                    NTPisValid = false;
                 }
             } else {
                 // No sync if in AP mode as no internet connection is possible.
