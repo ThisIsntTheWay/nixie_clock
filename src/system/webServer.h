@@ -361,7 +361,7 @@ void webServerStartup() {
     int nNum2 = 10;
     int nNum3 = 10;
     int nNum4 = 10;
-    int brightness = 999;
+    int brightness = 123;
 
     bool manual = false;
     bool configUpdate = false;
@@ -393,9 +393,8 @@ void webServerStartup() {
 
         Serial.printf("depMode, depInterval: %s . %s \n" , depMode, depInterval);       
       }
-    } else if (data.containsKey("brightness")) {
-      const char* c = data["brightness"];
-      brightness = atoi(c);
+    } else if (!data["brightness"].isNull()) {
+      brightness = data["brightness"];
     }
 
     // Read file
@@ -437,8 +436,12 @@ void webServerStartup() {
         }
       }
 
-      if (brightness < 999) {
-        tmpJSON["anodePWM"] = 255 * (brightness / 100);
+      if (brightness < 101 && !data["brightness"].isNull()) {
+        int bright = (brightness * 255) / 100;
+        tmpJSON["anodePWM"] = bright;
+      } else if (brightness > 100 && data["brightness"].isNull()) {
+          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Brightness value is out of bounds.\"}");
+          InputValid = false;
       }
     
       if (data.containsKey("dep_interval")) depInterval = tmpJSON["cathodeDepoisonInterval"]; 
