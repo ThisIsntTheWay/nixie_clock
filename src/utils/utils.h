@@ -13,7 +13,7 @@ String getSysMsg() {
 
     if (!globalErrorOverride) {
         if (APisFallback) {
-            msg = "Could not connect to WiFi betwork '" + parseNetConfig(4) + "'."; isError = true;
+            msg = "Could not connect to WiFi network '" + parseNetConfig(4) + "'."; isError = true;
         } else if (!NTPisValid) {
             msg = "NTP server is unresponsive: '" + parseRTCconfig(1) + "'."; isError = true;
         } else {
