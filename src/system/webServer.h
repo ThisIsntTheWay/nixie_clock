@@ -365,17 +365,17 @@ void webServerStartup() {
     int brightness = 123;
 
     bool manual = false;
-    bool configUpdate = false;
     bool InputValid = true;
+    bool configUpdate = false;
 
-    const char* depMode = "false";
+    const char* depMode;
     const char* depInterval;
     
     // Populate new numbers
-    if (data.containsKey("nNum1")) nNum1 = data["nNum1"];
-    if (data.containsKey("nNum2")) nNum2 = data["nNum2"];
-    if (data.containsKey("nNum3")) nNum3 = data["nNum3"];
-    if (data.containsKey("nNum4")) nNum4 = data["nNum4"];
+    if (!data["nNum1"].isNull()) nNum1 = data["nNum1"];
+    if (!data["nNum2"].isNull()) nNum2 = data["nNum2"];
+    if (!data["nNum3"].isNull()) nNum3 = data["nNum3"];
+    if (!data["nNum4"].isNull()) nNum4 = data["nNum4"];
 
     #ifdef DEBUG
       Serial.print("Manual is: "); Serial.println(manual);
@@ -386,16 +386,17 @@ void webServerStartup() {
 
     // Mode switches
     if (data.containsKey("mode")) {
-      if (data["mode"] == "manual")           { manual = true; crypto = false; }
-      else if (data["mode"] == "clock")       { manual = false; crypto = false; }
-      else if (data["mode"] == "tumbler")     { manual = false; crypto = false; cycleNixies = true; }
-      else if (data["mode"] == "crypto" || data["mode"] == "depoison") {
+      if (data["mode"] == "manual")         { manual = true; crypto = false; }
+      else if (data["mode"] == "clock")     { manual = false; crypto = false; }
+      else if (data["mode"] == "tumbler")   { manual = false; crypto = false; cycleNixies = true; }
+      else if (data["mode"] == "crypto")    { manual = false; crypto = true; configUpdate = true; }
+      else if (data["mode"] == "depoison")  {
         configUpdate = true;
 
         depMode = data["dep_mode"];
         depInterval = data["dep_interval"];
 
-        Serial.printf("depMode, depInterval: %s . %s \n" , depMode, depInterval);       
+        Serial.print("depMode, depInterval: "); Serial.println(depMode); Serial.println(depInterval);
       }
     }
 
@@ -421,8 +422,8 @@ void webServerStartup() {
         const char* crypto_asset = data["crypto_asset"];
         const char* crypto_quote = data["crypto_quote"];
 
-        if (data.containsKey("crypto_asset")) crypto_asset = tmpJSON["crypto_asset"]; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
-        if (data.containsKey("crypto_quote")) crypto_quote = tmpJSON["crypto_quote"]; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
+        if (!data["crypto_asset"].isNull()) crypto_asset = tmpJSON["crypto_asset"]; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
+        if (!data["crypto_quote"].isNull()) crypto_quote = tmpJSON["crypto_quote"]; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
       }
 
       // Depoison
