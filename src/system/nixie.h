@@ -32,11 +32,17 @@ char tube2Digit = 0;
 char tube3Digit = 0;
 char tube4Digit = 0;
 
-// Temp sotrage for nixie digits
+// Temp storage for nixie digits
 int oldDigit1;
 int oldDigit2;
 int oldDigit3;
 int oldDigit4;
+
+// Optoisolator IR LEDs
+int opto1 = 2;
+int opto2 = 15;
+int opto3 = 4;
+int opto4 = 5;
 
 // Structs
 struct nixieConfigStruct {
@@ -45,6 +51,7 @@ struct nixieConfigStruct {
     int cathodeDepoisonTime;
     int cathodeDepoisonMode;
     int cathodeDepoisonInterval;
+    int anodePWM;
 };
 
 struct nixieConfigStruct nixieConfigJSON;
@@ -123,6 +130,7 @@ String parseNixieConfig(int mode) {
         nixieConfigJSON.cathodeDepoisonTime = cfgNixie["cathodeDepoisonTime"];
         nixieConfigJSON.cathodeDepoisonMode = cfgNixie["cathodeDepoisonMode"];
         nixieConfigJSON.cathodeDepoisonInterval = cfgNixie["cathodeDepoisonInterval"];
+        nixieConfigJSON.anodePWM = cfgNixie["anodePWM"];
         
         nixieConfig.close();
 
@@ -131,6 +139,7 @@ String parseNixieConfig(int mode) {
             case 2: return String(nixieConfigJSON.cathodeDepoisonTime); break;
             case 3: return String(nixieConfigJSON.cathodeDepoisonMode); break;
             case 4: return String(nixieConfigJSON.cathodeDepoisonInterval); break;
+            case 5: return String(nixieConfigJSON.anodePWM); break;
             default: return "[NIXIE: unknown mode]";
         }
     }
@@ -144,6 +153,19 @@ String parseNixieConfig(int mode) {
 
 void taskSetupNixie(void* parameter) {
     while (!FlashFSready) { vTaskDelay(500); }
+    
+    // opto-Isolator stuff
+    pinMode(opto1, OUTPUT);
+    pinMode(opto2, OUTPUT);
+    pinMode(opto3, OUTPUT);
+    pinMode(opto4, OUTPUT);
+
+    // Prepare PWM
+    ledcSetup(1, 200, 8);
+    ledcAttachPin(opto1, 1);
+    ledcAttachPin(opto2, 1);
+    ledcAttachPin(opto3, 1);
+    ledcAttachPin(opto4, 1);
 
     if (!(LITTLEFS.exists("/config/nixieConfig.json"))) {
         Serial.println(F("[T] Nixie: No config found."));
@@ -160,6 +182,7 @@ void taskSetupNixie(void* parameter) {
         cfgNixie["crypto_quote"] = "USD";
         cfgNixie["cathodeDepoisonTime"] = 600;
         cfgNixie["cathodeDepoisonMode"] = 1;
+        cfgNixie["anodePWM"] = 255;
 
         // Write rtcConfig.cfg
         if (!(serializeJson(cfgNixie, nixieConfig)))
@@ -190,6 +213,8 @@ void taskUpdateNixie(void* parameter) {
 
     Serial.println("[T] Nixie: Starting nixie updater...");
     for (;;) {
+        // Set brightness of nixies
+        ledcWrite(1, parseNixieConfig(5).toInt());
 
         // Check if nixies should update manually or automatically
         if (nixieAutonomous && !cycleNixies) {

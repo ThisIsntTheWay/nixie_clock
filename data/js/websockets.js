@@ -43,6 +43,7 @@ function onMessage(event) {
     if (evData.startsWith("NIXIE_DEP_TIME")) document.getElementById('depoison_schedule').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DEP_MODE")) document.getElementById('depoison_mode').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_MODE")) document.getElementById('tubes_mode').innerHTML = evData.replace(regex, '');
+    if (evData.startsWith("NIXIE_BRIGHTNESS")) document.getElementById('tubes_brightness').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_CRYPTO")) document.getElementById('crypto_ticker').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_MSG")) document.getElementById('sys_msg').innerHTML = evData.replace(regex, '');
 }
@@ -67,6 +68,7 @@ function wsQuery() {
         if (!!document.getElementById('depoison_interval')) websocket.send("getDepoisonInt");
         if (!!document.getElementById('depoison_schedule')) websocket.send("getDepoisonTime");
         if (!!document.getElementById('depoison_mode')) websocket.send("getDepoisonMode");
+        if (!!document.getElementById('tubes_brightness')) websocket.send("getTubesBrightness");
     } else {
         console.warn("Cannot send msg to WS endpoint. Connection is in state " + websocket.readyState + ".");
     }

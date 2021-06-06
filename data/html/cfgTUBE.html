@@ -19,6 +19,7 @@
 			function toggleConfigSpans() {
 				let chCrypto = document.getElementById("mode_crypto");
 				let chManual = document.getElementById("mode_manual");
+				let chNone = document.getElementById("mode_none");
 				let chDep = document.getElementById("depoison_config_radio");
 				let selDepConf = document.getElementById("dep_mode_sel");
 				
@@ -65,7 +66,7 @@
 				let chCrypto = document.getElementById("mode_crypto");
 				let chDep = document.getElementById("depoison_config_radio");
 
-				// Only incorporate tube numbers if they were checked
+				// Define what mode to set in POST request
 				if (chManual.checked) {
 					var d1 = document.getElementById("digit1").value;
 					var d2 = document.getElementById("digit2").value;
@@ -106,6 +107,9 @@
 							console.warn("Unhandled value in 'dep_mode_sel' selection element.");
 					}
 				}
+				
+				// Add brightness
+				obj.brightness = slider.value;
 
 				// Prepare request
     			responseText.innerHTML = "";
@@ -131,14 +135,19 @@
 			<h3>Make changes to the clock display here</h3>
 			Currently displaying: <b id="tubes_display">%TUBES_DISPLAY%</b><br>
 			Current display mode: <b id="tubes_mode">%TUBES_MODE%</b><br>
+			Current brightness: <b id="tubes_brightness">%TUBES_BRIGHTNESS%</b><b>&percnt;</b><br>
 			<p>
 
 			Mode override:<br>
-			<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()" checked="1"/>Manual<br/>
-			<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/>
-			<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/><br/>
+			<input type="radio" id="mode_none" name="r" onclick="toggleConfigSpans()" checked="1"/>Keep current<br/>
+			<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>Manual<br/>
+			<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/>
+			<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/><br/>
 
-			<span id="manual_config">
+			Set brightness: <br>
+			<input type="range" min="1" max="100" value="%TUBES_BRIGHTNESS%" class="slider" id="brightness"> (<span id="bright_val"></span>&percnt;)<br><br>
+
+			<span id="manual_config" style="display: none;">
 				Change tube values:<br>
 				<input type="numeric" size="1" id="digit1" value="" maxlength="1" />
 				<input type="numeric" size="1" id="digit2" value="" maxlength="1" />
@@ -154,7 +163,7 @@
 				<em>Prices pulled from binance.</em>
 			</span>
 
-			<br><br>
+			<br>
 			<b>Cathode depoisoning</b><br>
 			Current mode: <b id="depoison_mode">%DEPOISON_MODE%</b><br>
 			Interval: <b id="depoison_interval">%DEPOISON_INTERVAL%</b><br>
@@ -186,6 +195,16 @@
 		</center>
 		<script>
 			var responseText = document.getElementById('response');
+			let slider = document.getElementById("brightness");
+			var sliderVal = document.getElementById("bright_val");
+
+			slider.oninput = function() {
+				sliderVal.innerHTML = this.value;
+			}
+
+			slider.oninput = function() {
+				sliderVal.innerHTML = this.value;
+			}
 		</script>
 	</body>
 </html>

@@ -83,7 +83,8 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     //Serial.printf("[T] WS got message: %s\n", (char*)data);   
 
     // Decide what to send based on message
-    if      (strcmp((char*)data, "getTime") == 0)          { client->text("SYS_TIME " + getTime());         }
+    if      (strcmp((char*)data, "ackError") == 0)         { client->text("System error acknowledged."); globalErrorOverride = true; }
+    else if (strcmp((char*)data, "getTime") == 0)          { client->text("SYS_TIME " + getTime());         }
     else if (strcmp((char*)data, "getSysMsg") == 0)        { client->text("SYS_MSG " + getSysMsg());        }
     else if (strcmp((char*)data, "getRTCMode") == 0)       { client->text("SYS_MODE " + parseRTCconfig(2)); }
     else if (strcmp((char*)data, "getNTPsource") == 0)     { client->text("SYS_NTP " + parseRTCconfig(1));  }
@@ -97,6 +98,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getWIFIrssi") == 0)      { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getDepoisonTime") == 0)  { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
     else if (strcmp((char*)data, "getDepoisonInt") == 0)   { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
+    else if (strcmp((char*)data, "getTubesBrightness") == 0)   { client->text("NIXIE_BRIGHTNESS " + ((parseNixieConfig(5).toInt() / 255) * 100)); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)  { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)     {
       if (crypto) { client->text("NIXIE_MODE Crypto"); }
@@ -358,8 +360,14 @@ void webServerStartup() {
     int nNum2 = 10;
     int nNum3 = 10;
     int nNum4 = 10;
+    int brightness = 999;
+
     bool manual = false;
     bool configUpdate = false;
+    bool InputValid = true;
+
+    const char* depMode;
+    const char* depInterval;
     
     // Populate new numbers
     if (data.containsKey("nNum1")) nNum1 = data["nNum1"];
@@ -379,67 +387,73 @@ void webServerStartup() {
       else if (data["mode"] == "crypto" || data["mode"] == "depoison") {
         configUpdate = true;
 
-        const char* depMode = data["dep_mode"];
-        const char* depInterval = data["dep_interval"];
+        depMode = data["dep_mode"];
+        depInterval = data["dep_interval"];
 
-        Serial.printf("depMode, depInterval: %s . %s \n" , depMode, depInterval);
+        Serial.printf("depMode, depInterval: %s . %s \n" , depMode, depInterval);       
+      }
+    } else if (data.containsKey("brightness")) {
+      const char* c = data["brightness"];
+      brightness = atoi(c);
+    }
 
-        // Read file
-        StaticJsonDocument<250> tmpJSON;
-        File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "r");
+    // Read file
+    StaticJsonDocument<250> tmpJSON;
+    File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "r");
 
-        String errMsg = "Failure!";
+    String errMsg = "Failure!";
 
-        DeserializationError error = deserializeJson(tmpJSON, nixieConfig);
-        if (error) {
-          String err = error.c_str();
-          Serial.print(F("[X] NIXIE: Could not deserialize JSON:"));
-            Serial.println(err);
+    DeserializationError error = deserializeJson(tmpJSON, nixieConfig);
+    if (error) {
+      String err = error.c_str();
+      Serial.print(F("[X] NIXIE: Could not deserialize JSON:"));
+        Serial.println(err);
 
-          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"System error: Cannot deserialize JSON: " + err + "\"}");
+      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"System error: Cannot deserialize JSON: " + err + "\"}");
+      nixieConfig.close();
+    } else {
+      nixieConfig.close();
+      
+      if (data["mode"] == crypto) {
+        crypto = true;
+        const char* crypto_asset = data["crypto_asset"];
+        const char* crypto_quote = data["crypto_quote"];
+
+        if (data.containsKey("crypto_asset")) crypto_asset = tmpJSON["crypto_asset"]; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
+        if (data.containsKey("crypto_quote")) crypto_quote = tmpJSON["crypto_quote"]; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
+      }
+
+      // Depoison
+      if (strcmp(depMode, "true") == 0) {
+        Serial.println("Got depmode");
+        // Verify that depoison mode is valid
+        if (!(data["dep_mode"] == "1") || !(data["dep_mode"] == "2") || !(data["dep_mode"] == "3")) {
+          request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown mode specified.\"}");
+          InputValid = false;
         } else {
-          nixieConfig.close();
-          
-          if (data["mode"] == crypto) {
-            crypto = true;
-            const char* crypto_asset = data["crypto_asset"];
-            const char* crypto_quote = data["crypto_quote"];
-
-            if (data.containsKey("crypto_asset")) crypto_asset = tmpJSON["crypto_asset"]; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
-            if (data.containsKey("crypto_quote")) crypto_quote = tmpJSON["crypto_quote"]; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
-          }
-
-          bool InputValid = true;
-
-          // Depoison
-          if (depMode) {
-            Serial.println("Got depmode");
-            // Verify that depoison mode is valid
-            if (!(data["dep_mode"] == "1") || !(data["dep_mode"] == "2") || !(data["dep_mode"] == "3")) {
-              request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unknown mode specified.\"}");
-              InputValid = false;
-            } else {
-              depMode = tmpJSON["cathodeDepoisonMode"];
-              Serial.println("[i] Webserver: Writing cathodeDepoisonMode");
-            }
-          } 
-        
-          if (data.containsKey("dep_interval")) depInterval = tmpJSON["cathodeDepoisonInterval"]; 
-
-          if (InputValid) {
-            // Write config.cfg
-            File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
-            if (!(serializeJson(tmpJSON, nixieConfig))) {
-              Serial.println(F("[X] WebServer: Config write failure."));
-              request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
-            } else {
-              request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
-            }
-
-            nixieConfig.close();
-          }
+          depMode = tmpJSON["cathodeDepoisonMode"];
+          Serial.println("[i] Webserver: Writing cathodeDepoisonMode");
         }
       }
+
+      if (brightness < 999) {
+        tmpJSON["anodePWM"] = 255 * (brightness / 100);
+      }
+    
+      if (data.containsKey("dep_interval")) depInterval = tmpJSON["cathodeDepoisonInterval"]; 
+    }
+
+    // Write config.cfg
+    if (InputValid) {
+      File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
+      if (!(serializeJson(tmpJSON, nixieConfig))) {
+        Serial.println(F("[X] WebServer: Config write failure."));
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
+      } else {
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
+      }
+
+      nixieConfig.close();
     }
 
     // Serialize JSON
