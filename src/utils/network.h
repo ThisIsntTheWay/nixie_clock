@@ -115,6 +115,7 @@ String parseNetConfig(int mode) {
 //  ---------------------
 
 void taskWiFi(void* parameter) {
+    // AP credentials (WPA)
     const char* AP_SSID = "ESP32 - Nixie clock";
     const char* AP_PSK  = "NixieClock2021";
 
