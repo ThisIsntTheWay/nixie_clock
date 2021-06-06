@@ -1,13 +1,11 @@
 #include <utils/network.h>
+#include <system/rtc.h>
 #include "rom/rtc.h"
 
 #ifndef utils_h
 #define utils_h
 
-void getESPresetReason(RESET_REASON reason)
-{
-
-}
+bool globalErrorOverride = false;
 
 String getSysMsg() {
     String msg;
@@ -15,15 +13,19 @@ String getSysMsg() {
 
     if (APisFallback) {
         msg = "Could not connect to WiFi betwork '" + parseNetConfig(4) + "'."; isError = true;
+    } else if (!NTPisValid) {
+        msg = "NTP server is unresponsive: '" + parseRTCconfig(1) + "'."; isError = true;
     } else {
         switch (rtc_get_reset_reason(0)) {
-            case 15 : msg = "Brownout detection triggered! Power supply possibly unstable."; isError = true; break;/**<15, Reset when the vdd voltage is not stable*/
-            default : msg = "No reason";
+            case 12 : msg = "System rebooted due to core panick."; isError = true; break;
+            case 15 : msg = "Brownout detector triggered; power supply possibly unstable."; isError = true; break;
+            default : msg = "";
         }
     }
 
     if (isError) msg = "<span style='color: red'>" + msg + "</span>";
-    return msg;
+
+    if (!globalErrorOverride) return msg;
 }
 
-#endif utils_h
+#endif
