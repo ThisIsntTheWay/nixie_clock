@@ -6,20 +6,21 @@
 #define utils_h
 
 bool globalErrorOverride = false;
+bool bigError = false;
 
 String getSysMsg() {
     String msg = "";
     bool isError = false;
 
-    if (APisFallback) {
+    if (APisFallback && !bigError) {
         msg = "Could not connect to WiFi network '" + parseNetConfig(4) + "'."; isError = true;
-    } else if (!NTPisValid) {
+    } else if (!NTPisValid && !bigError) {
         msg = "NTP server is unresponsive: '" + parseRTCconfig(1) + "'."; isError = true;
     } else {
         if (!globalErrorOverride) {
             switch (rtc_get_reset_reason(0)) {
-                case 12 : msg = "System rebooted due to core panic."; isError = true; break;
-                case 15 : msg = "Brownout detector triggered; power supply possibly unstable."; isError = true; break;
+                case 12 : msg = "System rebooted due to core panic."; bigError = true; isError = true; break;
+                case 15 : msg = "Brownout detector triggered; power supply possibly unstable."; bigError = true; isError = true; break;
                 default : msg = "";
             }
         }
