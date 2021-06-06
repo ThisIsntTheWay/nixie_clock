@@ -85,10 +85,11 @@ void setup() {
     Serial.begin(115200);
 
     Serial.println(F("[i] System booting up..."));
-    Serial.printf("[i] Prior reset reason: Core 0: %d, Core 1: %d\n", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
+    Serial.printf("[i] Previous reset reason: Core 0: %d, Core 1: %d\n", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
 
     // Initial scan for WiFi networks.
     // This will prevent getting empty results on WiFi Scans in the WebGUI
+    Serial.println(F("[i] Conducting an initial WiFi scan..."));
     WiFi.scanNetworks();
     Serial.println(F("[i] Initial WiFi scan complete."));
 
