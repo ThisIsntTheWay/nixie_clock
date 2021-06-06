@@ -19,7 +19,6 @@
 			function toggleConfigSpans() {
 				let chCrypto = document.getElementById("mode_crypto");
 				let chManual = document.getElementById("mode_manual");
-				let chNone = document.getElementById("mode_none");
 				let chDep = document.getElementById("depoison_config_radio");
 				let selDepConf = document.getElementById("dep_mode_sel");
 				
@@ -139,7 +138,6 @@
 			<p>
 
 			Mode override:<br>
-			<input type="radio" id="mode_none" name="r" onclick="toggleConfigSpans()" checked="1"/>Keep current<br/>
 			<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>Manual<br/>
 			<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/>
 			<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/><br/>
