@@ -22,6 +22,7 @@
 #define SH_CP   26   // Clock
 #define ST_CP   25   // Latch
 
+bool nixieSetupComplete = false;
 bool nixieAutonomous = true;
 bool cycleNixies = false;
 bool crypto = false;
@@ -43,6 +44,8 @@ int opto1 = 2;
 int opto2 = 15;
 int opto3 = 4;
 int opto4 = 5;
+
+HTTPClient httpNIXIE;
 
 // Structs
 struct nixieConfigStruct {
@@ -93,16 +96,16 @@ int displayCryptoPrice(String ticker, String quote) {
         return 0;
 
     // Obtain ticker price from binance
-    http.useHTTP10(true);
-    http.begin("https://api.binance.com/api/v3/ticker/price?symbol=" + ticker + quote);
+    httpNIXIE.useHTTP10(true);
+    httpNIXIE.begin("https://api.binance.com/api/v3/ticker/price?symbol=" + ticker + quote);
 
-    http.GET();
+    httpNIXIE.GET();
 
-    if (http.connected()) {
+    if (httpNIXIE.connected()) {
         DynamicJsonDocument doc(1024);
-        DeserializationError error = deserializeJson(doc, http.getStream());
+        DeserializationError error = deserializeJson(doc, httpNIXIE.getStream());
         
-        http.end();
+        httpNIXIE.end();
 
         if (error) {
             Serial.print(F("[X] Crypto: Could not deserialize JSON: "));
@@ -196,19 +199,6 @@ String parseNixieConfig(int mode) {
 
 void taskSetupNixie(void* parameter) {
     while (!FlashFSready) { vTaskDelay(500); }
-    
-    // opto-Isolator stuff
-    pinMode(opto1, OUTPUT);
-    pinMode(opto2, OUTPUT);
-    pinMode(opto3, OUTPUT);
-    pinMode(opto4, OUTPUT);
-
-    // Prepare PWM
-    ledcSetup(1, 200, 8);
-    ledcAttachPin(opto1, 1);
-    ledcAttachPin(opto2, 1);
-    ledcAttachPin(opto3, 1);
-    ledcAttachPin(opto4, 1);
 
     if (!(LITTLEFS.exists("/config/nixieConfig.json"))) {
         Serial.println(F("[T] Nixie: No config found."));
@@ -239,6 +229,7 @@ void taskSetupNixie(void* parameter) {
         Serial.println(F("[T] Nixie: Config found."));
     }
 
+    nixieSetupComplete = true;
     vTaskDelete(NULL);
 }
 
@@ -329,12 +320,28 @@ void taskUpdateNixie(void* parameter) {
 }
 
 void taskUpdateNixieBrightness(void* parameter) {
-    while (!FlashFSready) { vTaskDelay(500); }
+    // Wait for LittleFS and taskSetupNixie to be ready
+    while (!FlashFSready && !nixieSetupComplete) { vTaskDelay(500); }
+
+    // opto-Isolator stuff
+    pinMode(opto1, OUTPUT);
+    pinMode(opto2, OUTPUT);
+    pinMode(opto3, OUTPUT);
+    pinMode(opto4, OUTPUT);
+
+    // Prepare PWM
+    ledcSetup(1, 200, 8);
+    ledcAttachPin(opto1, 1);
+    ledcAttachPin(opto2, 1);
+    ledcAttachPin(opto3, 1);
+    ledcAttachPin(opto4, 1);
+
+    Serial.println("[T] Nixie: Starting brightness updater...");
     for (;;) {
         // Set brightness of nixies
         ledcWrite(1, parseNixieConfig(5).toInt());
 
-        vTaskDelay(20);
+        vTaskDelay(100);
     }
 }
 

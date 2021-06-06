@@ -19,7 +19,7 @@
 //  VARIABLES
 //  ---------------------
 
-HTTPClient http;
+HTTPClient httpHUE;
 
 // Structs
 struct hueConfigStruct {
@@ -77,14 +77,14 @@ int getHueLightIndex() {
     String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights";
     int lightsAmount = 0;
 
-    http.useHTTP10(true);
+    httpHUE.useHTTP10(true);
 
-    if (http.begin(URI)) {
-        if (http.GET() > 0) {
+    if (httpHUE.begin(URI)) {
+        if (httpHUE.GET() > 0) {
             // Deserialize JSON response from HUE bridge
             // Ref: https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
             DynamicJsonDocument doc(3200);
-            deserializeJson(doc, http.getStream());
+            deserializeJson(doc, httpHUE.getStream());
 
             JsonObject root = doc.as<JsonObject>();
             
@@ -103,7 +103,7 @@ int getHueLightIndex() {
         Serial.println("[!] HUE: Cannot init http for lights index.");
     }
 
-    http.end();
+    httpHUE.end();
 
     return lightsAmount;
 }
@@ -115,21 +115,21 @@ char sendHUELightReq(int lightID, bool state) {
     String URI = "http://" + parseHUEconfig(1) + "/api/" + parseHUEconfig(2) + "/lights/" + lightID + "/state";
         //Serial.println(URI);
 
-    http.begin(URI);
+    httpHUE.begin(URI);
 
     // POST and return response
     String request;
 
-    http.addHeader("Content-Type", "application/json");
+    httpHUE.addHeader("Content-Type", "application/json");
     if (state == false) { request = "{\"on\": false}"; }
     else { request = "{\"on\": true}"; }
 
-    int httpResponse = http.PUT(request);
+    int httpResponse = httpHUE.PUT(request);
 
     /*Serial.print("[i] HUE: HTTP Response: ");
         Serial.println(httpResponse);*/
 
-    http.end();
+    httpHUE.end();
 
     return httpResponse;
 }
@@ -142,16 +142,7 @@ void taskSetupHUE(void* paramter) {
     Serial.println("[T] HUE: Looking for config...");
 
     // Wait for FS mount
-    int i = 0;
-    while (!FlashFSready) {
-        if (i > 10) {
-            Serial.println("[X] HUE: FS mount timeout.");
-            vTaskDelete(NULL);
-        }
-
-        i++;
-        vTaskDelay(500);
-    }
+    while (!FlashFSready) { vTaskDelay(1000); }
 
     // Open HUE config
     if (!(LITTLEFS.exists("/config/hueConfig.json"))) {
