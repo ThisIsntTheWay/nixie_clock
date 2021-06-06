@@ -450,14 +450,14 @@ void webServerStartup() {
     }
 
     // Write config.cfg
-    if (InputValid) {
+    if (InputValid && configUpdate) {
       File nixieConfig = LITTLEFS.open(F("/config/nixieConfig.json"), "w");
       if (!(serializeJson(tmpJSON, nixieConfig))) {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
         if (crypto) nixieAutonomous = false;
-        
+
         request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixie config has been updated.\"}");
       }
 
@@ -481,6 +481,7 @@ void webServerStartup() {
 
       } else if (!manual && !crypto) {
         nixieAutonomous = true;
+        forceUpdate = true;
         request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in autonomous mode.\"}");
 
       } else {

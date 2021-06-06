@@ -24,6 +24,7 @@
 
 bool nixieSetupComplete = false;
 bool nixieAutonomous = true;
+bool forceUpdate = true;
 bool cycleNixies = false;
 bool crypto = false;
 
@@ -242,7 +243,6 @@ void taskUpdateNixie(void* parameter) {
     int lastMinute = 0;
     int lastHour = 0;
 
-    bool forceUpdate = true;
     cycleNixies = true;
 
     Serial.println("[T] Nixie: Starting nixie updater...");
