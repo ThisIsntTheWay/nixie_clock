@@ -1,11 +1,8 @@
 /*
-    ESP32 Nixie Clock - Nixie module
+    ESP32 Nixie Clock - Tasks module
     (c) V. Klopfenstein, 2021
 
-    All tasks/functions in here are related to nixie tube and bitshift operations.
-    It...
-     - Prepares and reads JSON configuration files related to nixie operations.
-     - Regularely updates the nixie tubes.
+    Headers for nixie.cpp
 */
 
 #ifndef nixie_h
@@ -22,23 +19,17 @@
 //  GLOBAL VARIABLES
 //  ---------------------
 
-bool nixieSetupComplete = false;
-bool nixieAutonomous = true;
-bool forceUpdate = true;
-bool cycleNixies = false;
-bool crypto = false;
+extern bool nixieSetupComplete;
+extern bool nixieAutonomous;
+extern bool forceUpdate;
+extern bool cycleNixies;
+extern bool crypto;
 
 // Nixie digits
-char tube1Digit = 0;
-char tube2Digit = 0;
-char tube3Digit = 0;
-char tube4Digit = 0;
-
-// Temp storage for nixie digits
-int oldDigit1;
-int oldDigit2;
-int oldDigit3;
-int oldDigit4;
+extern char tube1Digit;
+extern char tube2Digit;
+extern char tube3Digit;
+extern char tube4Digit;
 
 //  ---------------------
 //  Class

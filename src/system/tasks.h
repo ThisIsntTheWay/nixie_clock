@@ -1,7 +1,15 @@
+/*
+    ESP32 Nixie Clock - Tasks module
+    (c) V. Klopfenstein, 2021
+
+    Headers for tasks.cpp
+*/
+
 #ifndef tasks_h
 #define tasks_h
 
-#include <system/webServer.h>
+#include <system/nixie.h>
+#include <system/rtc.h>
 
 #define FACT_RST 17
 
@@ -21,8 +29,7 @@ void taskfactoryResetWDT(void*);
 void taskSetupRTC(void*);
 void taskUpdateRTC(void*);
 
-void wsWatchdog() {
-    ws.cleanupClients();
-}
+void taskWiFi(void*);
+void taskFSMount(void*);
 
 #endif

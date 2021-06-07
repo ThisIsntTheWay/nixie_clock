@@ -1,15 +1,180 @@
-#include <Arduino.h>
+/*
+    ESP32 Nixie Clock - Tasks module
+    (c) V. Klopfenstein, 2021
 
+    Incorporates all FreeRTOS tasks
+*/
+
+#include <Arduino.h>
 #include <system/tasks.h>
-#include <system/nixie.h>
+#include <system/webserver.h>
+#include <utils/sysInit.h>
 
 // Load nixie stuff
 Nixie nixie;
 RTCModule rtcModule;
+SysInit sysInit;
 
 // https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2018/08/esp32-pinout-chip-ESP-WROOM-32.png
 // Factory reset button GPIO pin
 #define FACT_RST 17
+
+// --------------------------------------
+//  General
+// --------------------------------------
+void taskFSMount(void* parameter) {
+    Serial.println(F("[T] FS: Mounting..."));
+
+	if (LITTLEFS.begin()) {
+		Serial.println("[T] FS: Mounted.");
+        FlashFSready = true;
+	} else {
+		Serial.println("[X] FS: Mount failure.");
+		Serial.println("[X] FS: Rebooting ESP.");
+        //ESP.restart();
+	}
+
+    // Acquire info from SPIFFS
+    // Taken from: https://diyprojects.io/esp32-get-started-spiff-library-read-write-modify-files/
+    Serial.println(F("[i] FS: Filesystem info:"));
+    Serial.print(" > Total space:      ");
+    Serial.print(LITTLEFS.totalBytes());
+    Serial.println(" bytes");
+
+    Serial.print(" > Total space used: ");
+    Serial.print(LITTLEFS.usedBytes());
+    Serial.println(" bytes");
+
+    Serial.println();
+
+    // Open dir folder
+    File dir = SPIFFS.open("/");
+    // List file at root
+    sysInit.listFilesInDir(dir, 0);
+
+    vTaskDelete(NULL);
+}
+
+void taskWiFi(void* parameter) {
+    // AP credentials (WPA)
+    const char* AP_SSID = "ESP32 - Nixie clock";
+    const char* AP_PSK  = "NixieClock2021";
+
+    // Check for net config file
+    Serial.println("[T] WiFi: Looking for config...");
+
+    while (!FlashFSready) { vTaskDelay(1000); }
+    if (!(LITTLEFS.exists("/config/netConfig.json"))) {
+        Serial.println(F("[T] WiFi: No config found."));
+        
+        if (!LITTLEFS.exists("/config"))
+            LITTLEFS.mkdir("/config");
+
+        File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "w");
+
+        // Construct JSON
+        StaticJsonDocument<250> cfgNet;
+
+        cfgNet["Mode"] = "AP";
+        cfgNet["AP_SSID"] = AP_SSID;
+        cfgNet["AP_PSK"] = AP_PSK;
+        cfgNet["WiFi_SSID"] = "NaN";
+        cfgNet["WiFi_PSK"] = "NaN";
+        cfgNet["IP"] = "NaN";
+        cfgNet["Netmask"] = "NaN";
+        cfgNet["Gateway"] = "NaN";
+        cfgNet["DNS"] = "NaN";
+
+        // Write netConfig.cfg
+        if (!(serializeJson(cfgNet, netConfigF)))
+            Serial.println(F("[X] WiFi: Config write failure."));
+
+        netConfigF.close();
+
+        // Set time on RTC
+        Serial.println(F("[>] WiFi: Config created."));
+    } else {
+        Serial.println(F("[i] WiFi: Config found!"));
+    }
+
+    // Parse net config file
+    // Read file
+    File netConfigF = LITTLEFS.open(F("/config/netConfig.json"), "r");
+
+    // Parse JSON
+    StaticJsonDocument<300> cfgNet;
+    DeserializationError error = deserializeJson(cfgNet, netConfigF);
+    if (error) {
+        Serial.print(F("[X] WiFi: Could not deserialize JSON: "));
+            Serial.println(error.c_str());
+    }
+        
+    strlcpy(s.netConfig.Mode, cfgNet["Mode"], sizeof(s.netConfig.Mode));
+    strlcpy(s.netConfig.AP_SSID, cfgNet["AP_SSID"], sizeof(s.netConfig.AP_SSID));
+    strlcpy(s.netConfig.AP_PSK, cfgNet["AP_PSK"], sizeof(s.netConfig.AP_PSK));
+    
+    netConfigF.close();
+
+    // Start WiFi AP if mode is 'AP'
+    if (strcmp(s.netConfig.Mode, "AP") == 0 || strcmp(s.netConfig.WiFi_SSID, "NaN") == 0) {
+        if (strcmp(s.netConfig.WiFi_SSID, "NaN") == 0)
+            Serial.println("[!] WiFi: Mode is 'client', but SSID is invalid.");
+        Serial.println("[i] WiFi: Starting AP.");
+
+        WiFi.softAP(s.netConfig.AP_SSID, s.netConfig.AP_PSK);
+        Serial.print("[i] WiFi: AP IP address: ");
+            Serial.println(WiFi.softAPIP());
+
+        WiFiReady = true;
+
+    // Start WiFi client if mode is 'Client'
+    } else {
+        APmode = false;
+        Serial.println("[i] WiFi: Starting client.");
+        Serial.print("[i] WiFi: Connecting to '");
+            Serial.print(s.parseNetConfig(4));
+            Serial.print("' using '");
+            Serial.print(s.parseNetConfig(5));
+            Serial.println("'.");
+
+        int i = 0;
+        WiFi.mode(WIFI_STA);
+
+        // For some reason, parseNetConfig() mus be called prior to extracting data from the netConfig struct.
+        // I have no idea why (yet)
+        WiFi.begin(s.netConfig.WiFi_SSID, s.netConfig.WiFi_PSK);
+
+        while (WiFi.status() != WL_CONNECTED) {
+            if (i > 12) {
+                Serial.println(F("[X] WiFi: Connection timeout."));
+
+                // Open up a WiFi AP instead
+                Serial.println(F("[i] WiFi: Starting AP as fallback..."));
+                WiFi.softAP(s.netConfig.AP_SSID, s.netConfig.AP_PSK);
+                Serial.print("[i] WiFi: AP IP address: ");
+                    Serial.println(WiFi.softAPIP());
+
+                APisFallback = true;
+                WiFiReady = true;
+
+                vTaskDelete(NULL);
+            }
+
+            vTaskDelay(1000);
+
+            Serial.println(F("[T] WiFi: Connecting..."));
+            i++;
+        }
+
+        Serial.print(F("[T] WiFi: Connected. RSSI: ")); Serial.println(WiFi.RSSI());
+
+        WiFiReady = true;
+        Serial.print("[T] WiFi: IP: ");
+            Serial.println(WiFi.localIP());
+    }
+
+    vTaskDelete(NULL);
+}
 
 // --------------------------------------
 //  Nixies
@@ -130,6 +295,11 @@ void taskSetupRTC (void* parameters) {
 
         // Construct JSON
         StaticJsonDocument<200> cfgRTC;
+        
+        // Time settings
+        char* ntpServer = "pool.ntp.org";
+        const long  gmtOffset_sec = 3600;
+        const int   daylightOffset_sec = 3600;
 
         cfgRTC["NTP"] = ntpServer;
         cfgRTC["GMT"] = gmtOffset_sec;

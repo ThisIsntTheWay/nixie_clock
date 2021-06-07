@@ -6,7 +6,9 @@
     Anything related to a webserver happens here.
 */
 
-// Switch to LittleFS if needed
+#ifndef webServer_h
+#define webServer_h
+
 #define USE_LittleFS
 
 #include <FS.h>
@@ -17,25 +19,32 @@
   #include <SPIFFS.h>
 #endif 
 
-#ifndef webServer_h
-#define webServer_h
-
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include "AsyncJson.h"
 
 #include <system/rtc.h>
 #include <system/philipsHue.h>
+#include <system/nixie.h>
 #include <utils/utils.h>
-
-#ifndef nixie_h
-    #include <system/nixie.h>
-#endif
 
 // Create instances
 AsyncWebServer server(80);
 Nixie n;
 RTCModule r;
+SysInit s;
+
+bool nixieSetupComplete = false;
+bool nixieAutonomous = true;
+bool forceUpdate = true;
+bool cycleNixies = false;
+bool crypto = false;
+
+// Nixie digits
+char tube1Digit = 0;
+char tube2Digit = 0;
+char tube3Digit = 0;
+char tube4Digit = 0;
 
 //  ---------------------
 //  FUNCTIONS
@@ -55,10 +64,10 @@ String processor(const String& var) {
   else if (var == "HUE_API_USER")           { return "* * *";             }   // HUE API User
   else if (var == "HUE_TOGGLEON_TIME")      { return parseHUEconfig(3);   }   // HUE toggle ON time return
   else if (var == "HUE_TOGGLEOFF_TIME")     { return parseHUEconfig(4);   }   // HUE toggle OFF time
-  else if (var == "NET_MODE")               { return parseNetConfig(1);   }   // Connectivity mode
-  else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
-  else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
-  else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
+  else if (var == "NET_MODE")               { return s.parseNetConfig(1);   }   // Connectivity mode
+  else if (var == "AP_SSID")                { return s.parseNetConfig(2);   }   // ESP32 AP SSID
+  else if (var == "AP_PSK")                 { return s.parseNetConfig(3);   }   // ESP32 AP PSK
+  else if (var == "WIFI_SSID")              { return s.parseNetConfig(4);   }   // WiFi client SSID
   else if (var == "CRYPTO_TICKER")          { return n.parseNixieConfig(1); }   // Cryptocurrency ticker
   else if (var == "TUBES_BRIGHTNESS")       { return n.parseNixieConfig(6); } // Tube brightness
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
@@ -98,7 +107,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getHUEon") == 0)            { client->text("HUE_ON_SCHED " + parseHUEconfig(3)); }
     else if (strcmp((char*)data, "getHUEoff") == 0)           { client->text("HUE_OFF_SCHED " + parseHUEconfig(4)); }
     else if (strcmp((char*)data, "getCryptoTicker") == 0)     { client->text("SYS_CRYPTO " + n.parseNixieConfig(1)); }
-    else if (strcmp((char*)data, "getWIFIssid") == 0)         { client->text("SYS_SSID " + parseNetConfig(4)); }
+    else if (strcmp((char*)data, "getWIFIssid") == 0)         { client->text("SYS_SSID " + s.parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)         { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
     else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + n.parseNixieConfig(2)); }
     else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + n.parseNixieConfig(4)); }

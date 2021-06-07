@@ -16,25 +16,19 @@
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include <NTPClient.h>
-#include <utils/network.h>
+#include <utils/sysInit.h>
 
 //  ---------------------
 //  VARIABLES
 //  ---------------------
-// Time settings
-char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 3600;
-const int   daylightOffset_sec = 3600;
-
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Instances
 //RTC_DS1307 rtc;
-RTC_DS3231 rtc;
-WiFiUDP ntpUDP;
+extern RTC_DS3231 rtc;
+extern WiFiUDP ntpUDP;
 
-bool RTCready = false;
-bool NTPisValid = true;
+extern bool RTCready;
+extern bool NTPisValid;
 
 //  ---------------------
 //  Class

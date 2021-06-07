@@ -1,6 +1,9 @@
-/*  Nixie class
-    This file contains the nixie class and is responsible for controlling the nixie tubes
-*/  
+/*
+    ESP32 Nixie Clock - Nixie module
+    (c) V. Klopfenstein, 2021
+
+    Code for addressing nixie tubes.
+*/
 
 #include <system/nixie.h>
 
@@ -8,6 +11,8 @@
 #define DS_PIN  27   // Data
 #define SH_CP   26   // Clock
 #define ST_CP   25   // Latch
+
+extern Nixie nixie;
 
 Nixie::Nixie() {
 }

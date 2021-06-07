@@ -1,3 +1,10 @@
+/*
+    ESP32 Nixie Clock - RTC module
+    (c) V. Klopfenstein, 2021
+
+    Anything related to RTC and time goes in here.
+*/
+
 #include <arduino.h>
 #include <system/rtc.h>
 

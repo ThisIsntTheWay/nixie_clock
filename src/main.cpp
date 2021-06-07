@@ -2,14 +2,14 @@
     ESP32 Nixie Clock - Entrypoint
     (c) V. Klopfenstein, 2021
 
-    This is the entrypoint of the whole program.
-    The purpose of this file is to spawn all tasks built with FreeRTOS.
+    This is the entrypoint of the system.
 */
 
 #include "Arduino.h"
 
 #include <system/tasks.h>
-#include <utils/network.h>
+#include <system/webserver.h>
+#include <utils/sysInit.h>
 
 //  ---------------------
 //  MAIN
@@ -17,6 +17,17 @@
 
 void setup() {
     Serial.begin(115200);
+
+    // Init booleans
+    RTCready = false;
+    NTPisValid = true;
+    APisFallback = false;
+    
+    nixieSetupComplete = false;
+    nixieAutonomous = true;
+    forceUpdate = true;
+    cycleNixies = true;
+    crypto = false;
 
     Serial.println(F("[i] System booting up..."));
     Serial.printf("[i] Previous reset reason: Core 0: %d, Core 1: %d\n", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
