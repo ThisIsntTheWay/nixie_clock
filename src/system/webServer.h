@@ -6,15 +6,6 @@
     Anything related to a webserver happens here.
 */
 
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include "AsyncJson.h"
-
-#include <system/rtc.h>
-#include <system/philipsHue.h>
-#include <system/nixie.h>
-#include <utils/utils.h>
-
 // Switch to LittleFS if needed
 #define USE_LittleFS
 
@@ -29,10 +20,22 @@
 #ifndef webServer_h
 #define webServer_h
 
-// Create webserver instances
-AsyncWebServer server(80);
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include "AsyncJson.h"
 
-bool EnforceFactoryReset = false;
+#include <system/rtc.h>
+#include <system/philipsHue.h>
+#include <utils/utils.h>
+
+#ifndef nixie_h
+    #include <system/nixie.h>
+#endif
+
+// Create instances
+AsyncWebServer server(80);
+Nixie n;
+RTCModule r;
 
 //  ---------------------
 //  FUNCTIONS
@@ -43,11 +46,11 @@ String processor(const String& var) {
 
   // Unfortunately, var can only be handled withlots of if conditions:
   // A switch..case statement cannot be used with datatype "string".
-  if (var == "TIME" || var == "RTC_TIME")   { return getTime();           }   // Current Time
-  else if (var == "NTP_SOURCE")             { return parseRTCconfig(1);   }   // Current NTP server
-  else if (var == "TIME_MODE")              { return parseRTCconfig(2);   }   // Current time source
-  else if (var == "GMT_VAL")                { return parseRTCconfig(3);   }   // Current GMT
-  else if (var == "DST_VAL")                { return parseRTCconfig(4);   }   // Current DST
+  if (var == "TIME" || var == "RTC_TIME")   { return r.getTime();           }   // Current Time
+  else if (var == "NTP_SOURCE")             { return r.parseRTCconfig(1);   }   // Current NTP server
+  else if (var == "TIME_MODE")              { return r.parseRTCconfig(2);   }   // Current time source
+  else if (var == "GMT_VAL")                { return r.parseRTCconfig(3);   }   // Current GMT
+  else if (var == "DST_VAL")                { return r.parseRTCconfig(4);   }   // Current DST
   else if (var == "HUE_BRIDGE")             { return parseHUEconfig(1);   }   // HUE bridge IP
   else if (var == "HUE_API_USER")           { return "* * *";             }   // HUE API User
   else if (var == "HUE_TOGGLEON_TIME")      { return parseHUEconfig(3);   }   // HUE toggle ON time return
@@ -56,8 +59,8 @@ String processor(const String& var) {
   else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
-  else if (var == "CRYPTO_TICKER")          { return parseNixieConfig(1); }   // Cryptocurrency ticker
-  else if (var == "TUBES_BRIGHTNESS")       { return parseNixieConfig(6); } // Tube brightness
+  else if (var == "CRYPTO_TICKER")          { return n.parseNixieConfig(1); }   // Cryptocurrency ticker
+  else if (var == "TUBES_BRIGHTNESS")       { return n.parseNixieConfig(6); } // Tube brightness
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
@@ -85,21 +88,21 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
 
     // Decide what to send based on message
     if      (strcmp((char*)data, "ackError") == 0)            { client->text("System error acknowledged."); globalErrorOverride = true; }
-    else if (strcmp((char*)data, "getTime") == 0)             { client->text("SYS_TIME " + getTime()); }
+    else if (strcmp((char*)data, "getTime") == 0)             { client->text("SYS_TIME " + r.getTime()); }
     else if (strcmp((char*)data, "getSysMsg") == 0)           { client->text("SYS_MSG " + getSysMsg()); }
-    else if (strcmp((char*)data, "getRTCMode") == 0)          { client->text("SYS_MODE " + parseRTCconfig(2)); }
-    else if (strcmp((char*)data, "getNTPsource") == 0)        { client->text("SYS_NTP " + parseRTCconfig(1)); }
-    else if (strcmp((char*)data, "getGMTval") == 0)           { client->text("SYS_GMT " + parseRTCconfig(3)); }
-    else if (strcmp((char*)data, "getDSTval") == 0)           { client->text("SYS_DST " + parseRTCconfig(4)); }
+    else if (strcmp((char*)data, "getRTCMode") == 0)          { client->text("SYS_MODE " + r.parseRTCconfig(2)); }
+    else if (strcmp((char*)data, "getNTPsource") == 0)        { client->text("SYS_NTP " + r.parseRTCconfig(1)); }
+    else if (strcmp((char*)data, "getGMTval") == 0)           { client->text("SYS_GMT " + r.parseRTCconfig(3)); }
+    else if (strcmp((char*)data, "getDSTval") == 0)           { client->text("SYS_DST " + r.parseRTCconfig(4)); }
     else if (strcmp((char*)data, "getHUEip") == 0)            { client->text("HUE_IP " + parseHUEconfig(1)); }
     else if (strcmp((char*)data, "getHUEon") == 0)            { client->text("HUE_ON_SCHED " + parseHUEconfig(3)); }
     else if (strcmp((char*)data, "getHUEoff") == 0)           { client->text("HUE_OFF_SCHED " + parseHUEconfig(4)); }
-    else if (strcmp((char*)data, "getCryptoTicker") == 0)     { client->text("SYS_CRYPTO " + parseNixieConfig(1)); }
+    else if (strcmp((char*)data, "getCryptoTicker") == 0)     { client->text("SYS_CRYPTO " + n.parseNixieConfig(1)); }
     else if (strcmp((char*)data, "getWIFIssid") == 0)         { client->text("SYS_SSID " + parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)         { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
-    else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
-    else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
-    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + parseNixieConfig(6)); 
+    else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + n.parseNixieConfig(2)); }
+    else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + n.parseNixieConfig(4)); }
+    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + n.parseNixieConfig(6)); 
     }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)     { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)        {
@@ -110,7 +113,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getDepoisonMode") == 0)  {
       String msg;
       
-      switch (nixieConfigJSON.cathodeDepoisonMode) {
+      switch (n.nixieConfig.cathodeDepoisonMode) {
         case 1: msg = "On hour change"; break;
         case 2: msg = "Interval"; break;
         case 3: msg = "On schedule"; break;
@@ -478,7 +481,7 @@ void webServerStartup() {
       // Handle conditions
       if (manual && !cycleNixies && !crypto) {
         nixieAutonomous = false;
-        displayNumber(nNum1, nNum2, nNum3, nNum4);
+        n.displayNumber(nNum1, nNum2, nNum3, nNum4);
         request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in manual mode.\"}");
 
       } else if (cycleNixies && !crypto) {
@@ -705,10 +708,10 @@ void webServerStartup() {
   });
 
   server.on("/api/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (parseRTCconfig(2) == "ntp") {
+    if (r.parseRTCconfig(2) == "ntp") {
       Serial.println("[T] WebServer: Enforcing RTC sync.");
 
-      NTPClient timeClient(ntpUDP, config.NTP, config.GMT + config.DST);
+      NTPClient timeClient(ntpUDP, r.rtcConfig.NTP, r.rtcConfig.GMT + r.rtcConfig.DST);
       timeClient.begin();
       
       if (timeClient.forceUpdate()) {
@@ -740,11 +743,6 @@ void webServerStartup() {
     for (int i = 0; i < l; i++) { sendHUELightReq(i + 1, true); }
 
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
-  });
-
-  server.on("/debug/queueReset", HTTP_GET, [](AsyncWebServerRequest *request) {
-    EnforceFactoryReset = true;
-    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Initiated reset!\"}");
   });
   
   server.on("/debug/forceRestart", HTTP_GET, [](AsyncWebServerRequest *request) {

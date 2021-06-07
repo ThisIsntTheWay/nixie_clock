@@ -1,9 +1,8 @@
-#include <utils/network.h>
-#include <system/rtc.h>
-#include "rom/rtc.h"
-
 #ifndef utils_h
 #define utils_h
+
+#include <utils/network.h>
+#include "rom/rtc.h"
 
 bool globalErrorOverride = false;
 bool bigError = false;
@@ -15,7 +14,7 @@ String getSysMsg() {
     if (APisFallback && !bigError) {
         msg = "Could not connect to WiFi network '" + parseNetConfig(4) + "'."; isError = true;
     } else if (!NTPisValid && !bigError) {
-        msg = "NTP server is unresponsive: '" + parseRTCconfig(1) + "'."; isError = true;
+        msg = "NTP server is unresponsive."; isError = true;
     } else {
         if (!globalErrorOverride) {
             switch (rtc_get_reset_reason(0)) {
