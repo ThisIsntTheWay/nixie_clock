@@ -13,6 +13,7 @@
 #include <ArduinoJson.h>
 #include "WiFi.h"
 #include <WiFiClientSecure.h>
+#include <ESPmDNS.h>
 
 #ifndef network_h
 #define network_h
@@ -185,6 +186,12 @@ void taskWiFi(void* parameter) {
             Serial.println(WiFi.softAPIP());
 
         WiFiReady = true;
+
+        // Start mDNS
+        const char* host = "nixie-clock";
+        if (!MDNS.begin(host)) {
+            Serial.println("[X] WiFi: mDNS setup error!");
+        }
 
     // Start WiFi client if mode is 'Client'
     } else {
