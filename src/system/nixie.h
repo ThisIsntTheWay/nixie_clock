@@ -177,8 +177,6 @@ String parseNixieConfig(int mode) {
         nixieConfigJSON.cathodeDepoisonMode = cfgNixie["cathodeDepoisonMode"];
         nixieConfigJSON.cathodeDepoisonInterval = cfgNixie["cathodeDepoisonInterval"];
         nixieConfigJSON.anodePWM = cfgNixie["anodePWM"];
-        
-        nixieConfig.close();
 
         switch (mode) {
             case 1: return String(nixieConfigJSON.crypto_asset) + "/" + String(nixieConfigJSON.crypto_quote); break;
@@ -190,6 +188,8 @@ String parseNixieConfig(int mode) {
             default: return "[NIXIE: unknown mode]";
         }
     }
+    
+    nixieConfig.close();
 
     return String();
 }
