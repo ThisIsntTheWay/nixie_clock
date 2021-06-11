@@ -144,8 +144,6 @@ int displayCryptoPrice(String ticker, String quote) {
 
             return price;
         }
-    } else {
-        Serial.println("[X] Crypto: Connection to the server failed.");
     }
 
     return 0;
@@ -273,13 +271,13 @@ void taskUpdateNixie(void* parameter) {
                 
                 // Periodically display time
                 if (lastMinute != rtcDT.minute() || lastHour != rtcDT.hour() || forceUpdate) {
-                    if (!timeIsValid) {
+                    if (timeIsValid) {
                         Serial.println("[T] Nixie: Updating time:");
                         Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
                         Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
                         Serial.print(" > Epoch: "); Serial.println(rtcDT.unixtime());
                     } else {
-                        Serial.println("[T] Nixie: Resolving bad time sync.");
+                        Serial.println("[T] Nixie: Bad time - will not update.");
                     }
 
                     // Update lastX values
