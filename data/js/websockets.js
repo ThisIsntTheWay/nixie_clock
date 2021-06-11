@@ -15,11 +15,14 @@ function initWebSocket() {
 
 function onOpen(event) {
     console.info('WS: Connection opened.');
+    showToast("Connected to host", "success");
 }
 
 function onClose(event) {
-    console.warn('WS: Connection closed.');
     setTimeout(initWebSocket, 2000);
+    
+    console.warn('WS: Connection closed.');
+    showToast("Lost connection to host", "error");
 }
 
 // Message handling

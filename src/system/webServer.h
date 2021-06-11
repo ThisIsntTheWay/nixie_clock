@@ -243,11 +243,17 @@ void webServerStartup() {
     request->send(LITTLEFS, f);
   });
 
-  // Global css
+  // Global CSS
   server.on("/css/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     String f = "/css/style.css";
     request->send(LITTLEFS, f);
   });
+
+  // Toast
+  server.on("/css/toast.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String f = "/css/toast.css";
+    request->send(LITTLEFS, f);    
+  });  
   
   // Debug interface
   server.on("/debug", HTTP_GET, [](AsyncWebServerRequest *request) {

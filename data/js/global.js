@@ -75,3 +75,23 @@ function tableFromJson(jsonTable, mode) {
 function copySelfToElement(caller, element) {
     document.getElementById(element).value = document.getElementById(caller.id).getAttribute("value");
 }
+
+// Toasts
+function showToast(message, type) {
+    let x = document.getElementById("toast");
+    let a = document.createAttribute("appearance");
+    a.value = type;
+
+    x.setAttributeNode(a);
+    x.innerHTML = message;
+
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+}
+
+window.addEventListener('load', function () {
+    console.debug("Loaded in toaster element.");
+    var toastDiv = document.createElement("div");
+    toastDiv.id = 'toast';
+    document.body.appendChild(toastDiv);
+})
