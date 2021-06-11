@@ -95,10 +95,7 @@
 					obj.dep_mode = selDepConf.value;
 
 					switch (selDepConf.value) {
-						case "2":
-							obj.dep_interval = document.getElementById("depoison_interval_val").value;
-							break;
-						case "3": 
+						case "2": 
 							obj.dep_schedBegin = document.getElementById("dep_sched_1").value;
 							obj.dep_schedEnd = document.getElementById("dep_sched_2").value;
 							break;
@@ -139,13 +136,13 @@
 				</div>
 
 				<div class="config_div">
+					Set brightness: <br>
+					<input type="range" min="1" max="100" value="%TUBES_BRIGHTNESS%" class="slider" id="brightness"> (<span id="bright_val"></span>&percnt;)<br><br>
+
 					Mode override:<br>
 					<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>Manual<br/>
 					<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/>
 					<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/><br>
-
-					Set brightness: <br>
-					<input type="range" min="1" max="100" value="%TUBES_BRIGHTNESS%" class="slider" id="brightness"> (<span id="bright_val"></span>&percnt;)<br><br>
 
 					<span id="manual_config" style="display: none;">
 						Change tube values:<br>
@@ -174,8 +171,7 @@
 						<label for="dep_mode_sel">Mode selection:</label>
 							<select name="dep_mode_sel" id="dep_mode_sel" onchange="toggleConfigSpans()">
 								<option value="1" onselect="toggleConfigSpans()">On hour change</option>
-								<option value="2">Interval</option>
-								<option value="3">On schedule</option>
+								<option value="2">On schedule</option>
 							</select>
 						<br><br>
 						<span id="interval_config" style="display: none;">
@@ -183,7 +179,6 @@
 						</span>
 						<span id="schedule_config" style="display: none;">
 							Between: <input type="text" size="4" id="dep_sched_1" value=""/> to <input type="text" size="4" id="dep_sched_2" value=""/><br>
-							<em>Executed on interval as defined by user.</em><br>
 						</span>
 					</span>
 				</div>
