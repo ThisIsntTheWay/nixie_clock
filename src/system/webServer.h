@@ -650,7 +650,8 @@ void webServerStartup() {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
-        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated - ESP rebooting...\"}");
+        ESP.restart();
       }
     }
 
