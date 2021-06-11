@@ -55,7 +55,6 @@ String getTime() {
     } else {
         char buf1[15];
         DateTime now = rtcRTC.now();
-        //Serial.printf("[i] Free heap: %d\n", ESP.getFreeHeap());
 
         snprintf(buf1, sizeof(buf1), "%02d:%02d:%02d",  now.hour(), now.minute(), now.second());
 
@@ -64,10 +63,6 @@ String getTime() {
 }
 
 String parseRTCconfig(int mode) {
-    // Mode param:
-    // 1: Return NTP server
-    // 2: Return config mode
-
     if (!RTCready)
         return "RTC failure";
 
@@ -76,8 +71,6 @@ String parseRTCconfig(int mode) {
 
     // Parse JSON
     StaticJsonDocument<250> cfgRTC;
-
-    // > Deserialize
     DeserializationError error = deserializeJson(cfgRTC, rtcConfig);
     if (error) {
         String err = error.c_str();
