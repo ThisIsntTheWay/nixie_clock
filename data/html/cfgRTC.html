@@ -95,13 +95,16 @@
 			
 			<div class="config_div">
 				Set time source:<br>
-				<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>
-				<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual
+				<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()"/>
+					<label for="ntp_control">NTP</label><br/>
+				<input type="radio" id="manual_control" name="r" onclick="showHideConfig()"/>
+					<label for="manual_control">Manual</label><br/>
+				<br/>
 			
 				<span id="ntp_config" style="display: none;">
 					Set NTP server: <input type="numeric" size="16" id="ntp_source" value=""/><br>
 					GMT offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
-					DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>	
+					DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>
 				</span>
 				<span id="manual_config" style="display: none;">
 					Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>
