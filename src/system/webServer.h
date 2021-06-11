@@ -452,7 +452,7 @@ void webServerStartup() {
       if (brightness < 101 && !data["brightness"].isNull()) {
         int bright = (brightness * 255) / 100;
         tmpJSON["anodePWM"] = bright;
-      } else if (brightness > 100 && data["brightness"].isNull()) {
+      } else if (brightness > 100 && !data["brightness"].isNull()) {
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Brightness value is out of bounds.\"}");
         InputValid = false;
       }
