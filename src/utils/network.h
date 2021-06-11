@@ -199,8 +199,6 @@ void taskWiFi(void* parameter) {
         Serial.println("[i] WiFi: Starting client.");
         Serial.print("[i] WiFi: Connecting to '");
             Serial.print(parseNetConfig(4));
-            Serial.print("' using '");
-            Serial.print(parseNetConfig(5));
             Serial.println("'.");
 
         int i = 0;
