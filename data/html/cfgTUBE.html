@@ -140,9 +140,13 @@
 					<input type="range" min="1" max="100" value="%TUBES_BRIGHTNESS%" class="slider" id="brightness"> (<span id="bright_val"></span>&percnt;)<br><br>
 
 					Mode override:<br>
-					<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>Manual<br/>
-					<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/>
-					<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/><br>
+					<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>
+						<label for="mode_manual">Manual</label><br/>
+					<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>
+						<label for="mode_crypto">Crypto</label><br/>
+					<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>
+						<label for="mode_clock">Clock</label><br/>
+					<br>
 
 					<span id="manual_config" style="display: none;">
 						Change tube values:<br>
@@ -155,7 +159,7 @@
 					<span id="crypto_config" style="display: none;">
 						Current ticker: <b id="crypto_ticker">%CRYPTO_TICKER%</b><br>
 						Set asset: <input type="text" size="5" id="crypto_asset" value=""/><br>
-						Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br>
+						Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br><br>
 						<em>Prices pulled from binance.</em>
 					</span>
 				</div>
@@ -166,7 +170,9 @@
 					Interval: <b id="depoison_interval">%DEPOISON_INTERVAL%</b><br>
 					Schedule: <b id="depoison_schedule">%DEPOISON_SCHEDULE%</b><br><br>
 
-					<input type="radio" id="depoison_config_radio" name="r" onclick="toggleConfigSpans()"/>Change configuration<br/>
+					<input type="radio" id="depoison_config_radio" name="r" onclick="toggleConfigSpans()"/>
+						<label for="depoison_config_radio">Change configuration</label><br/>
+
 					<span id="depoison_config" style="display: none;"><br>
 						<label for="dep_mode_sel">Mode selection:</label>
 							<select name="dep_mode_sel" id="dep_mode_sel" onchange="toggleConfigSpans()">
@@ -175,17 +181,14 @@
 							</select>
 						<br><br>
 						<span id="interval_config" style="display: none;">
-							Set interval (in minutes): <input type="text" size="6" id="depoison_interval_val" value=""/><br>
-						</span>
-						<span id="schedule_config" style="display: none;">
 							Between: <input type="text" size="4" id="dep_sched_1" value=""/> to <input type="text" size="4" id="dep_sched_2" value=""/><br>
 						</span>
 					</span>
 				</div>
 
-				<div class="config_apply">
-					<a href="#" value="Apply" class="button" onclick="submit()">Apply</a>
-					<a href="#" value="Tumbler" class="button" onclick="tumble()">Tumbler</a>
+				<div class="config_apply" name="apply">
+					<a href="#apply" value="Apply" class="button" onclick="submit()">Apply</a>
+					<a href="#apply" value="Tumbler" class="button" onclick="tumble()">Tumbler</a>
 				</div>
 				<div class="config_response"> </div>
 			</div>
