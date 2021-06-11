@@ -234,35 +234,68 @@ void taskUpdateNixie(void* parameter) {
     while (!RTCready) { vTaskDelay(1000); }
     Serial.println("[T] Nixie: RTC ready.");
 
+    int hour = 0;
+    int minute = 0;
     int lastMinute = 0;
     int lastHour = 0;
 
+    // Cathode depoisoning stuff
+    bool justCycled = false;
+    bool timeIsValid;
     cycleNixies = true;
 
     Serial.println("[T] Nixie: Starting nixie updater...");
     for (;;) {
+        // Cache nixie config
+        parseNixieConfig(9);
+
+        DateTime rtcDT = rtcNixie.now();
+
+        timeIsValid = true;
+
+        // Save hour and minute as variables in order to have consistent data for further manipulation
+        hour = rtcDT.hour();
+        minute = rtcDT.minute();
+        
+        // Verify time and account for bad RTC data
+        if (hour > 23) {
+            timeIsValid = false;
+            hour = 0;
+        }
+        if (minute > 59){
+            timeIsValid = false;
+            minute = 0;
+        }
+
+        // Check if cathode depoisoning should occur
+        if (!justCycled && timeIsValid) {
+            switch (nixieConfigJSON.cathodeDepoisonMode) {
+                case 1: // On hour change
+                    if (lastMinute != minute) cycleNixies = true;
+                    break;
+                case 2: // On schedule
+                    if (timeIsValid) {
+                        int nowTime = ((hour * 100) + minute);                    
+                    }
+                    break;
+                default:
+                    cycleNixies = false;                
+            }
+        }
+
         // Check if nixies should update manually or automatically
-        if (nixieAutonomous && !cycleNixies) {
-            DateTime rtcDT = rtcNixie.now();
-
-            bool timeIsValid = true;
-
-            // Save hour and minute as variables in order to have consistent data for further manipulation
-            int hour = rtcDT.hour();
-            int minute = rtcDT.minute();
-            //Serial.print("hour: "); Serial.println(hour);
-            //Serial.print("minute: "); Serial.println(minute);
-
-            // Verify time and account for bad RTC data
-            if (hour > 23) hour = 0;
-            if (minute > 59) minute = 0;
-            if ((lastHour - hour) > 5 || (lastHour - hour) < -5) timeIsValid = false;
-
+        if (!cycleNixies && nixieAutonomous) {
             // if lastHour and/or lastMinute are invalid, enforce update because the RTC must have stored invalid data
             if (lastHour > 24 || lastMinute > 60) forceUpdate = true;
 
+            if (forceUpdate) Serial.println("Will forcefully update.");
+
             // Update nixies if valid numbers are valid
             if (timeIsValid || forceUpdate) {
+                Serial.println("passed test 2");
+                // Reset cathode depoisoning flag
+                justCycled = false;
+
                 // Split numbers
                 int hourD1   = hour / 10;
                 int hourD2   = hour % 10;
@@ -293,24 +326,25 @@ void taskUpdateNixie(void* parameter) {
                     if (forceUpdate) forceUpdate = false;
                 }
             }
-        } else if (cycleNixies) {
+        } else if (cycleNixies && !justCycled) {
             Serial.println("[T] Nixie: Cycling nixies...");
 
             // Cycle all nixies, first incrementing then decrementing them
             for (int i = 0; i < 10; i++) {
                 displayNumber(i,i,i,i);
-                vTaskDelay(65);
+                vTaskDelay(32);
             }
 
             for (int i = 9; i > -1; i--) {
                 displayNumber(i,i,i,i);
-                vTaskDelay(65);
+                vTaskDelay(32);
             }
 
             // Reset nixies
             nixieAutonomous = true;
             cycleNixies = false;
             forceUpdate = true;
+            justCycled = true;
         } else if (crypto && !cycleNixies) {
             Serial.println("[T] Nixie: Displaying crypto price...");
             displayCryptoPrice(String(nixieConfigJSON.crypto_asset), String(nixieConfigJSON.crypto_quote));
