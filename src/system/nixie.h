@@ -318,8 +318,8 @@ void taskUpdateNixieBrightness(void* parameter) {
     while (!nixieSetupComplete) { vTaskDelay(500); }
 
     // Opto-Isolator stuff
-    int opto1 = 4;
-    int opto2 = 5;
+    int opto1 = 5;
+    int opto2 = 4;
     int opto3 = 2;
     int opto4 = 15;
     pinMode(opto1, OUTPUT);
