@@ -29,7 +29,8 @@
 #ifndef webServer_h
 #define webServer_h
 
-// Create webserver instances
+// Instances
+RTC_DS3231 rtc;
 AsyncWebServer server(80);
 
 bool EnforceFactoryReset = false;

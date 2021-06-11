@@ -19,6 +19,8 @@
 //  VARIABLES
 //  ---------------------
 
+// Instances
+RTC_DS3231 rtcHUE;
 HTTPClient httpHUE;
 
 // Structs
@@ -182,7 +184,7 @@ void taskMonitorHUE(void* parameter) {
     bool turnedOff = false;
 
     for (;;) {
-        DateTime time = rtc.now();
+        DateTime time = rtcHUE.now();
         bool timeIsValid = true;
 
         // Acquire onTime and offTime

@@ -40,6 +40,8 @@ int oldDigit2;
 int oldDigit3;
 int oldDigit4;
 
+// Instances
+RTC_DS3231 rtcNixie;
 HTTPClient httpNIXIE;
 
 // Structs
@@ -243,7 +245,7 @@ void taskUpdateNixie(void* parameter) {
     for (;;) {
         // Check if nixies should update manually or automatically
         if (nixieAutonomous && !cycleNixies) {
-            DateTime rtcDT = rtc.now();
+            DateTime rtcDT = rtcNixie.now();
 
             bool timeIsValid = true;
 
@@ -271,10 +273,14 @@ void taskUpdateNixie(void* parameter) {
                 
                 // Periodically display time
                 if (lastMinute != rtcDT.minute() || lastHour != rtcDT.hour() || forceUpdate) {
-                    Serial.println("[T] Nixie: Updating time:");
-                    Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
-                    Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
-                    Serial.print(" > Epoch: "); Serial.println(rtcDT.unixtime());
+                    if (!timeIsValid) {
+                        Serial.println("[T] Nixie: Updating time:");
+                        Serial.print(" > Minutes: "); Serial.print(lastMinute); Serial.print(" > "); Serial.println(rtcDT.minute());
+                        Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
+                        Serial.print(" > Epoch: "); Serial.println(rtcDT.unixtime());
+                    } else {
+                        Serial.println("[T] Nixie: Resolving bad time sync.");
+                    }
 
                     // Update lastX values
                     if (lastHour != rtcDT.hour()) {

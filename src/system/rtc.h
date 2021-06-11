@@ -27,8 +27,7 @@ const long  gmtOffset_sec = 3600;
 const int   daylightOffset_sec = 3600;
 
 // Instances
-//RTC_DS1307 rtc;
-RTC_DS3231 rtc;
+RTC_DS3231 rtcRTC;
 WiFiUDP ntpUDP;
 
 // Structs
@@ -55,7 +54,7 @@ String getTime() {
         return String("<span style='color:red'>RTC failure</span>");
     } else {
         char buf1[15];
-        DateTime now = rtc.now();
+        DateTime now = rtcRTC.now();
         //Serial.printf("[i] Free heap: %d\n", ESP.getFreeHeap());
 
         snprintf(buf1, sizeof(buf1), "%02d:%02d:%02d",  now.hour(), now.minute(), now.second());
@@ -132,17 +131,17 @@ void taskSetupRTC (void* parameters) {
     Wire.setClock(100000);
 
     // Detect RTC
-    if (!rtc.begin()) {
+    if (!rtcRTC.begin()) {
         Serial.println(F("[X] RTC: No module found."));
         Serial.println(F("[X] RTC: Aborting..."));
         vTaskDelete(NULL);
     } else { RTCready = true; }
     
     // Set RTC datetime if it hasn't been running yet
-    // USE WITH DS1307 -> if (! rtc.isrunning()) {
-    if (rtc.lostPower()) {
+    // USE WITH DS1307 -> if (! rtcRTC.isrunning()) {
+    if (rtcRTC.lostPower()) {
         Serial.println("[i] RTC: Module not configured, setting compile time...");
-        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+        rtcRTC.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 
     // Create RTC config if it does not yet exist.
@@ -222,16 +221,16 @@ void taskUpdateRTC(void* parameter) {
 
                     // Check if NTP and RTC epochs are different
                     long ntpTime = timeClient.getEpochTime();
-                    long epochDiff = ntpTime - rtc.now().unixtime();
+                    long epochDiff = ntpTime - rtcRTC.now().unixtime();
 
-                    if (initialSync) rtc.adjust(DateTime(ntpTime));
+                    if (initialSync) rtcRTC.adjust(DateTime(ntpTime));
 
                     // Sync if epoch time differs too greatly from NTP and RTC
                     // Also ignore discrepancy if its difference is way too huge, indicating corrupt NTP packets
                     if ((epochDiff < -10 || epochDiff > 10) && !(epochDiff < -1200000000 || epochDiff > 1200000000)) {
                         Serial.print("[T] RTC sync: Clearing epoch difference of ");
                             Serial.println(epochDiff);
-                        rtc.adjust(DateTime(ntpTime));
+                        rtcRTC.adjust(DateTime(ntpTime));
                     }
                 } else {
                     Serial.println(F("[X] RTC sync: NTP server unresponsive."));
