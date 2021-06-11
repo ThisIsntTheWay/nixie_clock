@@ -28,6 +28,8 @@ input:hover, input:focus {
 input, textarea {
   background-color: transparent;
   color: white;
+  font-size: 1.2vw;
+  text-align: center;
 }
 
 /*    SLIDER    */
