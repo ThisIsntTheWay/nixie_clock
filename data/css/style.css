@@ -21,7 +21,8 @@ input {
 
 input:hover, input:focus {
   border: none;
-  border-bottom: 3px solid #FF9800
+  border-bottom: 3px solid #FF9800;
+  border-radius: 3px;
 }
 
 input, textarea {
@@ -43,14 +44,14 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 
 .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 20px;
-    border-radius: 30%;
-    background: #ff0707;
-    cursor: pointer;
-  }
+	-webkit-appearance: none;
+	appearance: none;
+	width: 15px;
+	height: 20px;
+	border-radius: 20%;
+	background: #ff0707;
+	cursor: pointer;
+}
 
 .slider:hover {
   opacity: 1;
