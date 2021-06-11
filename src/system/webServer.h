@@ -770,14 +770,7 @@ void webServerStartup() {
 }
 
 void taskSetupWebserver(void *parameter) {
-  int i = 0;
   while (!WiFiReady) {
-    /*if (i > 30) {
-      Serial.println("[X] WebServer: Network timeout.");
-      vTaskDelete(NULL);
-    }*/
-
-    i++;
     vTaskDelay(500);
   }
 
