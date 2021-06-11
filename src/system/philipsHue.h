@@ -197,7 +197,7 @@ void taskMonitorHUE(void* parameter) {
 
         // Verify time
         //Serial.printf("[i] hour: %d\n", hour);
-        if (time.hour() > 23 || time.minute() > 59) timeIsValid = false;
+        if (nowHour > 23 || nowMinute > 59) timeIsValid = false;
         
         // Turn lights ON if inbetween onH/onM and offH/offM
         if (timeIsValid) {        
