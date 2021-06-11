@@ -53,10 +53,13 @@ String getTime() {
     if (!RTCready) {
         return String("<span style='color:red'>RTC failure</span>");
     } else {
-        char buf1[15];
         DateTime now = rtcRTC.now();
+        char buf1[15];
 
         snprintf(buf1, sizeof(buf1), "%02d:%02d:%02d",  now.hour(), now.minute(), now.second());
+
+        if (now.hour() > 23 || now.minute() > 59)
+            return String("<span style='color:red'>" + String(buf1) + "</span>");
 
         return buf1;
     }
