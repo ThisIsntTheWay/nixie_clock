@@ -19,8 +19,8 @@ String getSysMsg() {
     } else {
         if (!globalErrorOverride) {
             switch (rtc_get_reset_reason(0)) {
-                case 12 : msg = "System has rebooted due to a core panic."; bigError = true; isError = true; break;
-                case 15 : msg = "System has rebooted due to a brownout.<br>Power supply possibly too weak/unstable."; bigError = true; isError = true; break;
+                case 12 : msg = "The system has rebooted due to a core panic."; bigError = true; isError = true; break;
+                case 15 : msg = "The system has rebooted due to a brownout.<br>Power supply possibly too weak or unstable."; bigError = true; isError = true; break;
                 default : msg = ""; isError = false;
             }
         } else {
@@ -28,7 +28,7 @@ String getSysMsg() {
         }
     }
 
-    if (isError) msg = "<span id='error_message' style='color: red'>" + msg + "</span>";
+    if (isError) msg = "<span id='error_message' style='color: red' onclick='ackError()'>" + msg + "</span>";
 
     return msg;
 }

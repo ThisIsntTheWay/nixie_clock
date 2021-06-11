@@ -74,6 +74,10 @@ function wsQuery() {
     }
 }
 
+function ackError() {
+    websocket.send("ackError");
+}
+
 // Start websockets connection on page load
 window.addEventListener('load', onLoad);
 function onLoad(event) {
@@ -81,9 +85,4 @@ function onLoad(event) {
 
     if (wsQueryInterval) clearInterval(wsQueryInterval);
     wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryIntervalCycle);
-}
-
-let errorMessage = document.getElementById("error_message");
-element.onclick = function(event) {
-  websocket.send("ackError");
 }
