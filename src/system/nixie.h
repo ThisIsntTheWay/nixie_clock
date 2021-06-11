@@ -330,7 +330,8 @@ void taskUpdateNixieBrightness(void* parameter) {
     pinMode(opto4, OUTPUT);
 
     // Prepare PWM
-    ledcSetup(1, 200, 8);
+    int pwmFreq = 1024;
+    ledcSetup(1, pwmFreq, 8);
     ledcAttachPin(opto1, 1);
     ledcAttachPin(opto2, 1);
     ledcAttachPin(opto3, 1);
