@@ -59,7 +59,7 @@ String getTime() {
         snprintf(buf1, sizeof(buf1), "%02d:%02d:%02d",  now.hour(), now.minute(), now.second());
 
         if (now.hour() > 23 || now.minute() > 59)
-            return String("<span style='color:red'>" + String(buf1) + "</span>");
+            return String("<span style='color:red'>Bad data! (" + String(buf1) + ")</span>");
 
         return buf1;
     }
