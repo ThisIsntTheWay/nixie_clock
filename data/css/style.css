@@ -6,6 +6,7 @@ body {
     background: #000000d9;
 }
 
+a { color: white; }
 h4 { padding-bottom: 0px; }
 table { border-spacing: 5; }
 th { text-align: left; }
@@ -24,7 +25,6 @@ div {
     width: 70%;
     border: 4px solid;
     border-spacing: 1px;
-    border-col
 }
 
 .config_summary {
