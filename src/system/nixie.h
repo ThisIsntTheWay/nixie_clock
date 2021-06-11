@@ -288,11 +288,8 @@ void taskUpdateNixie(void* parameter) {
             // if lastHour and/or lastMinute are invalid, enforce update because the RTC must have stored invalid data
             if (lastHour > 24 || lastMinute > 60) forceUpdate = true;
 
-            if (forceUpdate) Serial.println("Will forcefully update.");
-
             // Update nixies if valid numbers are valid
             if (timeIsValid || forceUpdate) {
-                Serial.println("passed test 2");
                 // Reset cathode depoisoning flag
                 justCycled = false;
 
