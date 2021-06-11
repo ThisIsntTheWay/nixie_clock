@@ -26,8 +26,6 @@ char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 3600;
 const int   daylightOffset_sec = 3600;
 
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
 // Instances
 //RTC_DS1307 rtc;
 RTC_DS3231 rtc;
@@ -72,7 +70,7 @@ String parseRTCconfig(int mode) {
     // 2: Return config mode
 
     if (!RTCready)
-        return "[RTC: failure]";
+        return "RTC failure";
 
     // Read file
     File rtcConfig = LITTLEFS.open(F("/config/rtcConfig.json"), "r");
@@ -208,6 +206,7 @@ void taskUpdateRTC(void* parameter) {
     vTaskDelay(5000);
 
     for (;;) {
+        parseRTCconfig(1);
         NTPClient timeClient(ntpUDP, config.NTP, config.GMT + config.DST);
 
         // Check if RTC should be synced with NTP
