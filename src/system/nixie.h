@@ -330,19 +330,31 @@ void taskUpdateNixieBrightness(void* parameter) {
     pinMode(opto4, OUTPUT);
 
     // Prepare PWM
-    int pwmFreq = 1024;
+    int pwmFreq = 75;
     ledcSetup(1, pwmFreq, 8);
-    ledcAttachPin(opto1, 1);
-    ledcAttachPin(opto2, 1);
-    ledcAttachPin(opto3, 1);
-    ledcAttachPin(opto4, 1);
+        ledcAttachPin(opto1, 1);
+
+    ledcSetup(2, pwmFreq, 8);
+        ledcAttachPin(opto2, 2);
+    
+    ledcSetup(3, pwmFreq, 8);
+        ledcAttachPin(opto3, 3);
+    
+    ledcSetup(4, pwmFreq, 8);
+        ledcAttachPin(opto4, 4);
 
     Serial.println("[T] Nixie: Starting brightness updater...");
     for (;;) {
         // Set brightness of nixies
-        ledcWrite(1, parseNixieConfig(5).toInt());
+        int pwm = parseNixieConfig(5).toInt();
 
-        vTaskDelay(100);
+        // Check if the tubes are actually displaying stuff, otherwise turn them off
+        if (tube1Digit < 9) { ledcWrite(1, 256); } else { ledcWrite(1, pwm); }
+        if (tube2Digit < 9) { ledcWrite(2, 256); } else { ledcWrite(2, pwm); }
+        if (tube3Digit < 9) { ledcWrite(3, 256); } else { ledcWrite(3, pwm); }
+        if (tube4Digit < 9) { ledcWrite(4, 256); } else { ledcWrite(4, pwm); }
+
+        vTaskDelay(500);
     }
 }
 
