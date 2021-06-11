@@ -40,12 +40,6 @@ int oldDigit2;
 int oldDigit3;
 int oldDigit4;
 
-// Optoisolator IR LEDs
-int opto1 = 2;
-int opto2 = 15;
-int opto3 = 4;
-int opto4 = 5;
-
 HTTPClient httpNIXIE;
 
 // Structs
@@ -324,13 +318,17 @@ void taskUpdateNixieBrightness(void* parameter) {
     while (!nixieSetupComplete) { vTaskDelay(500); }
 
     // Opto-Isolator stuff
+    int opto1 = 4;
+    int opto2 = 5;
+    int opto3 = 2;
+    int opto4 = 15;
     pinMode(opto1, OUTPUT);
     pinMode(opto2, OUTPUT);
     pinMode(opto3, OUTPUT);
     pinMode(opto4, OUTPUT);
 
     // Create and assign LED controllers to each opto-isolator channel
-    int pwmFreq = 90;
+    int pwmFreq = 100;
     ledcSetup(1, pwmFreq, 8);
         ledcAttachPin(opto1, 1);
 
@@ -348,7 +346,8 @@ void taskUpdateNixieBrightness(void* parameter) {
         // Set brightness of nixies
         int pwm = parseNixieConfig(5).toInt();
 
-        // Check if the tubes are actually displaying stuff, otherwise turn them off
+        // Check if the tubes are actually displaying stuff, otherwise turn them off.
+        // This prevents the anode from floating.
         if (tube1Digit == 'X') { ledcWrite(1, 0); } else { ledcWrite(1, pwm); }
         if (tube2Digit == 'X') { ledcWrite(2, 0); } else { ledcWrite(2, pwm); }
         if (tube3Digit == 'X') { ledcWrite(3, 0); } else { ledcWrite(3, pwm); }
