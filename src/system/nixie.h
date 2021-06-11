@@ -253,10 +253,13 @@ void taskUpdateNixie(void* parameter) {
             //Serial.print("hour: "); Serial.println(hour);
             //Serial.print("minute: "); Serial.println(minute);
 
-            // Verify time
-            //Serial.printf("[i] hour: %d\n", hour);
-            if (hour > 23 || minute > 59) timeIsValid = false;
+            // Verify time and account for bad RTC data
+            if (hour > 23) hour = 0;
+            if (minute > 59) minute = 0;
             if ((lastHour - hour) > 5 || (lastHour - hour) < -5) timeIsValid = false;
+
+            // if lastHour and/or lastMinute are invalid, enforce update because the RTC must have stored invalid data
+            if (lastHour > 24 || lastMinute > 60) forceUpdate = true;
 
             // Update nixies if valid numbers are valid
             if (timeIsValid || forceUpdate) {
