@@ -321,16 +321,16 @@ void taskUpdateNixie(void* parameter) {
 
 void taskUpdateNixieBrightness(void* parameter) {
     // Wait for LittleFS and taskSetupNixie to be ready
-    while (!FlashFSready && !nixieSetupComplete) { vTaskDelay(500); }
+    while (!nixieSetupComplete) { vTaskDelay(500); }
 
-    // opto-Isolator stuff
+    // Opto-Isolator stuff
     pinMode(opto1, OUTPUT);
     pinMode(opto2, OUTPUT);
     pinMode(opto3, OUTPUT);
     pinMode(opto4, OUTPUT);
 
-    // Prepare PWM
-    int pwmFreq = 75;
+    // Create and assign LED controllers to each opto-isolator channel
+    int pwmFreq = 90;
     ledcSetup(1, pwmFreq, 8);
         ledcAttachPin(opto1, 1);
 
@@ -349,10 +349,10 @@ void taskUpdateNixieBrightness(void* parameter) {
         int pwm = parseNixieConfig(5).toInt();
 
         // Check if the tubes are actually displaying stuff, otherwise turn them off
-        if (tube1Digit < 9) { ledcWrite(1, 256); } else { ledcWrite(1, pwm); }
-        if (tube2Digit < 9) { ledcWrite(2, 256); } else { ledcWrite(2, pwm); }
-        if (tube3Digit < 9) { ledcWrite(3, 256); } else { ledcWrite(3, pwm); }
-        if (tube4Digit < 9) { ledcWrite(4, 256); } else { ledcWrite(4, pwm); }
+        if (tube1Digit == 'X') { ledcWrite(1, 0); } else { ledcWrite(1, pwm); }
+        if (tube2Digit == 'X') { ledcWrite(2, 0); } else { ledcWrite(2, pwm); }
+        if (tube3Digit == 'X') { ledcWrite(3, 0); } else { ledcWrite(3, pwm); }
+        if (tube4Digit == 'X') { ledcWrite(4, 0); } else { ledcWrite(4, pwm); }
 
         vTaskDelay(500);
     }
