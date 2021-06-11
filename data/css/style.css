@@ -45,11 +45,11 @@ div {
     width: 75%;
 }
 
-.config_response {    
-    width: 50%;
-    border: 2px solid;
-    padding: 0%;
-    border-color: #fdd638;
+.config_response {
+	padding: 0%;
+}
+.config_response p {
+	margin: 0;
 }
 
 /*  IDs     */

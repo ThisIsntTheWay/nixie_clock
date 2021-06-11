@@ -192,14 +192,12 @@
 					<a href="#" value="Apply" class="button" onclick="submit()">Apply</a>
 					<a href="#" value="Tumbler" class="button" onclick="tumble()">Tumbler</a>
 				</div>
-				<div class="config_response">
-					<p id="response"></p>
-				</div>
+				<div class="config_response"> </div>
 			</div>
 		</div>
 		</center>
 		<script>
-			var responseText = document.getElementById('response');
+			var responseText = document.getElementsByClassName('config_response')[0];
 			let slider = document.getElementById("brightness");
 			var sliderVal = document.getElementById("bright_val");
 
