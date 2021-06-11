@@ -271,7 +271,7 @@ void taskUpdateNixie(void* parameter) {
         if (!justCycled && timeIsValid) {
             switch (nixieConfigJSON.cathodeDepoisonMode) {
                 case 1: // On hour change
-                    if (lastMinute != minute) cycleNixies = true;
+                    if (lastHour != hour) cycleNixies = true;
                     break;
                 case 2: // On schedule
                     if (timeIsValid) {
@@ -329,12 +329,12 @@ void taskUpdateNixie(void* parameter) {
             // Cycle all nixies, first incrementing then decrementing them
             for (int i = 0; i < 10; i++) {
                 displayNumber(i,i,i,i);
-                vTaskDelay(32);
+                vTaskDelay(50);
             }
 
             for (int i = 9; i > -1; i--) {
                 displayNumber(i,i,i,i);
-                vTaskDelay(32);
+                vTaskDelay(50);
             }
 
             // Reset nixies
