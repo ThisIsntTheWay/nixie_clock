@@ -1,5 +1,6 @@
 var spinnerIntervalSet = null;
 var spinnerCount = 0;
+var responseWDInterval = null;
 
 function spinner() {
     // Destroy timer if it exists already
@@ -76,8 +77,14 @@ function copySelfToElement(caller, element) {
     document.getElementById(element).value = document.getElementById(caller.id).getAttribute("value");
 }
 
-// Toasts
 function showToast(message, type) {
+    // Verify param
+    let verification = ["success", "error", "information", "warning", "default"];
+    if (!(verification.includes(type))) {
+        console.warn("Unknown toaster type: " + type);
+        type = "default";
+    }
+
     let x = document.getElementById("toast");
     let a = document.createAttribute("appearance");
     a.value = type;
@@ -89,7 +96,26 @@ function showToast(message, type) {
     setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
 }
 
+// Change config_response attribute
+function responseWD() {
+    let e = document.getElementsByClassName("config_response")[0];
+    let a = document.createAttribute("appearance");
+
+    if (xhr.status == 200) { a.value = "success"; }
+    else if (xhr.status == 400) { a.value = "error"; }
+    else { a.value = "none"; }
+
+    e.setAttributeNode(a);
+}
+
+
+// OnLoad
 window.addEventListener('load', function () {
+    // ResponseWD() interval
+    if (responseWDInterval) clearInterval(responseWDInterval);
+    responseWDInterval = setInterval(() => {responseWD()}, 100);
+
+    // Load toaster stuff
     console.debug("Loaded in toaster element.");
     var toastDiv = document.createElement("div");
     toastDiv.id = 'toast';
