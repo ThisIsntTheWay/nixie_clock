@@ -98,14 +98,16 @@ function showToast(message, type) {
 
 // Change config_response attribute
 function responseWD() {
-    let e = document.getElementsByClassName("config_response")[0];
-    let a = document.createAttribute("appearance");
-
-    if (xhr.status == 200) { a.value = "success"; }
-    else if (xhr.status == 400) { a.value = "error"; }
-    else { a.value = "none"; }
-
-    e.setAttributeNode(a);
+    if (typeof xhr !== 'undefined') {
+        let e = document.getElementsByClassName("config_response")[0];
+        let a = document.createAttribute("appearance");
+    
+        if (xhr.status == 200) { a.value = "success"; }
+        else if (xhr.status == 400) { a.value = "error"; }
+        else { a.value = "none"; }
+    
+        e.setAttributeNode(a);
+    }
 }
 
 
