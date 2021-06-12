@@ -1,4 +1,4 @@
-/*@import url('toast.css');*/
+@import url('toast.css');
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 body {
@@ -22,7 +22,7 @@ input {
 
 input:hover {
   border: none;
-	background-color: #b1b1b114;
+	background-color: #b1b1b11c;
   border-bottom: 2px solid #ff9800a6;
 }
 
@@ -139,38 +139,53 @@ div {
 }
 
 .config_body {
-    width: 70%;
-    border: 4px solid;
-    border-spacing: 1px;
+    width: 75%;
+    border: 3px solid;
+    border-bottom: 1px solid;
+    border-top: 1px solid;
 }
 
 .config_summary {
-    width: 70%;
-    border: 2px solid;
+    width: 90%;
+    border: none;
+    border-top: 1px solid;
 }
 .config_div {
-    width: 55%;
-    border: 2px solid;
+    width: 60%;
+    border: 1px solid;
+    border-left: 2px solid;
+    border-right: 2px solid;
 }
 
 .config_div2 {
-    width: 55%;
-    border: 2px solid;
+	margin-top: 2%;
+    width: 60%;
+    border: 1px solid;
+    border-left: 2px solid;
+    border-right: 2px solid;
 }
 
 .config_apply {
-    width: 75%;
+    width: 90%;
+    border-bottom: 1px solid;
 }
 
 .config_response {
+	margin-top: 2%;
 	padding: 0%;
+	white-space: pre;
+    background-color: transparent;
 }
-.config_response p {
-	margin: 0;
+.config_response:not(:empty) {
+	background-color: #3a3a3a;
 }
 
-/*  IDs     */
-#response { white-space: pre; }
+.config_response[appearance="success"]:not(:empty) {
+	background-color: #00a91e4a;
+}
+.config_response[appearance="error"]:not(:empty) {
+	background-color: #a900004a;
+}
 
 /*  BUTTON  */
 .button {
