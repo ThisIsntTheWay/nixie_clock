@@ -1,4 +1,4 @@
-@import url('toast.css');
+
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 body {
@@ -22,7 +22,7 @@ input {
 
 input:hover {
   border: none;
-	background-color: #b1b1b11c;
+	background-color: #b1b1b129;
   border-bottom: 2px solid #ff9800a6;
 }
 
