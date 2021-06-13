@@ -110,7 +110,6 @@ function responseWD() {
     }
 }
 
-
 // OnLoad
 window.addEventListener('load', function () {
     // ResponseWD() interval
