@@ -204,11 +204,9 @@ void taskMonitorHUE(void* parameter) {
             #ifdef DEBUG
                 Serial.printf("nowHour:nowMinute, onTime|offTime: %d:%d, %d|%d\n", nowHour, nowMinute, onTime, offTime);
             #endif
-
+                // Turn lights ON
                 if (nowTime > onTime && nowTime < offTime) {
-                    #ifdef DEBUG
-                        Serial.printf("[T] HUE: onTime triggered. (%d | %d)\n", nowTime, onTime);
-                    #endif
+                    Serial.printf("[T] HUE: onTime triggered. (%d | %d)\n", nowTime, onTime);
 
                     if (!turnedOn) {
                         int l = getHueLightIndex();
@@ -228,9 +226,7 @@ void taskMonitorHUE(void* parameter) {
                 
                 // Turn lights OFF
                 if (nowTime > offTime || nowTime < onTime) {
-                    #ifdef DEBUG
-                        Serial.printf("[T] HUE: offTime triggered. (%d | %d)\n", nowTime, offTime);
-                    #endif
+                    Serial.printf("[T] HUE: offTime triggered. (%d | %d)\n", nowTime, offTime);
 
                     if (!turnedOff) {
                         int l = getHueLightIndex();
