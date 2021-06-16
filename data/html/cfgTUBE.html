@@ -95,10 +95,7 @@
 					obj.dep_mode = selDepConf.value;
 
 					switch (selDepConf.value) {
-						case "2":
-							obj.dep_interval = document.getElementById("depoison_interval_val").value;
-							break;
-						case "3": 
+						case "2": 
 							obj.dep_schedBegin = document.getElementById("dep_sched_1").value;
 							obj.dep_schedEnd = document.getElementById("dep_sched_2").value;
 							break;
@@ -130,68 +127,74 @@
 	<body>
 		<center>
 			<h1>Tube control</h1>
-		<div>
-			<h3>Make changes to the clock display here</h3>
-			Currently displaying: <b id="tubes_display">%TUBES_DISPLAY%</b><br>
-			Current display mode: <b id="tubes_mode">%TUBES_MODE%</b><br>
-			Current brightness: <b id="tubes_brightness">%TUBES_BRIGHTNESS%</b><b>&percnt;</b><br>
-			<p>
+			<div class="config_body">
+				<h3>Make changes to the clock display here</h3>
+				<div class="config_summary">
+					Currently displaying: <b id="tubes_display">%TUBES_DISPLAY%</b><br>
+					Current display mode: <b id="tubes_mode">%TUBES_MODE%</b><br>
+					Current brightness: <b id="tubes_brightness">%TUBES_BRIGHTNESS%</b><b>&percnt;</b><br>
+				</div>
 
-			Mode override:<br>
-			<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>Manual<br/>
-			<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>Crypto<br/>
-			<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>Clock<br/><br/>
+				<div class="config_div">
+					Set brightness: <br>
+					<input type="range" min="1" max="100" value="%TUBES_BRIGHTNESS%" class="slider" id="brightness"> (<span id="bright_val"></span>&percnt;)<br><br>
 
-			Set brightness: <br>
-			<input type="range" min="1" max="100" value="%TUBES_BRIGHTNESS%" class="slider" id="brightness"> (<span id="bright_val"></span>&percnt;)<br><br>
+					Mode override:<br>
+					<input type="radio" id="mode_manual" name="r" onclick="toggleConfigSpans()"/>
+						<label for="mode_manual">Manual</label><br/>
+					<input type="radio" id="mode_crypto" name="r" onclick="toggleConfigSpans()"/>
+						<label for="mode_crypto">Crypto</label><br/>
+					<input type="radio" id="mode_clock" name="r" onclick="toggleConfigSpans()"/>
+						<label for="mode_clock">Clock</label><br/>
+					<br>
 
-			<span id="manual_config" style="display: none;">
-				Change tube values:<br>
-				<input type="numeric" size="1" id="digit1" value="" maxlength="1" />
-				<input type="numeric" size="1" id="digit2" value="" maxlength="1" />
-				<input type="numeric" size="1" id="digit3" value="" maxlength="1" />
-				<input type="numeric" size="1" id="digit4" value="" maxlength="1" />
-			</span>
+					<span id="manual_config" style="display: none;">
+						Change tube values:<br>
+						<input type="numeric" size="1" id="digit1" value="" maxlength="1" />
+						<input type="numeric" size="1" id="digit2" value="" maxlength="1" />
+						<input type="numeric" size="1" id="digit3" value="" maxlength="1" />
+						<input type="numeric" size="1" id="digit4" value="" maxlength="1" />
+					</span>
 
-			<span id="crypto_config" style="display: none;">
-				Current ticker: <b id="crypto_ticker">%CRYPTO_TICKER%</b><br>
-				Set asset: <input type="text" size="5" id="crypto_asset" value=""/><br>
-				Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br>
-				<em>Prices pulled from binance.</em>
-			</span>
+					<span id="crypto_config" style="display: none;">
+						Current ticker: <b id="crypto_ticker">%CRYPTO_TICKER%</b><br>
+						Set asset: <input type="text" size="5" id="crypto_asset" value=""/><br>
+						Set quote asset: <input type="text" size="5" id="crypto_quote" value=""/><br><br>
+						<em>Prices pulled from binance.</em>
+					</span>
+				</div>
 
-			<br>
-			<b>Cathode depoisoning</b><br>
-			Current mode: <b id="depoison_mode">%DEPOISON_MODE%</b><br>
-			Interval: <b id="depoison_interval">%DEPOISON_INTERVAL%</b><br>
-			Schedule: <b id="depoison_schedule">%DEPOISON_SCHEDULE%</b><br><br>
+				<div class="config_div2">
+					<b>Cathode depoisoning</b><br>
+					Current mode: <b id="depoison_mode">%DEPOISON_MODE%</b><br>
+					Schedule: <b id="depoison_schedule">%DEPOISON_SCHEDULE%</b><br><br>
 
-			<input type="radio" id="depoison_config_radio" name="r" onclick="toggleConfigSpans()"/>Change configuration<br/>
-			<span id="depoison_config" style="display: none;"><br>
-				<label for="dep_mode_sel">Mode selection:</label>
-					<select name="dep_mode_sel" id="dep_mode_sel" onchange="toggleConfigSpans()">
-						<option value="1" onselect="toggleConfigSpans()">On hour change</option>
-						<option value="2">Interval</option>
-						<option value="3">On schedule</option>
-					</select>
-				<br><br>
-				<span id="interval_config" style="display: none;">
-					Set interval (in minutes): <input type="text" size="6" id="depoison_interval_val" value=""/><br>
-				</span>
-				<span id="schedule_config" style="display: none;">
-					Between: <input type="text" size="4" id="dep_sched_1" value=""/> to <input type="text" size="4" id="dep_sched_2" value=""/><br>
-					<em>Executed on interval as defined by user.</em><br>
-				<br></span>
-			</span>
-			<br>
+					<input type="radio" id="depoison_config_radio" name="r" onclick="toggleConfigSpans()"/>
+						<label for="depoison_config_radio">Change configuration</label><br/>
 
-			<input type="submit" value="Apply" onclick="submit()"></input>
-			<input type="submit" value="Tumbler" onclick="tumble()"></input>
-			<p id="response"></p>
+					<span id="depoison_config" style="display: none;"><br>
+						<label for="dep_mode_sel">Mode selection:</label>
+							<select name="dep_mode_sel" id="dep_mode_sel" onchange="toggleConfigSpans()">
+								<option value="1" onselect="toggleConfigSpans()">On hour change</option>
+								<option value="2">On schedule</option>
+							</select>
+						<br><br>
+						<span id="interval_config" style="display: none;">
+							From <input type="text" size="4" id="dep_sched_1" value=""/> to <input type="text" size="4" id="dep_sched_2" value=""/><br>
+						</span>
+					</span>
+				</div>
+
+				<div class="config_apply" name="apply">
+					<a href="#apply" value="Apply" class="button" onclick="submit()">Apply</a>
+					<a href="#apply" value="Tumbler" class="button" onclick="tumble()">Tumbler</a>
+				</div>
+				<div class="config_response"> </div>
+			</div>
 		</div>
 		</center>
 		<script>
-			var responseText = document.getElementById('response');
+			var responseText = document.getElementsByClassName('config_response')[0];
 			let slider = document.getElementById("brightness");
 			var sliderVal = document.getElementById("bright_val");
 

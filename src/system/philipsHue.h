@@ -19,6 +19,8 @@
 //  VARIABLES
 //  ---------------------
 
+// Instances
+RTC_DS3231 rtcHUE;
 HTTPClient httpHUE;
 
 // Structs
@@ -182,7 +184,7 @@ void taskMonitorHUE(void* parameter) {
     bool turnedOff = false;
 
     for (;;) {
-        DateTime time = rtc.now();
+        DateTime time = rtcHUE.now();
         bool timeIsValid = true;
 
         // Acquire onTime and offTime
@@ -195,18 +197,16 @@ void taskMonitorHUE(void* parameter) {
 
         // Verify time
         //Serial.printf("[i] hour: %d\n", hour);
-        if (time.hour() > 23 || time.minute() > 59) timeIsValid = false;
+        if (nowHour > 23 || nowMinute > 59) timeIsValid = false;
         
         // Turn lights ON if inbetween onH/onM and offH/offM
         if (timeIsValid) {        
             #ifdef DEBUG
                 Serial.printf("nowHour:nowMinute, onTime|offTime: %d:%d, %d|%d\n", nowHour, nowMinute, onTime, offTime);
             #endif
-
+                // Turn lights ON
                 if (nowTime > onTime && nowTime < offTime) {
-                    #ifdef DEBUG
-                        Serial.printf("[T] HUE: onTime triggered. (%d | %d)\n", nowTime, onTime);
-                    #endif
+                    Serial.printf("[T] HUE: onTime triggered. (%d | %d)\n", nowTime, onTime);
 
                     if (!turnedOn) {
                         int l = getHueLightIndex();
@@ -226,9 +226,7 @@ void taskMonitorHUE(void* parameter) {
                 
                 // Turn lights OFF
                 if (nowTime > offTime || nowTime < onTime) {
-                    #ifdef DEBUG
-                        Serial.printf("[T] HUE: offTime triggered. (%d | %d)\n", nowTime, offTime);
-                    #endif
+                    Serial.printf("[T] HUE: offTime triggered. (%d | %d)\n", nowTime, offTime);
 
                     if (!turnedOff) {
                         int l = getHueLightIndex();

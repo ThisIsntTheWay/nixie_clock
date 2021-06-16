@@ -81,36 +81,43 @@
 	<body>
 		<center>
 			<h1>RTC control</h1>
-		<div>
+		<div class="config_body">
 			<h3>Change RTC settings</h3>
-			Current time: <b id="rtc_time">%RTC_TIME%</b><br>
-			<a href="#" onclick="forceSync()">Enforce sync</a><p>
+			<div class="config_summary">
+				Current time: <b id="rtc_time">%RTC_TIME%</b><br>
+				<a href="#" class="button" onclick="forceSync()">Enforce sync</a><p></p>
+				
+				Current mode: <b id="rtc_mode">%TIME_MODE%</b><br>
+				NTP server: <b id="rtc_ntp">%NTP_SOURCE%</b><br>
+				GMT value: <b id="rtc_gmt">%GMT_VAL%</b><br>
+				DST value: <b id="rtc_dst">%DST_VAL%</b>
+			</div>
 			
-			Current mode: <b id="rtc_mode">%TIME_MODE%</b><br>
-			NTP server: <b id="rtc_ntp">%NTP_SOURCE%</b><br>
-			GMT value: <b id="rtc_gmt">%GMT_VAL%</b><br>
-			DST value: <b id="rtc_dst">%DST_VAL%</b><br><br>
+			<div class="config_div">
+				Set time source:<br>
+				<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()"/>
+					<label for="ntp_control">NTP</label><br/>
+				<input type="radio" id="manual_control" name="r" onclick="showHideConfig()"/>
+					<label for="manual_control">Manual</label><br/>
+				<br/>
 			
-			Set time source:<br>
-			<input type="radio" id="ntp_control" name="r" onclick="showHideConfig()" />NTP<br>
-			<input type="radio" id="manual_control" name="r" onclick="showHideConfig()" />Manual<br>
-			<br>
-			
-			<span id="ntp_config" style="display: none;">
-				Set NTP server: <input type="numeric" size="16" id="ntp_source" value=""/><br>
-				GMT offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
-				DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>	
-			</span>
-			<span id="manual_config" style="display: none;">
-				Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>
-			</span>
-			<br>
-			<input type="submit" value="Apply" onclick="submit()"></input>
-			<p id="response"></p>
+				<span id="ntp_config" style="display: none;">
+					Set NTP server: <input type="numeric" size="16" id="ntp_source" value=""/><br>
+					GMT offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
+					DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>
+				</span>
+				<span id="manual_config" style="display: none;">
+					Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>
+				</span>
+			</div>
+			<div class="config_apply" name="apply">
+				<a href="#apply" class="button" onclick="submit()">Apply</a>
+			</div>
+			<div class="config_response"></div>
 		</div>
 		</center>
 		<script>
-			var responseText = document.getElementById('response');
+			var responseText = document.getElementsByClassName('config_response')[0];
 		</script>
 	</body>
 </html>

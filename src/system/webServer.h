@@ -6,9 +6,16 @@
     Anything related to a webserver happens here.
 */
 
-#ifndef webServer_h
-#define webServer_h
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include "AsyncJson.h"
 
+#include <system/rtc.h>
+#include <system/philipsHue.h>
+#include <system/nixie.h>
+#include <utils/utils.h>
+
+// Switch to LittleFS if needed
 #define USE_LittleFS
 
 #include <FS.h>
@@ -19,32 +26,14 @@
   #include <SPIFFS.h>
 #endif 
 
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include "AsyncJson.h"
+#ifndef webServer_h
+#define webServer_h
 
-#include <system/rtc.h>
-#include <system/philipsHue.h>
-#include <system/nixie.h>
-#include <utils/utils.h>
-
-// Create instances
+// Instances
+RTC_DS3231 rtc;
 AsyncWebServer server(80);
-Nixie n;
-RTCModule r;
-SysInit s;
 
-bool nixieSetupComplete = false;
-bool nixieAutonomous = true;
-bool forceUpdate = true;
-bool cycleNixies = false;
-bool crypto = false;
-
-// Nixie digits
-char tube1Digit = 0;
-char tube2Digit = 0;
-char tube3Digit = 0;
-char tube4Digit = 0;
+bool EnforceFactoryReset = false;
 
 //  ---------------------
 //  FUNCTIONS
@@ -55,21 +44,21 @@ String processor(const String& var) {
 
   // Unfortunately, var can only be handled withlots of if conditions:
   // A switch..case statement cannot be used with datatype "string".
-  if (var == "TIME" || var == "RTC_TIME")   { return r.getTime();           }   // Current Time
-  else if (var == "NTP_SOURCE")             { return r.parseRTCconfig(1);   }   // Current NTP server
-  else if (var == "TIME_MODE")              { return r.parseRTCconfig(2);   }   // Current time source
-  else if (var == "GMT_VAL")                { return r.parseRTCconfig(3);   }   // Current GMT
-  else if (var == "DST_VAL")                { return r.parseRTCconfig(4);   }   // Current DST
+  if (var == "TIME" || var == "RTC_TIME")   { return getTime();           }   // Current Time
+  else if (var == "NTP_SOURCE")             { return parseRTCconfig(1);   }   // Current NTP server
+  else if (var == "TIME_MODE")              { return parseRTCconfig(2);   }   // Current time source
+  else if (var == "GMT_VAL")                { return parseRTCconfig(3);   }   // Current GMT
+  else if (var == "DST_VAL")                { return parseRTCconfig(4);   }   // Current DST
   else if (var == "HUE_BRIDGE")             { return parseHUEconfig(1);   }   // HUE bridge IP
   else if (var == "HUE_API_USER")           { return "* * *";             }   // HUE API User
   else if (var == "HUE_TOGGLEON_TIME")      { return parseHUEconfig(3);   }   // HUE toggle ON time return
   else if (var == "HUE_TOGGLEOFF_TIME")     { return parseHUEconfig(4);   }   // HUE toggle OFF time
-  else if (var == "NET_MODE")               { return s.parseNetConfig(1);   }   // Connectivity mode
-  else if (var == "AP_SSID")                { return s.parseNetConfig(2);   }   // ESP32 AP SSID
-  else if (var == "AP_PSK")                 { return s.parseNetConfig(3);   }   // ESP32 AP PSK
-  else if (var == "WIFI_SSID")              { return s.parseNetConfig(4);   }   // WiFi client SSID
-  else if (var == "CRYPTO_TICKER")          { return n.parseNixieConfig(1); }   // Cryptocurrency ticker
-  else if (var == "TUBES_BRIGHTNESS")       { return n.parseNixieConfig(6); } // Tube brightness
+  else if (var == "NET_MODE")               { return parseNetConfig(1);   }   // Connectivity mode
+  else if (var == "AP_SSID")                { return parseNetConfig(2);   }   // ESP32 AP SSID
+  else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
+  else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
+  else if (var == "CRYPTO_TICKER")          { return parseNixieConfig(1); }   // Cryptocurrency ticker
+  else if (var == "TUBES_BRIGHTNESS")       { return parseNixieConfig(6); } // Tube brightness
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
   else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
@@ -97,21 +86,21 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
 
     // Decide what to send based on message
     if      (strcmp((char*)data, "ackError") == 0)            { client->text("System error acknowledged."); globalErrorOverride = true; }
-    else if (strcmp((char*)data, "getTime") == 0)             { client->text("SYS_TIME " + r.getTime()); }
+    else if (strcmp((char*)data, "getTime") == 0)             { client->text("SYS_TIME " + getTime()); }
     else if (strcmp((char*)data, "getSysMsg") == 0)           { client->text("SYS_MSG " + getSysMsg()); }
-    else if (strcmp((char*)data, "getRTCMode") == 0)          { client->text("SYS_MODE " + r.parseRTCconfig(2)); }
-    else if (strcmp((char*)data, "getNTPsource") == 0)        { client->text("SYS_NTP " + r.parseRTCconfig(1)); }
-    else if (strcmp((char*)data, "getGMTval") == 0)           { client->text("SYS_GMT " + r.parseRTCconfig(3)); }
-    else if (strcmp((char*)data, "getDSTval") == 0)           { client->text("SYS_DST " + r.parseRTCconfig(4)); }
+    else if (strcmp((char*)data, "getRTCMode") == 0)          { client->text("SYS_MODE " + parseRTCconfig(2)); }
+    else if (strcmp((char*)data, "getNTPsource") == 0)        { client->text("SYS_NTP " + parseRTCconfig(1)); }
+    else if (strcmp((char*)data, "getGMTval") == 0)           { client->text("SYS_GMT " + parseRTCconfig(3)); }
+    else if (strcmp((char*)data, "getDSTval") == 0)           { client->text("SYS_DST " + parseRTCconfig(4)); }
     else if (strcmp((char*)data, "getHUEip") == 0)            { client->text("HUE_IP " + parseHUEconfig(1)); }
     else if (strcmp((char*)data, "getHUEon") == 0)            { client->text("HUE_ON_SCHED " + parseHUEconfig(3)); }
     else if (strcmp((char*)data, "getHUEoff") == 0)           { client->text("HUE_OFF_SCHED " + parseHUEconfig(4)); }
-    else if (strcmp((char*)data, "getCryptoTicker") == 0)     { client->text("SYS_CRYPTO " + n.parseNixieConfig(1)); }
-    else if (strcmp((char*)data, "getWIFIssid") == 0)         { client->text("SYS_SSID " + s.parseNetConfig(4)); }
+    else if (strcmp((char*)data, "getCryptoTicker") == 0)     { client->text("SYS_CRYPTO " + parseNixieConfig(1)); }
+    else if (strcmp((char*)data, "getWIFIssid") == 0)         { client->text("SYS_SSID " + parseNetConfig(4)); }
     else if (strcmp((char*)data, "getWIFIrssi") == 0)         { client->text("SYS_RSSI " + String(WiFi.RSSI()) + "db"); }
-    else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + n.parseNixieConfig(2)); }
-    else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + n.parseNixieConfig(4)); }
-    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + n.parseNixieConfig(6)); 
+    else if (strcmp((char*)data, "getDepoisonTime") == 0)     { client->text("NIXIE_DEP_TIME " + parseNixieConfig(2)); }
+    else if (strcmp((char*)data, "getDepoisonInt") == 0)      { client->text("NIXIE_DEP_INTERVAL " + parseNixieConfig(4)); }
+    else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + parseNixieConfig(6)); 
     }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)     { client->text("NIXIE_DISPLAY " + String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)        {
@@ -122,7 +111,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getDepoisonMode") == 0)  {
       String msg;
       
-      switch (n.nixieConfig.cathodeDepoisonMode) {
+      switch (nixieConfigJSON.cathodeDepoisonMode) {
         case 1: msg = "On hour change"; break;
         case 2: msg = "Interval"; break;
         case 3: msg = "On schedule"; break;
@@ -254,11 +243,17 @@ void webServerStartup() {
     request->send(LITTLEFS, f);
   });
 
-  // Global css
+  // Global CSS
   server.on("/css/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     String f = "/css/style.css";
     request->send(LITTLEFS, f);
   });
+
+  // Toast
+  server.on("/css/toast.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String f = "/css/toast.css";
+    request->send(LITTLEFS, f);    
+  });  
   
   // Debug interface
   server.on("/debug", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -457,7 +452,7 @@ void webServerStartup() {
       if (brightness < 101 && !data["brightness"].isNull()) {
         int bright = (brightness * 255) / 100;
         tmpJSON["anodePWM"] = bright;
-      } else if (brightness > 100 && data["brightness"].isNull()) {
+      } else if (brightness > 100 && !data["brightness"].isNull()) {
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Brightness value is out of bounds.\"}");
         InputValid = false;
       }
@@ -490,7 +485,7 @@ void webServerStartup() {
       // Handle conditions
       if (manual && !cycleNixies && !crypto) {
         nixieAutonomous = false;
-        n.displayNumber(nNum1, nNum2, nNum3, nNum4);
+        displayNumber(nNum1, nNum2, nNum3, nNum4);
         request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in manual mode.\"}");
 
       } else if (cycleNixies && !crypto) {
@@ -661,7 +656,8 @@ void webServerStartup() {
         Serial.println(F("[X] WebServer: Config write failure."));
         request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
       } else {
-        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
+        request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated - ESP rebooting...\"}");
+        ESP.restart();
       }
     }
 
@@ -717,10 +713,10 @@ void webServerStartup() {
   });
 
   server.on("/api/RTCsync", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (r.parseRTCconfig(2) == "ntp") {
+    if (parseRTCconfig(2) == "ntp") {
       Serial.println("[T] WebServer: Enforcing RTC sync.");
 
-      NTPClient timeClient(ntpUDP, r.rtcConfig.NTP, r.rtcConfig.GMT + r.rtcConfig.DST);
+      NTPClient timeClient(ntpUDP, config.NTP, config.GMT + config.DST);
       timeClient.begin();
       
       if (timeClient.forceUpdate()) {
@@ -753,6 +749,11 @@ void webServerStartup() {
 
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"OK\"}");
   });
+
+  server.on("/debug/queueReset", HTTP_GET, [](AsyncWebServerRequest *request) {
+    EnforceFactoryReset = true;
+    request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Initiated reset!\"}");
+  });
   
   server.on("/debug/forceRestart", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Rebooting...\"}");
@@ -777,14 +778,7 @@ void webServerStartup() {
 }
 
 void taskSetupWebserver(void *parameter) {
-  int i = 0;
   while (!WiFiReady) {
-    /*if (i > 30) {
-      Serial.println("[X] WebServer: Network timeout.");
-      vTaskDelete(NULL);
-    }*/
-
-    i++;
     vTaskDelay(500);
   }
 

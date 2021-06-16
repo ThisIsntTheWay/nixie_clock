@@ -15,11 +15,14 @@ function initWebSocket() {
 
 function onOpen(event) {
     console.info('WS: Connection opened.');
+    showToast("Connected to host", "success");
 }
 
 function onClose(event) {
-    console.warn('WS: Connection closed.');
     setTimeout(initWebSocket, 2000);
+    
+    console.warn('WS: Connection closed.');
+    showToast("Lost connection to host", "error");
 }
 
 // Message handling
@@ -74,6 +77,10 @@ function wsQuery() {
     }
 }
 
+function ackError() {
+    websocket.send("ackError");
+}
+
 // Start websockets connection on page load
 window.addEventListener('load', onLoad);
 function onLoad(event) {
@@ -81,9 +88,4 @@ function onLoad(event) {
 
     if (wsQueryInterval) clearInterval(wsQueryInterval);
     wsQueryInterval = setInterval(() => {wsQuery()}, wsQueryIntervalCycle);
-}
-
-let errorMessage = document.getElementById("error_message");
-element.onclick = function(event) {
-  websocket.send("ackError");
 }

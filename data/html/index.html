@@ -6,6 +6,7 @@
 		<link href="/css/style.css" rel="stylesheet">
 
 		<script src="/js/websockets.js"></script>
+		<script src="/js/global.js"></script>
 	</head>
 	<body>
 		<center>
@@ -13,16 +14,18 @@
 		</center>
 		<div>
 			<center>
-			<b>The current time is: </b><span id="rtc_time">%TIME%</span><br>
-			<p></p>
+			<div class="config_body">
+				<h2><b>System time: </b><span title="The time shown is from the RTC." id="rtc_time">%TIME%</span></h2><br>
 
-			Configuration menu:<br>
-			<a href="/rtc">RTC / Time</a><br>
-			<a href="/tube">Nixie tubes</a><br>
-			<a href="/hue">Philips HUE</a><br>
-			<a href="/network">Network</a><br>
-			<br><br>
+				Configuration menu<p><p>
+				<a href="/rtc">RTC / Time</a><br>
+				<a href="/tube">Nixie tubes</a><br>
+				<a href="/hue">Philips HUE</a><br>
+				<a href="/network">Network</a><br>
+			</div>
+
 			<p id="sys_msg"></p>
+
 			</center>
 		</div>
 	</body>

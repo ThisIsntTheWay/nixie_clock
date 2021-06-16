@@ -37,7 +37,7 @@
 			}
 			
 			function submit() {
-				let responseText = document.getElementById('response');				
+				let responseText = document.getElementsByClassName('config_response')[0];				
     			responseText.innerHTML = "";
 				
 				// Dispatch POST request
@@ -70,32 +70,38 @@
 	<body>
 		<center>
 			<h1>Network config</h1>
-		<div>
+		<div class="config_body">
 			<h3>Change network configuration</h3><p>
 			
-			Current mode: <b>%NET_MODE%</b><br><br>
-			
-			Set operation mode:<br>
-			<input type="radio" id="mode_AP" name="r" onclick="showHideConfig()"/>Access Point<br>
-			<input type="radio" id="mode_Client" name="r" onclick="showHideConfig()"/>WiFi client<br>
-			<br>
-			
-			<span id="ap_config" style="display: none;">
-				AP SSID: <b>%AP_SSID%</b><br>
-				AP PSK: <b>%AP_PSK%</b><br>
-			</span>
-			<span id="client_config" style="display: none;">
-				Current WiFi SSID: <b>%WIFI_SSID%</b><br>
-				WiFi signal strength: <b id="wifi_rssi">%WIFI_RSSI%</b><br>
-				Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value=""/><br>
-				Set WiFi PSK: <input type="password" size="16" id="wifi_client_psk" value=""/><br><br>
-				<input type="button" value="Scan WiFi" onclick="startWiFiScan()"/>
-			</span>
-			<br>
-			<input type="submit" value="Apply" onclick="submit()"></input>
-			<p id="response"></p>
+			<div class="config_summary">
+				Current mode: <b>%NET_MODE%</b><br>
+			</div>
+			<div class="config_div">
+				Set operation mode:<br>
+				<input type="radio" id="mode_AP" name="r" onclick="showHideConfig()"/>
+					<label for="mode_AP">Access Point</label><br/>
+				<input type="radio" id="mode_Client" name="r" onclick="showHideConfig()"/>
+					<label for="mode_Client">WiFi client</label><br/>
+				<br>
+				
+				<span id="ap_config" style="display: none;">
+					AP SSID: <b>%AP_SSID%</b><br>
+					AP PSK: <b>%AP_PSK%</b><br>
+				</span>
+				<span id="client_config" style="display: none;">
+					Current WiFi SSID: <b>%WIFI_SSID%</b><br>
+					WiFi signal strength: <b id="wifi_rssi">%WIFI_RSSI%</b><br><br>
+					Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value=""/><br>
+					Set WiFi PSK: <input type="password" size="16" id="wifi_client_psk" value=""/><br><br>
+					<a href="#" class="button" onclick="startWiFiScan()">Scan WiFi</a>
+				</span>
+			</div>
+			<div class="config_apply" name="apply">
+				<a href="#apply" class="button" onclick="submit()">Apply</a>
+			</div>
+			<div class="config_response"></div>
 		</div>
 		</center>
-		<script> var responseText = document.getElementById('response'); </script>
+		<script> var responseText = document.getElementsByClassName('config_response')[0]; </script>
 	</body>
 </html>

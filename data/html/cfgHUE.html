@@ -50,33 +50,37 @@
 	<body>
 		<center>
 			<h1>Philips HUE control</h1>
-		<div>
+		<div class="config_body">
 			<h3>Philips HUE management</h3>
-			HUE bridge IP: <b id="hue_ip">%HUE_BRIDGE%</b><br>
-			Change to: 
-			<input type="numeric" size="16" id="bridge_ip" value="" maxlength="16" /><br>
-			<br>
-			HUE bridge API user: <b>%HUE_API_USER%</b><br>
-			Change to: 
-			<input type="numeric" size="16" id="bridge_user" value="" maxlength="42" /><br>
-			<br>
+
+			<div class="config_summary">
+				HUE bridge IP: <b id="hue_ip">%HUE_BRIDGE%</b><br>
+				Change to: 
+				<input type="numeric" size="16" id="bridge_ip" value="" maxlength="16" /><br>
+				<br>
+				HUE bridge API user: <b>%HUE_API_USER%</b><br>
+				Change to: 
+				<input type="numeric" size="16" id="bridge_user" value="" maxlength="42" /><br>
+			</div>
 			
-			<b>Time control</b><br>
-			Turn all lights ON at: <b id="hue_on_time">%HUE_TOGGLEON_TIME%</b><br>
-			Turn all lights OFF at: <b id="hue_off_time">%HUE_TOGGLEOFF_TIME%</b><br>
-			<br>
-			
-			Change turn <span class="green">on</span> time:
-			<input type="numeric" size="6" id="turnON" maxlength="6" /><br>
-			
-			Change turn <span class="red">off</span> time:
-			<input type="numeric" size="6" id="turnOFF" maxlength="6" /></p>
-			<input type="submit" value="Apply" onclick="submit()" /></p>
-			<p id="response"></p>
+			<div class="config_div">
+				<b>Time control</b><br>
+				Turn all lights ON at: <b id="hue_on_time">%HUE_TOGGLEON_TIME%</b><br>
+				Turn all lights OFF at: <b id="hue_off_time">%HUE_TOGGLEOFF_TIME%</b><br>
+				<br>
+				
+				Change turn <span class="green">on</span> time:
+				<input type="numeric" size="6" id="turnON" maxlength="6" /><br>
+				
+				Change turn <span class="red">off</span> time:
+				<input type="numeric" size="6" id="turnOFF" maxlength="6" /></p>
+			</div>
+			<div class="config_apply" name="apply">
+				<a href="#apply" class="button" onclick="submit()"/>Apply</a>
+			</div>
+			<div class="config_response"> </div>
 		</div>
 		</center>
-		<script>
-			var responseText = document.getElementById('response');
-		</script>
+			<script> var responseText = document.getElementsByClassName('config_response')[0]; </script>
 	</body>
 </html>
