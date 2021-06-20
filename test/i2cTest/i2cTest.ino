@@ -14,7 +14,7 @@ void loop() {
   byte error, address;
   int nDevices;
  
-  Serial.println("Scanning...");
+  //Serial.println("Scanning...");
  
   nDevices = 0;
   for(address = 1; address < 127; address++ ) {
@@ -29,7 +29,6 @@ void loop() {
         Serial.print("0");
 
       Serial.print(address,HEX);
-      Serial.println("  !");
  
       nDevices++;
     }
@@ -43,8 +42,6 @@ void loop() {
     }    
   } if (nDevices == 0)
     Serial.println("No I2C devices found\n");
-  else
-    Serial.println("done\n");
  
-  delay(750);           // wait 5 seconds for next scan
+  delay(250);           // wait 5 seconds for next scan
 }
