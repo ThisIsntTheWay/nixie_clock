@@ -3,6 +3,7 @@
 #define SH_CP   26   // Clock
 #define ST_CP   25   // Latch
 
+
 int loopNum = 0;
 
 // Convert dec to BCD
@@ -15,7 +16,7 @@ byte decToBCD(byte in) {
 void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     byte n1, n2, n3, n4;
     
-    Serial.print("NUM INGRESS: ");
+    Serial.print("Displaying the following numbers: ");
         Serial.print(number_1);
         Serial.print(" ");
         Serial.print(number_2);
@@ -28,6 +29,10 @@ void displayNumber(int number_1, int number_2, int number_3, int number_4) {
     n2 = decToBCD(number_2);
     n3 = decToBCD(number_3);
     n4 = decToBCD(number_4);
+
+    Serial.print(" > Num2 BCD: "); Serial.println(n2, BIN);
+    Serial.print(" > Pass 1 BCD: "); Serial.println((n3 << 4 | n4), BIN);
+    Serial.print(" > Pass 2 BCD: "); Serial.println((n1 << 4 | n2), BIN);
 
     // Push to shift registers
     digitalWrite(ST_CP, LOW);
