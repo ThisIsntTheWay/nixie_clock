@@ -28,7 +28,7 @@ void loop() {
       if (address<16)
         Serial.print("0");
 
-      Serial.print(address,HEX);
+      Serial.println(address,HEX);
  
       nDevices++;
     }
@@ -43,5 +43,5 @@ void loop() {
   } if (nDevices == 0)
     Serial.println("No I2C devices found\n");
  
-  delay(250);           // wait 5 seconds for next scan
+  delay(250);
 }
