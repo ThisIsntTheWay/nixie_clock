@@ -8,20 +8,18 @@
 #ifndef utils_h
 #define utils_h
 
-#include <utils/sysInit.h>
+#include <utils/network.h>
 #include "rom/rtc.h"
 
 bool globalErrorOverride = false;
 bool bigError = false;
-
-SysInit sI;
 
 String getSysMsg() {
     String msg = "";
     bool isError = false;
 
     if (APisFallback && !bigError) {
-        msg = "Could not connect to WiFi network '" + sI.parseNetConfig(4) + "'."; isError = true;
+        msg = "Could not connect to WiFi network '" + parseNetConfig(4) + "'."; isError = true;
     } else if (!NTPisValid && !bigError) {
         msg = "NTP server is unresponsive."; isError = true;
     } else {
