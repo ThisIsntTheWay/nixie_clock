@@ -9,7 +9,7 @@ This project aims to implement the following basic features:
  - WebGUI for configuring all of the above. 
 
 :warning: **Safety warning**</br>
-Vacuum tubes generally use high voltage (170V+) in operation.<br/>
+These tubes use high voltage (140V+) in operation.<br/>
 Proper handling and grounding of HV components is critical for personal safety.
 
 ## Software libraries
