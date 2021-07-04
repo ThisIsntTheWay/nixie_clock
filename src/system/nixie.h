@@ -288,7 +288,7 @@ void taskUpdateNixie(void* parameter) {
             // if lastHour and/or lastMinute are invalid, enforce update because the RTC must have stored invalid data
             if (lastHour > 24 || lastMinute > 60) forceUpdate = true;
 
-            // Update nixies if valid numbers are valid
+            // Update nixies if numbers are valid
             if (timeIsValid || forceUpdate) {
                 // Reset cathode depoisoning flag
                 justCycled = false;
@@ -307,7 +307,20 @@ void taskUpdateNixie(void* parameter) {
                         Serial.print(" > Hours: "); Serial.print(lastHour); Serial.print(" > "); Serial.println(rtcDT.hour());
                         Serial.print(" > Epoch: "); Serial.println(rtcDT.unixtime());
                     } else {
-                        Serial.println("[T] Nixie: Bad time - will not update.");
+                        // Use NTP time as RTC is providing bad data.
+                        if (!APmode && NTPisValid) {
+                            NTPClient timeTMP(ntpUDP, config.NTP, config.GMT + config.DST);
+                            timeTMP.begin();
+
+                            if (timeTMP.forceUpdate()) {
+                                Serial.println("[T] Nixie: Using NTP time.");
+
+                                long ntpTime = timeTMP.getEpochTime();
+                                rtcNixie.adjust(DateTime(ntpTime));
+                            }
+
+                            timeTMP.end();
+                        }
                     }
 
                     // Update lastX values
@@ -355,6 +368,9 @@ void taskUpdateNixieBrightness(void* parameter) {
     // Wait for LittleFS and taskSetupNixie to be ready
     while (!nixieSetupComplete) { vTaskDelay(500); }
 
+    // Cache nixieConfig parser
+    parseNixieConfig(5);
+
     // Opto-Isolator stuff
     int opto1 = 5;
     int opto2 = 4;
@@ -382,7 +398,7 @@ void taskUpdateNixieBrightness(void* parameter) {
     Serial.println("[T] Nixie: Starting brightness updater...");
     for (;;) {
         // Set brightness of nixies
-        int pwm = parseNixieConfig(5).toInt();
+        int pwm = nixieConfigJSON.anodePWM;
 
         // Check if the tubes are actually displaying stuff, otherwise turn them off.
         // This prevents the anode from floating.

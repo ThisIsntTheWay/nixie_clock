@@ -58,10 +58,10 @@ String processor(const String& var) {
   else if (var == "AP_PSK")                 { return parseNetConfig(3);   }   // ESP32 AP PSK
   else if (var == "WIFI_SSID")              { return parseNetConfig(4);   }   // WiFi client SSID
   else if (var == "CRYPTO_TICKER")          { return parseNixieConfig(1); }   // Cryptocurrency ticker
-  else if (var == "TUBES_BRIGHTNESS")       { return parseNixieConfig(6); } // Tube brightness
+  else if (var == "TUBES_BRIGHTNESS")       { return parseNixieConfig(6); }   // Tube brightness
   else if (var == "WIFI_RSSI")              { return String(WiFi.RSSI()) + "db"; }   // WiFi network dbi/RSSI
   else if (var == "TUBES_DISPLAY")          { return String(tube1Digit) + "" + String(tube2Digit) + " " + String(tube3Digit) + "" + String(tube4Digit); }   // Nixie tubes display
-  else if (var == "TUBES_MODE")             {                               // Nixie tubes mode
+  else if (var == "TUBES_MODE")             {                                 // Nixie tubes mode
     if (nixieAutonomous && !cycleNixies) { return "Clock"; }
     else if (!nixieAutonomous && cycleNixies) { return "Cycling..."; }
     else if (!nixieAutonomous && !cycleNixies) { return "Manual"; }
@@ -475,6 +475,9 @@ void webServerStartup() {
       }
 
       nixieConfig.close();
+
+      // Cache nixie config JSON
+      parseNixieConfig(1);
     }
 
     // Serialize JSON
