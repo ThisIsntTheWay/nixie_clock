@@ -10,7 +10,7 @@
 /****************************************************/
 //#define DEBUG
 
-//#define CUSTOM_I2C
+//#define CUSTOM_I2C            // Board v2 (REV5) (July 2021)
 //#define I2C_SLOWMODE          // I2C 100kHz
 #ifdef CUSTOM_I2C
     #define SDA_PIN 33
@@ -62,6 +62,12 @@ bool RTC::initialize() {
         _Wire.begin(SDA_PIN, SCL_PIN);
     #else
         _Wire.begin();
+    #endif
+
+    #ifdef I2C_SLOWMODE
+        _Wire.setClock(100000);
+    #else
+        _Wire.setClock(400000);
     #endif
 
     _Wire.beginTransmission(RTC_ADDR);
