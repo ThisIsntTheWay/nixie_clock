@@ -61,7 +61,7 @@
 				}
 
 				// Form POST request
-				xhr.open("POST", "/api/NETendpoint", true);
+				xhr.open("POST", "/api/network", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify(obj));
 			}
@@ -74,7 +74,7 @@
 			<h3>Change network configuration</h3><p>
 			
 			<div class="config_summary">
-				Current mode: <b>%NET_MODE%</b><br>
+				Current mode: <b>. . .</b><br>
 			</div>
 			<div class="config_div">
 				Set operation mode:<br>
@@ -85,12 +85,12 @@
 				<br>
 				
 				<span id="ap_config" style="display: none;">
-					AP SSID: <b>%AP_SSID%</b><br>
-					AP PSK: <b>%AP_PSK%</b><br>
+					AP SSID: <b>. . .</b><br>
+					AP PSK: <b>. . .</b><br>
 				</span>
 				<span id="client_config" style="display: none;">
-					Current WiFi SSID: <b>%WIFI_SSID%</b><br>
-					WiFi signal strength: <b id="wifi_rssi">%WIFI_RSSI%</b><br><br>
+					Current WiFi SSID: <b>. . .</b><br>
+					WiFi signal strength: <b id="wifi_rssi">. . .</b><br><br>
 					Set WiFi SSID: <input type="text" size="16" id="wifi_client_ssid" value=""/><br>
 					Set WiFi PSK: <input type="password" size="16" id="wifi_client_psk" value=""/><br><br>
 					<a href="#" class="button" onclick="startWiFiScan()">Scan WiFi</a>

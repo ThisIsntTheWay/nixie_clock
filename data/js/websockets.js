@@ -37,9 +37,6 @@ function onMessage(event) {
     if (evData.startsWith("SYS_NTP")) document.getElementById('rtc_ntp').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_GMT")) document.getElementById('rtc_gmt').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_DST")) document.getElementById('rtc_dst').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("HUE_IP")) document.getElementById('hue_ip').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("HUE_ON_SCHED")) document.getElementById('hue_on_time').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("HUE_OFF_SCHED")) document.getElementById('hue_off_time').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_RSSI")) document.getElementById('wifi_rssi').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DISPLAY")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DEP_INTERVAL")) document.getElementById('depoison_interval').innerHTML = evData.replace(regex, '');
@@ -58,16 +55,13 @@ function wsQuery() {
         if (!!document.getElementById('rtc_time')) websocket.send("getTime");
         if (!!document.getElementById('rtc_mode')) websocket.send("getRTCMode");
         if (!!document.getElementById('rtc_ntp')) websocket.send("getNTPsource");
-        if (!!document.getElementById('rtc_gmt') && xhr.state == 200) websocket.send("getGMTval");
-        if (!!document.getElementById('rtc_dst') && xhr.state == 200) websocket.send("getDSTval");
+        if (!!document.getElementById('rtc_gmt')) websocket.send("getGMTval");
+        if (!!document.getElementById('rtc_dst')) websocket.send("getDSTval");
         if (!!document.getElementById('wifi_rssi')) websocket.send("getWIFIrssi");
         if (!!document.getElementById('tubes_display')) websocket.send("getNixieDisplay");
         if (!!document.getElementById('tubes_mode')) websocket.send("getNixieMode");
         if (!!document.getElementById('crypto_ticker')) websocket.send("getCryptoTicker");
         if (!!document.getElementById('sys_msg')) websocket.send("getSysMsg");
-        if (!!document.getElementById('hue_on_time')) websocket.send("getHUEon");
-        if (!!document.getElementById('hue_off_time')) websocket.send("getHUEoff");
-        if (!!document.getElementById('hue_ip')) websocket.send("getHUEip");
         if (!!document.getElementById('depoison_interval')) websocket.send("getDepoisonInt");
         if (!!document.getElementById('depoison_schedule')) websocket.send("getDepoisonTime");
         if (!!document.getElementById('depoison_mode')) websocket.send("getDepoisonMode");
