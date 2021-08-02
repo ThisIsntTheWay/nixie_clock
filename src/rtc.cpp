@@ -2,12 +2,27 @@
 #include <Wire.h>
 #include <rtc.h>
 
+
+// Designed to work with RTC models DS1307 and DS3231 by Maxim Integrated
+
+/****************************************************/
+//  DEFINITIONS
+/****************************************************/
 //#define DEBUG
 
-// Designed to work with RTC model DS3231 by Maxim Integrated
+//#define CUSTOM_I2C
+//#define I2C_SLOWMODE          // I2C 100kHz
+#ifdef CUSTOM_I2C
+    #define SDA_PIN 33
+    #define SCL_PIN 13
+#endif
 
 // Declare statics
 bool RTC::RTCfault = false;
+
+/****************************************************/
+//  MAIN
+/****************************************************/
 
 /**************************************************************************/
 /*!
@@ -43,7 +58,12 @@ RTC::RTC(TwoWire & w) : _Wire(w) {}
 */
 /**************************************************************************/
 bool RTC::initialize() {
-    _Wire.begin();
+    #ifdef CUSTOM_I2C
+        _Wire.begin(SDA_PIN, SCL_PIN);
+    #else
+        _Wire.begin();
+    #endif
+
     _Wire.beginTransmission(RTC_ADDR);
     if (_Wire.endTransmission() == 0) {
         return true;
