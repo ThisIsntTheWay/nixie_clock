@@ -2,7 +2,8 @@
 #include <nixies.h>
 #include <config.h>
 
-int oPins[] = {5, 4, 2, 15};
+int oPins[] = {5, 4, 2, 15};        // Board REV4 and lower
+//int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
 
 // Instantiate statics
 int Nixies::t1 = 0;
