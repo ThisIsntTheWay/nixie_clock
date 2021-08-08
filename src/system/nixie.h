@@ -268,7 +268,7 @@ void taskUpdateNixie(void* parameter) {
         }
 
         // Check if cathode depoisoning should occur
-        if (!justCycled && timeIsValid) {
+        if (!justCycled && timeIsValid) {/*
             switch (nixieConfigJSON.cathodeDepoisonMode) {
                 case 1: // On hour change
                     if (lastHour != hour) cycleNixies = true;
@@ -280,7 +280,8 @@ void taskUpdateNixie(void* parameter) {
                     break;
                 default:
                     cycleNixies = false;                
-            }
+            }*/
+            if (lastHour != hour) cycleNixies = true;
         }
 
         // Check if nixies should update manually or automatically
@@ -352,9 +353,9 @@ void taskUpdateNixie(void* parameter) {
 
             // Reset nixies
             nixieAutonomous = true;
-            cycleNixies = false;
             forceUpdate = true;
             justCycled = true;
+            cycleNixies = false;
         } else if (crypto && !cycleNixies) {
             Serial.println("[T] Nixie: Displaying crypto price...");
             displayCryptoPrice(String(nixieConfigJSON.crypto_asset), String(nixieConfigJSON.crypto_quote));
