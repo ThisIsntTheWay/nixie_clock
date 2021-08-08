@@ -50,10 +50,10 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
         String msg;
         switch (cfg.sysStatus) {
             case 0:
-                msg = "System nominal.";
+                msg = "System nominal";
                 break;
             case 3:
-                msg = "System error.";
+                msg = "System error";
                 break;
         }
 
