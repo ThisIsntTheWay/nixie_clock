@@ -33,7 +33,7 @@
 					}
 				}
 
-				xhr.open("GET", "/api/RTCsync", true);
+				xhr.open("GET", "/api/rtc", true);
 				xhr.send();
 			}
 			
@@ -84,13 +84,13 @@
 		<div class="config_body">
 			<h3>Change RTC settings</h3>
 			<div class="config_summary">
-				Current time: <b id="rtc_time">%RTC_TIME%</b><br>
+				Current time: <b id="rtc_time">. . .</b><br>
 				<a href="#" class="button" onclick="forceSync()">Enforce sync</a><p></p>
 				
-				Current mode: <b id="rtc_mode">%TIME_MODE%</b><br>
-				NTP server: <b id="rtc_ntp">%NTP_SOURCE%</b><br>
-				GMT value: <b id="rtc_gmt">%GMT_VAL%</b><br>
-				DST value: <b id="rtc_dst">%DST_VAL%</b>
+				Current mode: <b id="rtc_mode">. . .</b><br>
+				NTP server: <b id="rtc_ntp">. . .</b><br>
+				UTC value: <b id="rtc_gmt">. . .</b><br>
+				DST: <b id="rtc_dst">. . ./b>
 			</div>
 			
 			<div class="config_div">
@@ -103,8 +103,8 @@
 			
 				<span id="ntp_config" style="display: none;">
 					Set NTP server: <input type="numeric" size="16" id="ntp_source" value=""/><br>
-					GMT offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
-					DST offset: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>
+					Timezone offset: <input type="numeric" size="8" id="gmt" value="" maxlength="8" /><br>
+					Daylight savings time: <input type="numeric" size="8" id="dst" value="" maxlength="8" /><br>
 				</span>
 				<span id="manual_config" style="display: none;">
 					Set manual time: <input type="numeric" size="16" id="manual_time" value=""/><br>

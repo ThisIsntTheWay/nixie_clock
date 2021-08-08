@@ -16,16 +16,13 @@ Proper handling and grounding of HV components is critical for personal safety.
 This project uses the following libraries:<br/>
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br/>
 - [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)<br/>
-- [RTCLib](https://github.com/adafruit/RTClib)<br/>
 - [LittleFS](https://github.com/lorol/LITTLEFS)<br/>
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br/>
-
-Note: "TinyWire" must be removed as a dependency from RTCLib.<br/>
-This library is incompatible with the ESP32 and will result in compiler errors.
 
 ## Hardware
 **Microcontroller:** ESP32</br>
 **Indicator tubes:** 4x IN-14, 1x IN-3</br>
+**Opto-isolator:** 1x TLP 627-4</br>
 **Shift register:** 2x SN74HC595N (SIPO)</br>
 **Driver IC:** 4x K155ID1
 
@@ -46,12 +43,17 @@ Software-wise, the following features have been implemented so far:
  - [X] Implement webserver.
  - [X] Implement RTC.
  - [X] Implement config files.
- - [X] Implement HUE API.
+ - [X] ~~Implement HUE API.~~
+   - **Removed as of commit dbf017c67a21eaf4032c0a3266b7488ecc361137**
  - [X] Change configs from webGUI.
  - [ ] Implement proper manual time control.
  - [x] Implement nixie logic.
    - [X] Test said implementation.
  - [X] Implement nixie config in webGUI.
  - [X] Store SSID and PSK in config files.
- - [X] Change WiFi settings from webGUI..
+ - [X] Change WiFi settings from webGUI.
  - [ ] Change network settings from webGUI.
+
+### Notes
+A major code rewrite was conducted on 02.08.2021 that has completely overhauled the base system.  
+The system runs much more stable now and the codebase has become easier to maintain.

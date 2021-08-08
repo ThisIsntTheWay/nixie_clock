@@ -1,129 +1,49 @@
-/*
-    ESP32 Nixie Clock - Entrypoint
-    (c) V. Klopfenstein, 2021
+#include <Arduino.h>
+#include <tasks.h>
 
-    This is the entrypoint of the whole program.
-    The purpose of this file is to spawn all tasks built with FreeRTOS.
-*/
-
-#include "Arduino.h"
-
-// Custom headers
-#include <system/webServer.h>
-#include <system/rtc.h>
-#include <system/nixie.h>
-#include <utils/network.h>
-
-TaskHandle_t TaskRTC_Handle;
-TaskHandle_t TaskNixie_Handle;
-TaskHandle_t TaskBright_Handle;
-TaskHandle_t TaskHUE_Handle;
-
-// https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2018/08/esp32-pinout-chip-ESP-WROOM-32.png
-// Factory reset button GPIO pin
-#define FACT_RST 17
-
-// Task to monitor if a factory reset has been triggered.
-void taskfactoryResetWDT(void* parameter) {
-    unsigned long activeMillis;
-    unsigned long currMillis;
-
-    pinMode(FACT_RST, INPUT_PULLDOWN);
-
-    for (;;) {
-        vTaskDelete(NULL);
-
-        // Check if factory reset button is pressed using some millis() math
-        currMillis = millis();
-        if (digitalRead(FACT_RST)) activeMillis = currMillis;
-
-        // Trigger factory reset if pin is HIGH for at least 5 seconds
-        if ((currMillis - activeMillis >= 5000) || EnforceFactoryReset) {
-            // Perform factory reset
-            Serial.println("[!!!] FACTORY RESET INITIATED [!!!]");
-
-            while (!FlashFSready) {
-                Serial.println("[!] Reset: Awaiting FS mount...");
-                vTaskDelay(500);
-            }
-
-            // Destroy all tasks
-            Serial.println("[!] Reset: Destroying perpetual tasks...");
-            vTaskDelete(TaskRTC_Handle);
-            vTaskDelete(TaskNixie_Handle);
-            vTaskDelete(TaskHUE_Handle);
-
-            server.end();
-
-            // Destroy config files
-            Serial.println("[!] Reset: Nuking /config dir...");
-            File configDir = LITTLEFS.open("/config");
-            File configFile = configDir.openNextFile();
-
-            while (configFile) {
-                Serial.print(" > Destroying: ");
-                    Serial.println(configFile.name());
-                
-                LITTLEFS.remove(configFile.name());
-
-                configFile = configDir.openNextFile();
-            }
-
-            // At last, restart ESP
-            Serial.println("[!] Reset: Restarting ESP...");
-            ESP.restart();
-        }
-    }
-
-    vTaskDelay(100);
-}
-
-//  ---------------------
-//  MAIN
-//  ---------------------
+Configurator c;
 
 void setup() {
-    Serial.begin(115200);
+  Serial.begin(115200);
+  
+  // Create build info
+  c.buildInfo = "v" + String(BUILD_VERSION) + " (" + BUILD_REL_TYPE + ") - " + __DATE__ + ", " + __TIME__;
 
-    Serial.println(F("[i] System booting up..."));
-    Serial.printf("[i] Previous reset reason: Core 0: %d, Core 1: %d\n", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
+  /* // Write build info
+  File buildInfoFile = LITTLEFS.open(F("buildinfo"), "w");
+  buildInfoFile.println(buildInfo);
+  buildInfoFile.close(); */
 
-    // Initial scan for WiFi networks.
-    // This will prevent getting empty results on WiFi Scans in the WebGUI
-    Serial.println(F("[i] Conducting an initial WiFi scan..."));
-    WiFi.scanNetworks();
-    Serial.println(F("[i] Initial WiFi scan complete."));
+  Serial.print(F("[i] System: Build: "));
+    Serial.println(c.buildInfo);
 
-    // Shift registers
-    pinMode(DS_PIN, OUTPUT);
-    pinMode(SH_CP, OUTPUT);
-    pinMode(ST_CP, OUTPUT);
+  // Conduct an initial WiFi Scan
+  WiFi.scanNetworks(true);
+  WiFi.scanDelete();
+  
+  #ifdef DEBUG
+    Serial.println("[i] System: DEBUG flag is set.");
+  #endif
+  #ifdef DEBUG_VERBOSE
+    Serial.println("[i] System: DEBUG_VERBOSE flag is set.");
+  #endif
+  #ifdef EXP_BOARD_INSTALLED
+    Serial.println("[i] System: EXP_BOARD_INSTALLED flag is set.");
+  #endif
 
-    // Clear nixies
-    digitalWrite(ST_CP, LOW);
-    shiftOut(DS_PIN, SH_CP, MSBFIRST, 0b11111111);
-    shiftOut(DS_PIN, SH_CP, MSBFIRST, 0b11111111);
-    digitalWrite(ST_CP, HIGH);
+  // Setup tasks
+  xTaskCreate(taskSysInit, "Nixie setup", 3500, NULL, 1, NULL);
 
-    // FreeRTOS tasks
-    Serial.println(F("[i] Starting tasks..."));
-
-    // One-time / setup tasks
-    xTaskCreate(taskWiFi, "WiFi initiator", 3500, NULL, 1, NULL);
-    xTaskCreate(taskFSMount, "FS Mount", 2500, NULL, 1, NULL);
-    xTaskCreate(taskSetupRTC, "RTC Setup", 3500, NULL, 1, NULL);
-    xTaskCreate(taskSetupNixie, "RTC Setup", 2500, NULL, 1, NULL);
-    xTaskCreate(taskSetupHUE, "HUE Setup", 3500, NULL, 1, NULL);
-    xTaskCreate(taskSetupWebserver, "Webserver start", 5500, NULL, 1, NULL);
-
-    // Perpetual tasks
-    xTaskCreate(taskUpdateRTC, "RTC Sync", 5500, NULL, 1, &TaskRTC_Handle);
-    xTaskCreate(taskUpdateNixie, "Nixie updater", 6000, NULL, 2, &TaskNixie_Handle);
-    xTaskCreate(taskUpdateNixieBrightness, "Nixie brightness", 3000, NULL, 2, &TaskBright_Handle);
-    xTaskCreate(taskMonitorHUE, "HUE monitor", 6000, NULL, 3, &TaskHUE_Handle);
-    xTaskCreate(taskfactoryResetWDT, "Master reset", 2500, NULL, 1, NULL);
+  xTaskCreate(taskSetupNetwork, "Network setup", 3500, NULL, 1, NULL);
+  xTaskCreate(taskSetupRTC, "RTC setup", 2500, NULL, 1, NULL);
+  xTaskCreate(taskSetupNixies, "Nixie setup", 3500, NULL, 1, NULL);
+  xTaskCreate(taskSetupWebserver, "Webserver setup", 5500, NULL, 1, NULL);
+  
+  // Perp. tasks
+  xTaskCreate(taskMonitorStatus, "Status monitor", 2500, NULL, 1, NULL);
+  xTaskCreate(taskUpdateNixies, "Nixie updater", 3500, NULL, 1, c.task_perp_nix);
+  xTaskCreate(taskUpdateRTC, "RTC updater", 3500, NULL, 1, c.task_perp_rtc);
+  xTaskCreate(taskUpdateCaches, "Cache updater", 5500, NULL, 1, c.task_perp_cac);
 }
 
-void loop() {
-    ws.cleanupClients();
-}
+void loop() {}

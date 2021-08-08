@@ -49,7 +49,7 @@
 				}
 
 				// Form POST request
-				xhr.open("POST", "/api/nixieControl", true);
+				xhr.open("POST", "/api/nixies", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify( {"mode": "tumbler"} ));
 
@@ -118,7 +118,7 @@
 				}
 
 				// Form POST request
-				xhr.open("POST", "/api/nixieControl", true);
+				xhr.open("POST", "/api/nixies", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify(obj));
 			}
@@ -130,9 +130,9 @@
 			<div class="config_body">
 				<h3>Make changes to the clock display here</h3>
 				<div class="config_summary">
-					Currently displaying: <b id="tubes_display">%TUBES_DISPLAY%</b><br>
-					Current display mode: <b id="tubes_mode">%TUBES_MODE%</b><br>
-					Current brightness: <b id="tubes_brightness">%TUBES_BRIGHTNESS%</b><b>&percnt;</b><br>
+					Currently displaying: <b id="tubes_display">. . .</b><br>
+					Current display mode: <b id="tubes_mode">. . .</b><br>
+					Current brightness: <b id="tubes_brightness">. . .</b><b>&percnt;</b><br>
 				</div>
 
 				<div class="config_div">
