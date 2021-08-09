@@ -44,8 +44,9 @@ void taskSysInit(void* parameter) {
 
 void taskMonitorStatus(void* parameter) {
     // Onboard LED (NOT the one in the ESP32 DS)
-    pinMode(ONBOARD_LED, OUTPUT);
-    digitalWrite(ONBOARD_LED, 1);
+    ledcSetup(9, 100, 8);
+    ledcAttachPin(ONBOARD_LED, 9);
+    ledcWrite(9,255);
 
     while (!nixies.isReady) {
         vTaskDelay(500);
@@ -56,7 +57,7 @@ void taskMonitorStatus(void* parameter) {
     for (;;) {
         switch (config.sysStatus) {
             case 0:
-                digitalWrite(ONBOARD_LED, 0);
+                ledcWrite(9,10);
                 break;
             case 1:             // Connecting to WiFi
                 // Pulse tubes
@@ -83,11 +84,11 @@ void taskMonitorStatus(void* parameter) {
 
                     for (int i = 1; i <= TUBES_BLINK_AMOUNT; i++) {
                         nixies.setBrightness(3, 10, true);
-                        digitalWrite(ONBOARD_LED, 0);
+                        ledcWrite(9,0);
                         vTaskDelay(150);
 
                         nixies.setBrightness(3, 175, true);
-                        digitalWrite(ONBOARD_LED, 1);
+                        ledcWrite(9,255);
                         vTaskDelay(150);
                     }
                 } else {
@@ -96,11 +97,11 @@ void taskMonitorStatus(void* parameter) {
                     // Blink tubes
                     for (int i = 1; i <= TUBES_BLINK_AMOUNT; i++) {
                         nixies.setBrightness(0, 10, true);
-                        digitalWrite(ONBOARD_LED, 0);
+                        ledcWrite(9,0);
                         vTaskDelay(150);
 
                         nixies.setBrightness(0, 175, true);
-                        digitalWrite(ONBOARD_LED, 1);
+                        ledcWrite(9,255);
                         vTaskDelay(150);
                     }                    
                 }
@@ -115,11 +116,11 @@ void taskMonitorStatus(void* parameter) {
                 // Blink tubes
                 for (int i = 1; i <= TUBES_BLINK_AMOUNT; i++) {
                     nixies.setBrightness(0, 10, true);
-                    digitalWrite(ONBOARD_LED, 0);
+                    ledcWrite(9,0);
                     vTaskDelay(150);
 
                     nixies.setBrightness(0, 175, true);
-                    digitalWrite(ONBOARD_LED, 1);
+                    ledcWrite(9,255);
                     vTaskDelay(150);
                 }
 
@@ -131,11 +132,11 @@ void taskMonitorStatus(void* parameter) {
                 // Blink tubes
                 while (true) {
                     nixies.setBrightness(0, 10, true);
-                    digitalWrite(ONBOARD_LED, 0);
+                    ledcWrite(9,0);
                     vTaskDelay(450);
 
                     nixies.setBrightness(0, 175, true);
-                    digitalWrite(ONBOARD_LED, 1);
+                    ledcWrite(9,255);
                     vTaskDelay(450);
 
                     if (config.sysStatus != 3)
