@@ -10,7 +10,7 @@
 /****************************************************/
 //#define DEBUG
 
-//#define CUSTOM_I2C            // Board v2 (REV5) (July 2021)
+#define CUSTOM_I2C            // Board REV5 and up
 //#define I2C_SLOWMODE          // I2C 100kHz
 #ifdef CUSTOM_I2C
     #define SDA_PIN 33
