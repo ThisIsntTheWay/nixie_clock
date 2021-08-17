@@ -54,13 +54,13 @@ void Nixies::initialize(int DS, int ST, int SH, int pwmFreq) {
     @param n2 Number for tube #2
     @param n3 Number for tube #3
     @param n4 Number for tube #4
-    @warning params 'n3' and 'n4' will be ignored if 'EXP_BOARD_INSTALLED' is undefined.
+    @warning params 'n3' and 'n4' will be ignored if 'FULL_TUBESET' is undefined.
 */
 /**************************************************************************/
 void Nixies::changeDisplay(int n1, int n2, int n3, int n4) {
     digitalWrite(ST_PIN, 0);
         shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n1 << 4) | n2);
-    #ifdef EXP_BOARD_INSTALLED
+    #ifdef FULL_TUBESET
         shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n3 << 4) | n4);
     #endif
     digitalWrite(ST_PIN, 1);
@@ -131,7 +131,7 @@ void Nixies::blankDisplay() {
     // Push 0xFF to BCD decoders, disabling all outputs
     digitalWrite(ST_PIN, 0);
         shiftOut(DS_PIN, SH_PIN, MSBFIRST, 0b1111111);
-        #ifdef EXP_BOARD_INSTALLED
+        #ifdef FULL_TUBESET
             shiftOut(DS_PIN, SH_PIN, MSBFIRST, 0b1111111);
         #endif
     digitalWrite(ST_PIN, 1);
