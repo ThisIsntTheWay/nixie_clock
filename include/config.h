@@ -27,7 +27,7 @@
 #define CACHE_RENEWAL_INT   250     // Frequency of updating structs in the Configurator class
 
 // FLAGS
-#define EXP_BOARD_INSTALLED     // Expansion board installed (4 tubes)
+#define FULL_TUBESET     // Expansion board installed (4 tubes)
 //#define I2C_SLOWMODE          // I2C 100kHz
 #define DEBUG                   // DEBUG serial output
 //#define DEBUG_VERBOSE         // More DEBUG serial output

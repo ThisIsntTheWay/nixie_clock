@@ -42,8 +42,8 @@ void setup() {
   #ifdef DEBUG_VERBOSE
     Serial.println("[i] System: DEBUG_VERBOSE flag is set.");
   #endif
-  #ifdef EXP_BOARD_INSTALLED
-    Serial.println("[i] System: EXP_BOARD_INSTALLED flag is set.");
+  #ifdef FULL_TUBESET
+    Serial.println("[i] System: FULL_TUBESET flag is set.");
   #endif
 
   // Setup tasks
