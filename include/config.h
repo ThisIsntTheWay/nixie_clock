@@ -18,6 +18,7 @@
 #define DS_PIN  27   // Data
 #define SH_PIN  26   // Clock
 #define ST_PIN  25   // Latch
+#define WS_PIN  17   // WS2812B
 
 // VARIOUS
 #define PWM_FREQUENCY       100     // PWM Frequency
