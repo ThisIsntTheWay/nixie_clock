@@ -12,6 +12,7 @@ class RTC {
     public:
         bool RTCready;
         static bool RTCfault;
+        static bool i2cLock;
         
         RTC();
         RTC(TwoWire & w);

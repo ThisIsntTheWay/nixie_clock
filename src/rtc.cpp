@@ -3,7 +3,7 @@
 #include <rtc.h>
 
 
-// Designed to work with RTC models DS1307 and DS3231 by Maxim Integrated
+// Designed to work with RTC models DS1307/DS3231 (or similar)
 
 /****************************************************/
 //  DEFINITIONS
@@ -19,6 +19,7 @@
 
 // Declare statics
 bool RTC::RTCfault = false;
+bool RTC::i2cLock = false;
 
 /****************************************************/
 //  MAIN
