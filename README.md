@@ -38,7 +38,6 @@ The circuit has an intake of 5VDC, which is used for the following purposes:
 :information_source: The step-up circuit for the 170VDC is not included in the schematic.<br/>
 
 ## Progress
-Circuit diagrams and gerber files are currently WIP and not yet ready for release.<br/>
 Software-wise, the following features have been implemented so far:
  - [X] Implement webserver.
  - [X] Implement RTC.
