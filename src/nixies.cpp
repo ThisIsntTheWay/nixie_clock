@@ -2,6 +2,8 @@
 #include <nixies.h>
 #include <config.h>
 
+#define DEBUG_VERBOSE
+
 //int oPins[] = {5, 4, 2, 15};        // Board REV4 and lower
 int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
 
@@ -11,6 +13,12 @@ int Nixies::t2 = 0;
 int Nixies::t3 = 0;
 int Nixies::t4 = 0;
 
+/**************************************************************************/
+/*!
+    @brief      Converts a number of datatype 'byte' into a BCD code.
+    @param val  Number to convert.
+*/
+/**************************************************************************/
 byte Nixies::decToBcd(byte val) {
     if (val == 0)   { return 0; }
     else            { return((val/10*16) + (val%10)); }
@@ -49,17 +57,49 @@ void Nixies::initialize(int DS, int ST, int SH, int pwmFreq) {
 
 /**************************************************************************/
 /*!
-    @brief  Change tube displays
-    @param n1 Number for tube #1
-    @param n2 Number for tube #2
-    @param n3 Number for tube #3
-    @param n4 Number for tube #4
-    @warning params 'n3' and 'n4' will be ignored if 'FULL_TUBESET' is undefined.
+    @brief          Change tube display.
+    @param numArr   Array of size 4 containing the new display.
+    @param invFoot  ONLY APPLICABLE TO PCB REV5: If 'true', then all the numbers will be "inverted".
+    @warning        Only the first two numbers will be pushed if 'FULL_TUBESET' is undefined.
 */
 /**************************************************************************/
-void Nixies::changeDisplay(int n1, int n2, int n3, int n4) {
+void Nixies::changeDisplay(int numArr[], bool invFoot) {
+    byte n1, n2, n3, n4;
+
+    // TODO: Implement inversion logic
+    // Again, only applicable to REV5
+
+/*
+    IN	|	GET
+    0	-	1
+    1	-	0
+    2	-	9
+    3	-	8
+    4	-	7
+    5	-	6
+    6	-	5
+    7	-	4
+    8	-	3
+    9	-	2
+*/
+
+    if (invFoot) {
+        for (int i = 0; i < sizeof(numArr); i++) {
+            switch (numArr[i]) {
+                case 0:
+                    break;
+
+                case 1:
+                    break;
+
+                default:
+            }
+        }
+    }
+
+
     digitalWrite(ST_PIN, 0);
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n1 << 4) | n2);
+        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n2 << 4) | n1);
     #ifdef FULL_TUBESET
         shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n3 << 4) | n4);
     #endif
