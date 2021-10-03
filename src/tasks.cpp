@@ -213,6 +213,7 @@ void taskSetupRTC(void* parameter) {
             case 2:
                 // Error during I2C operation
                 Serial.println(F("[X] RTC: Failure; Module error."));
+                rtc.RTCfault = true;
                 break;
         }
     }    
@@ -224,6 +225,9 @@ void taskUpdateNixies(void* parameter) {
     while (!rtc.RTCready) {
         Serial.println("[i] Nixie: Awaiting RTC...");
         vTaskDelay(500);
+
+        if (rtc.RTCfault)
+            vTaskDelete(NULL);
     }
 
     int n1; // Hour
