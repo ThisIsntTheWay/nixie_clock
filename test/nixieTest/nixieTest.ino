@@ -52,7 +52,7 @@ void setup() {
     
     ledcSetup(i, 100, 8);
     ledcAttachPin(p, i);
-    ledcWrite(i, 255);
+    ledcWrite(i, 170);
   }
 }
 
