@@ -3,8 +3,8 @@
 #define SH_CP   26   // Clock
 #define ST_CP   25   // Latch
 
-
 int loopNum = 0;
+int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
 
 // Convert dec to BCD
 byte decToBCD(byte in) {
@@ -47,6 +47,17 @@ void setup() {
   pinMode(DS_PIN, OUTPUT);
   pinMode(SH_CP, OUTPUT);
   pinMode(ST_CP, OUTPUT);
+
+  // Opto isolator
+  for (int i = 0; i < 4; i++) {
+    int p = oPins[i];
+
+    pinMode(p, OUTPUT);
+    
+    ledcSetup(i, 100, 8);
+    ledcAttachPin(p, i);
+    ledcWrite(i, 255);
+  }
 }
 
 void loop() {
