@@ -14,30 +14,26 @@ byte decToBCD(byte in) {
 // The following function was inspired by:
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
 void displayNumber(int number_1, int number_2, int number_3, int number_4) {
-    byte n1, n2, n3, n4;
+    byte n1, n2, n3, n4, BCD1, BCD2;
     
-    Serial.print("Displaying the following numbers: ");
-        Serial.print(number_1);
-        Serial.print(" ");
-        Serial.print(number_2);
-        Serial.print(" ");
-        Serial.print(number_3);
-        Serial.print(" ");
-        Serial.println(number_4);
+    Serial.printf("Displaying the following numbers: %d %d %d %d", number_1, number_2, number_3, number_4);
 
     n1 = decToBCD(number_1);
     n2 = decToBCD(number_2);
     n3 = decToBCD(number_3);
     n4 = decToBCD(number_4);
 
+    BCD1 = (n1 << 4 | n2);
+    BCD2 = (n4 << 4 | n3);
+
     Serial.print(" > Num2 BCD: "); Serial.println(n2, BIN);
-    Serial.print(" > Pass 1 BCD: "); Serial.println((n3 << 4 | n4), BIN);
-    Serial.print(" > Pass 2 BCD: "); Serial.println((n1 << 4 | n2), BIN);
+    Serial.print(" > Pass 1 BCD: "); Serial.println(BCD1, BIN);
+    Serial.print(" > Pass 2 BCD: "); Serial.println(BCD2, BIN);
 
     // Push to shift registers
     digitalWrite(ST_CP, LOW);
-    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n3 << 4) | n4);  // REG1 [Hours]
-    shiftOut(DS_PIN, SH_CP, MSBFIRST, (n1 << 4) | n2);  // REG2 [Minutes]
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, BCD1);  // REG1 [Hours]
+    shiftOut(DS_PIN, SH_CP, MSBFIRST, BCD2);  // REG2 [Minutes]
     digitalWrite(ST_CP, HIGH);
 }
 
