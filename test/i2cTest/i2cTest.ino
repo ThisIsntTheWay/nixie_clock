@@ -3,8 +3,13 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+#define SDA_P 33
+#define SCL_P 13
+
 void setup() {
-  Wire.begin(); 
+  Wire.begin();
+  //Wire.begin(SDA_P, SCL_P);
+  
   Serial.begin(115200);
 }
 
