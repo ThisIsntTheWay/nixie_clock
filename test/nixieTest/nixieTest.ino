@@ -6,6 +6,8 @@
 int loopNum = 0;
 int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
 
+
+
 // Convert dec to BCD
 byte decToBCD(byte in) {
     return( (in/16*10) + (in%16) );
@@ -13,15 +15,15 @@ byte decToBCD(byte in) {
 
 // The following function was inspired by:
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
-void displayNumber(int number_1, int number_2, int number_3, int number_4) {
+void displayNumber(int iN[]) {
     byte n1, n2, n3, n4, BCD1, BCD2;
     
-    Serial.printf("Displaying the following numbers: %d %d %d %d", number_1, number_2, number_3, number_4);
-
-    n1 = decToBCD(number_1);
-    n2 = decToBCD(number_2);
-    n3 = decToBCD(number_3);
-    n4 = decToBCD(number_4);
+    n1 = iN[0];
+    n2 = iN[1];
+    n3 = iN[2];
+    n4 = iN[3];
+    
+    Serial.printf("Displaying the following numbers: %d %d %d %d\n", n1, n2, n3, n4);
 
     BCD1 = (n1 << 4 | n2);
     BCD2 = (n4 << 4 | n3);
@@ -56,12 +58,35 @@ void setup() {
   }
 }
 
+/*
+IN  | GET
+0 - 1
+1 - 0
+2 - 9
+3 - 8
+4 - 7
+5 - 6
+6 - 5
+7 - 4
+8 - 3
+9 - 2
+
+ */
+
 void loop() {
   loopNum++;
-  Serial.println(loopNum);
 
+  while(Serial.available() == 0) { }
+  int i = Serial.parseInt();
+
+  int iArr[] = {i, i, i, i};
+  
+  Serial.println(loopNum);
+  displayNumber(iArr);
+
+  /*
   for (int i = 0; i < 10; i++) {
    displayNumber(i,i,i,i);
    delay(2550);
-  }
+  } */
 }
