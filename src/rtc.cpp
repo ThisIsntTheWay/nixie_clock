@@ -2,7 +2,6 @@
 #include <Wire.h>
 #include <rtc.h>
 
-
 // Designed to work with RTC models DS1307/DS3231 (or similar)
 
 /****************************************************/
@@ -11,7 +10,8 @@
 //#define DEBUG
 
 #define CUSTOM_I2C            // Board REV5 and up
-//#define I2C_SLOWMODE          // I2C 100kHz
+#define I2C_SLOWMODE          // I2C 100kHz
+
 #ifdef CUSTOM_I2C
     #define SDA_PIN 33
     #define SCL_PIN 13
@@ -106,7 +106,7 @@ int RTC::checkStartup() {
 
             int timeStr = tmp.toInt();
             
-            // Segregate into seconds, minutes and hours
+            // Seperate into seconds, minutes and hours
             int timeArr[3] =  {
                 (timeStr % 100), 
                 ((timeStr / 100) % 100),
