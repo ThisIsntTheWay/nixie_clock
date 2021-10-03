@@ -90,7 +90,8 @@ int RTC::checkStartup() {
         Serial.print("[i] RTC: Register 0x0F: "); Serial.println(val, BIN);
     #endif
 
-    if (val != 9) {
+    // '99' means that readRegister() experienced an error
+    if (val != 99) {
         // Isolate bit 8 (OSF register)
         byte OSFval = bitRead(val, 7);
         #ifdef DEBUG
@@ -129,13 +130,18 @@ int RTC::checkStartup() {
                 Serial.println(val, BIN);
             #endif
 
+            // All OK, but time had to be set on the RTC
             return 1;
         } else {
+            // All OK
             return 0;
         }
     } else {
+        // Assume irrecoverable error
         return 2;
     }
+
+    // Default return, should never occur
     return 3;
 }
 
