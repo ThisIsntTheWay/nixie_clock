@@ -309,7 +309,7 @@ void taskUpdateNixies(void* parameter) {
                     Serial.printf("[i] Nixie: Updating brightness, PWM: %d\n", pwm);
                 #endif
 
-                // Turn anode off if tube is off (has a number higher than 9, making the BCD decoder pulling all cathodes low ).
+                // Turn anode off if tube is off (has a number higher than 9, making the BCD decoder pulling all cathodes low).
                 if (nixies.t1 > 9)  { nixies.setBrightness(0, 0, false); }
                 else                { nixies.setBrightness(0, pwm, false); }
 
