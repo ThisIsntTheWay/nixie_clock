@@ -6,8 +6,6 @@
 int loopNum = 0;
 int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
 
-
-
 // Convert dec to BCD
 byte decToBCD(byte in) {
     return( (in/16*10) + (in%16) );
@@ -17,6 +15,23 @@ byte decToBCD(byte in) {
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
 void displayNumber(int iN[]) {
     byte n1, n2, n3, n4, BCD1, BCD2;
+    
+    for (int i = 0; i < 4; i++) {
+      int a;
+
+      switch (iN[i]) {
+          case 0:
+              a = 1;
+              break;
+          case 1:
+              a = 0;
+              break;
+          default:
+              a = 11 - iN[i];
+      }
+
+      iN[i] = a;
+    }
     
     n1 = iN[0];
     n2 = iN[1];
@@ -56,6 +71,8 @@ void setup() {
     ledcAttachPin(p, i);
     ledcWrite(i, 170);
   }
+
+  Serial.println("System read, awaiting input...");
 }
 
 /*
@@ -81,7 +98,8 @@ void loop() {
 
   int iArr[] = {i, i, i, i};
   
-  Serial.println(loopNum);
+  Serial.print(loopNum);
+  Serial.printf(" ======================\nGot: %d",i);
   displayNumber(iArr);
 
   /*
