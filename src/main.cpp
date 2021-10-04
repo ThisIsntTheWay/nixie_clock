@@ -28,7 +28,7 @@ void setup() {
 
   // WS LED init
   ws2812fx.init();
-  ws2812fx.setBrightness(100);
+  ws2812fx.setBrightness(0);
   ws2812fx.setSpeed(200);
   ws2812fx.setMode(FX_MODE_RAINBOW_CYCLE);
   ws2812fx.start();
