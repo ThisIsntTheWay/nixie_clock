@@ -2,7 +2,7 @@
 #include <nixies.h>
 #include <config.h>
 
-#define DEBUG_VERBOSE
+//#define DEBUG_VERBOSE
 #define SOCKET_FOOTPRINT_INVERTED
 
 //int oPins[] = {5, 4, 2, 15};        // Board REV4 and lower
@@ -64,6 +64,12 @@ void Nixies::initialize(int DS, int ST, int SH, int pwmFreq) {
 */
 /**************************************************************************/
 void Nixies::changeDisplay(int numArr[]) {
+    // Update number cache
+    t1 = numArr[0];
+    t2 = numArr[1];
+    t3 = numArr[2];
+    t4 = numArr[3];
+    
     #ifdef SOCKET_FOOTPRINT_INVERTED
         /*
             IN	|	GET
@@ -96,10 +102,11 @@ void Nixies::changeDisplay(int numArr[]) {
         }
     #endif
 
+    // The numArr index placements aren't logical to the eye, but that's how the shift registers are arranged
     digitalWrite(ST_PIN, 0);
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[1] << 4) | numArr[0]); // n2 | n1
+        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[3] << 4) | numArr[1]);
     #ifdef FULL_TUBESET
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[2] << 4) | numArr[3]); // n3 | n4
+        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[2] << 4) | numArr[0]);
     #endif
     digitalWrite(ST_PIN, 1);
 
@@ -107,12 +114,6 @@ void Nixies::changeDisplay(int numArr[]) {
     #ifdef DEBUG_VERBOSE
         Serial.printf("[T] Nixie: Setting tubes: %d%d %d%d\n", n1, n2, n3, n4);
     #endif  */
-
-    // Update number cache
-    t1 = numArr[0];
-    t2 = numArr[1];
-    t3 = numArr[2];
-    t4 = numArr[3];
 
     #ifdef DEBUG_VERBOSE
         Serial.printf("[i] Nixies: Display cache: %d%d %d%d\n", t1, t2, t3, t4);
