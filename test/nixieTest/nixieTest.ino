@@ -6,6 +6,8 @@
 int loopNum = 0;
 int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
 
+#define INVERTED_PCB_FOOTPRINT
+
 // Convert dec to BCD
 byte decToBCD(byte in) {
     return( (in/16*10) + (in%16) );
@@ -15,23 +17,25 @@ byte decToBCD(byte in) {
 // https://forum.arduino.cc/index.php?topic=449828.msg3094698#msg3094698
 void displayNumber(int iN[]) {
     byte n1, n2, n3, n4, BCD1, BCD2;
-    
-    for (int i = 0; i < 4; i++) {
-      int a;
 
-      switch (iN[i]) {
-          case 0:
-              a = 1;
-              break;
-          case 1:
-              a = 0;
-              break;
-          default:
-              a = 11 - iN[i];
+    #ifdef INVERTED_PCB_FOOTPRINT
+      for (int i = 0; i < 4; i++) {
+        int a;
+  
+        switch (iN[i]) {
+            case 0:
+                a = 1;
+                break;
+            case 1:
+                a = 0;
+                break;
+            default:
+                a = 11 - iN[i];
+        }
+  
+        iN[i] = a;
       }
-
-      iN[i] = a;
-    }
+    #endif
     
     n1 = iN[0];
     n2 = iN[1];
