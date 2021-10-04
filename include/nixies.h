@@ -8,7 +8,7 @@ class Nixies {
         bool forceUpdate = false;
 
         void initialize(int DS, int ST, int SH, int pwmFreq);
-        void changeDisplay(int numArr[], bool invFoot);
+        void changeDisplay(int numArr[]);
         void setBrightness(int ch, int pwm, bool all);
         void tumbleDisplay();
         void blankDisplay();

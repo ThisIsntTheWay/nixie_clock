@@ -59,7 +59,7 @@ void taskMonitorStatus(void* parameter) {
             case 0:
                 ledcWrite(9,10);
                 break;
-            case 1:             // Connecting to WiFi
+            case 1: {            // Connecting to WiFi
                 // Pulse tubes
                 while (config.connecting) {
                     for (int i = 1; i <= 255; i++) {
@@ -80,7 +80,8 @@ void taskMonitorStatus(void* parameter) {
 
                 // Blink tubes
                 if (!config.connectTimeout) {
-                    nixies.changeDisplay(1,1,1,1);
+                    int n[] = {1,1,1,1};
+                    nixies.changeDisplay(n);
 
                     for (int i = 1; i <= TUBES_BLINK_AMOUNT; i++) {
                         nixies.setBrightness(3, 10, true);
@@ -92,7 +93,8 @@ void taskMonitorStatus(void* parameter) {
                         vTaskDelay(150);
                     }
                 } else {
-                    nixies.changeDisplay(0,0,0,0);
+                    int n[] = {0,0,0,0};
+                    nixies.changeDisplay(n);
 
                     // Blink tubes
                     for (int i = 1; i <= TUBES_BLINK_AMOUNT; i++) {
@@ -110,8 +112,10 @@ void taskMonitorStatus(void* parameter) {
                     config.sysStatus = 0;
                     
                 break;
-            case 2:             // AP active
-                nixies.changeDisplay(0,0,0,0);
+            }
+            case 2: {             // AP active
+                int n[] = {0,0,0,0};
+                nixies.changeDisplay(n);
 
                 // Blink tubes
                 for (int i = 1; i <= TUBES_BLINK_AMOUNT; i++) {
@@ -128,7 +132,8 @@ void taskMonitorStatus(void* parameter) {
                     config.sysStatus = 0;
 
                 break;
-            case 3:             // Error
+            }
+            case 3: {            // Error
                 // Blink tubes
                 while (true) {
                     nixies.setBrightness(0, 10, true);
@@ -144,11 +149,10 @@ void taskMonitorStatus(void* parameter) {
                 }
 
                 break;
+            }
         }
-
         vTaskDelay(100);
     }
-    
     vTaskDelay(200);
 }
 
@@ -166,7 +170,8 @@ void taskSetupNixies(void* paramter) {
     config.nixieConfiguration.mode = 1;
 
     // Set initial display
-    nixies.changeDisplay(1, 2, 3, 4);
+    int n[] = {1, 2, 3, 4};
+    nixies.changeDisplay(n);
 
     nixies.isReady = true;
 
@@ -363,15 +368,17 @@ void taskUpdateNixies(void* parameter) {
                                 n4 = m % 10;
                             }
 
-                            nixies.changeDisplay(n1, n2, n3, n4);
+                            int n[] = {n1, n2, n3, n4};
+                            nixies.changeDisplay(n);
                         }
 
                         break;
-                    case 2:
-                        nixies.changeDisplay(config.nixieConfiguration.nNum1,
-                                            config.nixieConfiguration.nNum2,
-                                            config.nixieConfiguration.nNum3,
-                                            config.nixieConfiguration.nNum4);
+                    case 2:    
+                        int n[] = { config.nixieConfiguration.nNum1,
+                                    config.nixieConfiguration.nNum2,
+                                    config.nixieConfiguration.nNum3,
+                                    config.nixieConfiguration.nNum4};
+                        nixies.changeDisplay(n);
                         break;
                 }
             }

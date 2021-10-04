@@ -3,6 +3,7 @@
 #include <config.h>
 
 #define DEBUG_VERBOSE
+#define SOCKET_FOOTPRINT_INVERTED
 
 //int oPins[] = {5, 4, 2, 15};        // Board REV4 and lower
 int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
@@ -59,61 +60,59 @@ void Nixies::initialize(int DS, int ST, int SH, int pwmFreq) {
 /*!
     @brief          Change tube display.
     @param numArr   Array of size 4 containing the new display.
-    @param invFoot  ONLY APPLICABLE TO PCB REV5: If 'true', then all the numbers will be "inverted".
     @warning        Only the first two numbers will be pushed if 'FULL_TUBESET' is undefined.
 */
 /**************************************************************************/
-void Nixies::changeDisplay(int numArr[], bool invFoot) {
-    byte n1, n2, n3, n4;
+void Nixies::changeDisplay(int numArr[]) {
+    #ifdef SOCKET_FOOTPRINT_INVERTED
+        /*
+            IN	|	GET
+            0	-	1
+            1	-	0
+            2	-	9
+            3	-	8
+            4	-	7
+            5	-	6
+            6	-	5
+            7	-	4
+            8	-	3
+            9	-	2
+        */
+        for (int i = 0; i < 4; i++) {  // This assumes that numArr is !> 4
+            int a;
 
-    // TODO: Implement inversion logic
-    // Again, only applicable to REV5
-
-/*
-    IN	|	GET
-    0	-	1
-    1	-	0
-    2	-	9
-    3	-	8
-    4	-	7
-    5	-	6
-    6	-	5
-    7	-	4
-    8	-	3
-    9	-	2
-*/
-
-    if (invFoot) {
-        for (int i = 0; i < sizeof(numArr); i++) {
             switch (numArr[i]) {
                 case 0:
+                    a = 1;
                     break;
-
                 case 1:
+                    a = 0;
                     break;
-
                 default:
+                    a = 11 - numArr[i];
             }
-        }
-    }
 
+            numArr[i] = a;
+        }
+    #endif
 
     digitalWrite(ST_PIN, 0);
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n2 << 4) | n1);
+        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[1] << 4) | numArr[0]); // n2 | n1
     #ifdef FULL_TUBESET
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (n3 << 4) | n4);
+        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[2] << 4) | numArr[3]); // n3 | n4
     #endif
     digitalWrite(ST_PIN, 1);
 
+    /*
     #ifdef DEBUG_VERBOSE
         Serial.printf("[T] Nixie: Setting tubes: %d%d %d%d\n", n1, n2, n3, n4);
-    #endif
+    #endif  */
 
     // Update number cache
-    t1 = n1;
-    t2 = n2;
-    t3 = n3;
-    t4 = n4;
+    t1 = numArr[0];
+    t2 = numArr[1];
+    t3 = numArr[2];
+    t4 = numArr[3];
 
     #ifdef DEBUG_VERBOSE
         Serial.printf("[i] Nixies: Display cache: %d%d %d%d\n", t1, t2, t3, t4);
@@ -147,15 +146,17 @@ void Nixies::tumbleDisplay() {
 
     for (int i = 0; i < 10; i++) {
         byte a = Nixies::decToBcd(i);
+        int n[] = {a, a, a, a};
 
-        Nixies::changeDisplay(a, a, a, a);
+        Nixies::changeDisplay(n);
         vTaskDelay(DEPOISON_DELAY);
     }
     
     for (int i = 9; i > -1; i--) {
         byte a = Nixies::decToBcd(i);
+        int n[] = {a, a, a, a};
 
-        Nixies::changeDisplay(a, a, a, a);
+        Nixies::changeDisplay(n);
         vTaskDelay(DEPOISON_DELAY);
     }
 
