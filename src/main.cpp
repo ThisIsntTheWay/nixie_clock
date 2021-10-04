@@ -1,11 +1,5 @@
 #include <Arduino.h>
 #include <tasks.h>
-#include <WS2812FX.h>
-
-#define LED_COUNT 4
-#define LED_PIN 17
-
-WS2812FX ws2812fx = WS2812FX(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ800);
 Configurator c;
 
 void setup() {
@@ -26,15 +20,7 @@ void setup() {
   WiFi.scanNetworks(true);
   WiFi.scanDelete();
 
-  // WS LED init
-  ws2812fx.init();
-  ws2812fx.setBrightness(0);
-  ws2812fx.setSpeed(200);
-  ws2812fx.setMode(FX_MODE_RAINBOW_CYCLE);
-  ws2812fx.start();
-
   delay(200);
-  ws2812fx.service();
   
   #ifdef DEBUG
     Serial.println("[i] System: DEBUG flag is set.");
