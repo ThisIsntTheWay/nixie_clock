@@ -188,9 +188,9 @@ void Nixies::blankDisplay() {
 /**************************************************************************/
 /*!
     @brief  Set the brightness of a tube
-    @param ch LEDC channel
+    @param ch LEDC channel (ignored if param 'all' is true)
     @param pwm Duty cycle length
-    @param all Change all channels
+    @param all Change all channels if true
 */
 /**************************************************************************/
 void Nixies::setBrightness(int ch, int pwm, bool all) {
