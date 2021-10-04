@@ -99,7 +99,7 @@ void loop() {
   int iArr[] = {i, i, i, i};
   
   Serial.print(loopNum);
-  Serial.printf(" ======================\nGot: %d",i);
+  Serial.printf(" ======================\nGot: %d\n",i);
   displayNumber(iArr);
 
   /*
