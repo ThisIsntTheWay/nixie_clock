@@ -56,6 +56,8 @@ class Configurator {
             // 0: Connecting to WiFi network
             // 1: Starting AP
             // 2: Error
+            // 3: RTC fault
+            // 4: WiFi disconnected
 
         TaskHandle_t *task_perp_nix;
         TaskHandle_t *task_perp_rtc;
