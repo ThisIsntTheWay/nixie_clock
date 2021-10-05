@@ -11,7 +11,7 @@
 //  GLOBAL VARS
 /****************************************************/
 // PROGRAM INFO
-#define BUILD_VERSION   0.5
+#define BUILD_VERSION   0.6
 #define BUILD_REL_TYPE  "Beta"
 
 // PINS
@@ -107,6 +107,7 @@ class Configurator {
         static struct NixieConfig nixieConfiguration;
         static struct NetConfig netConfiguration;
         static String buildInfo;
+        static String fwInfo;
 };
 
 #endif

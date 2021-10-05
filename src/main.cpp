@@ -7,6 +7,7 @@ void setup() {
   
   // Create build info
   c.buildInfo = "v" + String(BUILD_VERSION) + " (" + BUILD_REL_TYPE + ") - " + __DATE__ + ", " + __TIME__;
+  c.fwInfo = String(BUILD_VERSION) + "_" + BUILD_REL_TYPE + "-" + __DATE__ + __TIME__;
 
   /* // Write build info
   File buildInfoFile = LITTLEFS.open(F("buildinfo"), "w");

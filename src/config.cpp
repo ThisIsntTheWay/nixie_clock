@@ -7,6 +7,7 @@ Configurator::NixieConfig Configurator::nixieConfiguration;
 Configurator::RTCConfig Configurator::rtcConfiguration;
 Configurator::NetConfig Configurator::netConfiguration;
 String Configurator::buildInfo = "";
+String Configurator::fwInfo = "";
 byte Configurator::sysStatus = 0;
 
 // Main
