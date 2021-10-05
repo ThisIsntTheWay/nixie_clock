@@ -49,15 +49,17 @@ void taskMonitorStatus(void* parameter) {
 
     for (;;) {
         // Monitor WiFi status
-        switch (WiFi.status()) {
-            case WL_CONNECTION_LOST:
-                config.sysStatus = 4;
-                break;
-            case WL_DISCONNECTED:
-                config.sysStatus = 4;
-                break;
-            default:
-                break;
+        if (!rtc.RTCfault && !config.isAP) {
+            switch (WiFi.status()) {
+                case WL_CONNECTION_LOST:
+                    config.sysStatus = 4;
+                    break;
+                case WL_DISCONNECTED:
+                    config.sysStatus = 4;
+                    break;
+                default:
+                    break;
+            }
         }
 
         vTaskDelay(1000);
