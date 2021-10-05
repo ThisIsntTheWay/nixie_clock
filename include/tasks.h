@@ -4,6 +4,7 @@
 
 void taskSysInit(void* parameter);
 void taskMonitorStatus(void* parameter);
+void taskShowStatus(void* parameter);
 
 void taskSetupWebserver(void* parameter);
 

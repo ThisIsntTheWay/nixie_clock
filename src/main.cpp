@@ -41,7 +41,8 @@ void setup() {
   xTaskCreate(taskSetupWebserver, "Webserver setup", 5500, NULL, 1, NULL);
   
   // Perp. tasks
-  xTaskCreate(taskMonitorStatus, "Status monitor", 3500, NULL, 1, NULL);
+  xTaskCreate(taskShowStatus, "Status visualizer", 3500, NULL, 1, NULL);
+  xTaskCreate(taskMonitorStatus, "Status monitor", 2500, NULL, 1, NULL);
   xTaskCreate(taskUpdateNixies, "Nixie updater", 4500, NULL, 1, c.task_perp_nix);
   xTaskCreate(taskUpdateRTC, "RTC updater", 4500, NULL, 1, c.task_perp_rtc);
   xTaskCreate(taskUpdateCaches, "Cache updater", 5500, NULL, 1, c.task_perp_cac);
