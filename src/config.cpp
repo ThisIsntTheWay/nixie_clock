@@ -6,8 +6,11 @@
 Configurator::NixieConfig Configurator::nixieConfiguration;
 Configurator::RTCConfig Configurator::rtcConfiguration;
 Configurator::NetConfig Configurator::netConfiguration;
+Configurator::SystemConfig Configurator::sysConfiguration;
+
 String Configurator::buildInfo = "";
 String Configurator::fwInfo = "";
+
 byte Configurator::sysStatus = 0;
 
 // Main
@@ -130,6 +133,28 @@ void Configurator::parseNixieConfig() {
             nixieConfiguration.depoisonInterval = cfgNixie["depoisonInterval"];
             
             nixieConfig.close();   
+        }
+    }
+}
+
+
+void Configurator::parseSysConfig() {
+    if (FSReady) {
+        // Read file
+        File sysConfigFile = LITTLEFS.open(F("/config/sysConfig.json"), "r");
+
+        // Parse JSON
+        StaticJsonDocument<250> cfgSys;
+        DeserializationError error = deserializeJson(cfgSys, sysConfigFile);
+        if (error) {
+            String err = error.c_str();
+
+            Serial.print("[X] Nixie parser: Deserialization fault: "); Serial.println(err);
+        } else {
+            // Populate config struct
+            sysConfiguration.keepLEDpostBoot = cfgSys["keepLEDpostBoot"];
+            
+            sysConfigFile.close();   
         }
     }
 }

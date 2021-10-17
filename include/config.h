@@ -43,6 +43,7 @@ class Configurator {
         void parseRTCconfig();
         void parseNixieConfig();
         void parseNetConfig();
+        void parseSysConfig();
         void nukeConfig();
 
         bool FSReady;           // FS mounted
@@ -70,17 +71,23 @@ class Configurator {
             int tzOffset;
             int manEpoch;
         };
+
+        struct SystemConfig {
+            bool keepLEDpostBoot;
+        };
         
         struct NixieConfig {
             int mode;
                 // 1: Clock
                 // 2: Manual
                 // 3: Crypto
-            int brightness;
             int depoisonMode;
                 // 1: On hour change
                 // 2: On interval
+                // 3: On schedule
+
             int depoisonInterval;
+            int brightness;
             
             bool crypto;
             bool tumble;
@@ -108,6 +115,7 @@ class Configurator {
         static struct RTCConfig rtcConfiguration;
         static struct NixieConfig nixieConfiguration;
         static struct NetConfig netConfiguration;
+        static struct SystemConfig sysConfiguration;
         static String buildInfo;
         static String fwInfo;
 };
