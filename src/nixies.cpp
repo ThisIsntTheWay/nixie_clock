@@ -14,6 +14,9 @@ int Nixies::t2 = 0;
 int Nixies::t3 = 0;
 int Nixies::t4 = 0;
 
+int Nixies::currHour = 0;
+int Nixies::lastHour = 0;
+
 /**************************************************************************/
 /*!
     @brief      Converts a number of datatype 'byte' into a BCD code.

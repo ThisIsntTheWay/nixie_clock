@@ -20,6 +20,9 @@ class Nixies {
         static int t3;
         static int t4;
 
+        static int currHour;
+        static int lastHour;
+
     private:
         byte decToBcd(byte val);
 };

@@ -266,6 +266,43 @@ void taskSetupRTC(void* parameter) {
     vTaskDelete(NULL);
 }
 
+void taskUpdateDepoisonState(void* parameter) {
+    while (!nixies.isReady) {
+        vTaskDelay(1500);
+    }
+
+    for (;;) {
+        bool timeValid = true;
+
+        int m = rtc.getTime(1);
+        int h = rtc.getTime(2);
+
+        // Sanity check
+        timeValid = true;
+        if (h > 24 || m >= 60)                                    timeValid = false;
+        if (nixies.lastHour - h > 4 || nixies.lastHour - h < -4)  timeValid = false;
+
+        if (timeValid) {
+            // Process depoisoning
+            switch (config.nixieConfiguration.depoisonMode) {
+                // On hour change
+                case 1:
+                    if (nixies.lastHour != h) {
+                        nixies.lastHour = h;
+                        if (!nixies.isTumbling) { config.nixieConfiguration.tumble = true; }
+                    }
+                    break;
+
+                // On schedule
+                case 3:
+                    break;
+            }
+        }
+
+        vTaskDelay(1500);
+    }
+}
+
 void taskUpdateNixies(void* parameter) {
     // Stall until RTC is ready
     while (!rtc.RTCready) {
@@ -296,7 +333,6 @@ void taskUpdateNixies(void* parameter) {
         // Skip sequence if tubes are tumbling
         if (!nixies.isTumbling) {
            // Obtain RTC time
-            //int s = rtc.getTime(0);
             int m = rtc.getTime(1);
             int h = rtc.getTime(2);
 
@@ -311,33 +347,7 @@ void taskUpdateNixies(void* parameter) {
             #endif
 
             // Cathode depoisoning
-            if (nixies.forceUpdate || (timeValid && lastHour != h)) {
-                #ifdef DEBUG
-                    if (nixies.forceUpdate) {
-                        Serial.println("[i] Nixie: Update enforced.");
-                    }
-
-                    Serial.printf("[i] Nixie: Hour change: %d -> %d\n", lastHour, h);
-                #endif
-
-                // Update RTC time once more
-                m = rtc.getTime(1);
-                h = rtc.getTime(2);
-
-                // Sanity check
-                timeValid = true;
-                if (h > 24 || m >= 60)                      timeValid = false;
-                if (lastHour - h > 4 || lastHour - h < -4)  timeValid = false;
-
-                if (timeValid) {
-                    lastHour = h;
-                }
-                #ifdef DEBUG
-                    else {
-                        Serial.println("[X] Nixie: Time not valid; Will not set lastHour.");
-                    }
-                #endif
-
+            if (nixies.forceUpdate) {
                 if (!nixies.isTumbling) 
                     config.nixieConfiguration.tumble = true;
             }
@@ -552,7 +562,6 @@ void taskUpdateRTC(void* parameter) {
 
     NTPClient timeClient(ntpUDP, config.rtcConfiguration.ntpSource, config.rtcConfiguration.tzOffset);
     
-    //unsigned long ntpEpoch;
     int ntpHours;
     int ntpMinutes;
     int ntpSeconds;
