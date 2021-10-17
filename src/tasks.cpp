@@ -341,28 +341,6 @@ void taskUpdateNixies(void* parameter) {
                 if (!nixies.isTumbling) 
                     config.nixieConfiguration.tumble = true;
             }
-            
-            // Brightness updater
-            if (config.sysStatus == 0) {
-                int pwm = config.nixieConfiguration.brightness;
-
-                #ifdef DEBUG_VARIOUS
-                    Serial.printf("[i] Nixie: Updating brightness, PWM: %d\n", pwm);
-                #endif
-
-                // Turn anode off if tube is off (has a number higher than 9, making the BCD decoder pulling all cathodes low).
-                if (nixies.t1 > 9)  { nixies.setBrightness(0, 0, false); }
-                else                { nixies.setBrightness(0, pwm, false); }
-
-                if (nixies.t2 > 9)  { nixies.setBrightness(1, 0, false); }
-                else                { nixies.setBrightness(1, pwm, false); }
-
-                if (nixies.t3 > 9)  { nixies.setBrightness(2, 0, false); }
-                else                { nixies.setBrightness(2, pwm, false); }
-
-                if (nixies.t4 > 9)  { nixies.setBrightness(3, 0, false); }
-                else                { nixies.setBrightness(3, pwm, false); }
-            }
 
             // Update according to mode
             if (config.nixieConfiguration.tumble) {
@@ -373,13 +351,11 @@ void taskUpdateNixies(void* parameter) {
                 nixies.tumbleDisplay();
                 config.nixieConfiguration.tumble = false;
             } else {
-                // Determine mode
+                // Process display modes
                 // (Modes are described in struct 'NixieConfig')
-                #ifdef DEBUG
-                //    Serial.printf("[i] Nixie: Mode is: %d.\n", config.nixieConfiguration.mode);
-                #endif
 
                 switch (config.nixieConfiguration.mode) {
+                    // Display time
                     case 1:
                         #ifdef DEBUG
                             //Serial.printf("[i] Nixie: Time is: %d:%d:%d\n", h, m, s);
@@ -414,12 +390,19 @@ void taskUpdateNixies(void* parameter) {
                         }
 
                         break;
+
+                    // Manual display
                     case 2:    
                         int n[] = { config.nixieConfiguration.nNum1,
                                     config.nixieConfiguration.nNum2,
                                     config.nixieConfiguration.nNum3,
                                     config.nixieConfiguration.nNum4};
                         nixies.changeDisplay(n);
+                        break;
+
+                    // Cryptocurrency ticker
+                    case 3: 
+                        // Not yet implemented
                         break;
                 }
             }
@@ -429,6 +412,38 @@ void taskUpdateNixies(void* parameter) {
                 nixies.forceUpdate = false;
         }
         
+        vTaskDelay(500);
+    }
+}
+
+void taskUpdateBrightness(void* parameter) {
+    while (!nixies.isReady) {
+        vTaskDelay(1000);
+    }
+
+    for (;;) {
+        // Brightness updater
+        if (config.sysStatus == 0) {
+            int pwm = config.nixieConfiguration.brightness;
+
+            #ifdef DEBUG_VARIOUS
+                Serial.printf("[i] Nixie: Updating brightness, PWM: %d\n", pwm);
+            #endif
+
+            // Turn anode off if tube is off (has a number higher than 9, making the BCD decoder pulling all cathodes low).
+            if (nixies.t1 > 9)  { nixies.setBrightness(0, 0, false); }
+            else                { nixies.setBrightness(0, pwm, false); }
+
+            if (nixies.t2 > 9)  { nixies.setBrightness(1, 0, false); }
+            else                { nixies.setBrightness(1, pwm, false); }
+
+            if (nixies.t3 > 9)  { nixies.setBrightness(2, 0, false); }
+            else                { nixies.setBrightness(2, pwm, false); }
+
+            if (nixies.t4 > 9)  { nixies.setBrightness(3, 0, false); }
+            else                { nixies.setBrightness(3, pwm, false); }
+        }
+
         vTaskDelay(500);
     }
 }

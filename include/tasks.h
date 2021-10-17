@@ -15,5 +15,6 @@ void taskSetupRTC(void* parameter);
 void taskUpdateNixies(void* parameter);
 void taskUpdateRTC(void* parameter);
 void taskUpdateCaches(void* parameter);
+void taskUpdateBrightness(void* parameter);
 
 #endif
