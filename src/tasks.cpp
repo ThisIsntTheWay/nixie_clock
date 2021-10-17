@@ -295,6 +295,12 @@ void taskUpdateDepoisonState(void* parameter) {
 
                 // On schedule
                 case 3:
+                    if (h > 22 || h < 6) {
+                        if (nixies.lastHour != h) {
+                            nixies.lastHour = h;
+                            if (!nixies.isTumbling) { config.nixieConfiguration.tumble = true; }
+                        }
+                    }
                     break;
             }
         }

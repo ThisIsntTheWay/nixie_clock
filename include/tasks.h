@@ -16,5 +16,6 @@ void taskUpdateNixies(void* parameter);
 void taskUpdateRTC(void* parameter);
 void taskUpdateCaches(void* parameter);
 void taskUpdateBrightness(void* parameter);
+void taskUpdateDepoisonState(void* parameter);
 
 #endif

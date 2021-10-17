@@ -46,6 +46,7 @@ void setup() {
   xTaskCreate(taskUpdateBrightness, "Brightness updater", 2500, NULL, 1, NULL);
   //xTaskCreate(taskMonitorStatus, "Status monitor", 2500, NULL, 1, NULL);            DOES NOT ACT AS EXPECTED YET
   xTaskCreate(taskUpdateNixies, "Nixie updater", 4500, NULL, 1, c.task_perp_nix);
+  xTaskCreate(taskUpdateDepoisonState, "Depoison updater", 3500, NULL, 1, NULL);
   xTaskCreate(taskUpdateRTC, "RTC updater", 4500, NULL, 1, c.task_perp_rtc);
   xTaskCreate(taskUpdateCaches, "Cache updater", 5500, NULL, 1, c.task_perp_cac);
 }
