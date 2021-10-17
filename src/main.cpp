@@ -48,5 +48,6 @@ void setup() {
   xTaskCreate(taskUpdateNixies, "Nixie updater", 4500, NULL, 1, c.task_perp_nix);
   xTaskCreate(taskUpdateRTC, "RTC updater", 4500, NULL, 1, c.task_perp_rtc);
   xTaskCreate(taskUpdateCaches, "Cache updater", 5500, NULL, 1, c.task_perp_cac);
+}
 
 void loop() {}
