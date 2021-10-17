@@ -271,6 +271,8 @@ void taskUpdateDepoisonState(void* parameter) {
         vTaskDelay(1500);
     }
 
+    vTaskDelay(10000);
+
     for (;;) {
         bool timeValid = true;
 
@@ -327,8 +329,8 @@ void taskUpdateNixies(void* parameter) {
     // Artificial delay to ensure correct RTC readings
     vTaskDelay(1000);
 
-    int lastHour = rtc.getTime(2);
-    Serial.printf("[i] Nixie: lastHour set to: %d.\n", lastHour);
+    nixies.lastHour = rtc.getTime(2);
+    Serial.printf("[i] Nixie: lastHour set to: %d.\n", nixies.lastHour);
 
     while (!nixies.isReady || config.sysStatus != 0) {
         vTaskDelay(500);
@@ -346,7 +348,7 @@ void taskUpdateNixies(void* parameter) {
 
             // Sanity checks
             if (h > 24 || m >= 60)                      timeValid = false;
-            if (lastHour - h > 4 || lastHour - h < -4)  timeValid = false;
+            if (nixies.lastHour - h > 4 || nixies.lastHour - h < -4)  timeValid = false;
 
             #ifdef DEBUG_VERBOSE
                 Serial.printf("[i] Nixie: lastHour: '%d', timeValid: %d.\n", lastHour, timeValid);
@@ -369,7 +371,6 @@ void taskUpdateNixies(void* parameter) {
             } else {
                 // Process display modes
                 // (Modes are described in struct 'NixieConfig')
-
                 switch (config.nixieConfiguration.mode) {
                     // Display time
                     case 1:
