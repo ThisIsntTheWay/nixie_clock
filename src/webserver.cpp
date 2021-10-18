@@ -479,10 +479,18 @@ void webServerAPIs() {
                 default: encryption = "Unknown"; break;
             }
 
+            String RSSIlabel = "";
+            if (WiFi.RSSI(i) < -70) { RSSIlabel = "Weak"; }
+            else if (WiFi.RSSI(i) < -60) { RSSIlabel = "Fair"; }
+            else if (WiFi.RSSI(i) < -50) { RSSIlabel = "Good"; }
+            else if (WiFi.RSSI(i) > -50) { RSSIlabel = "Excellent"; }
+
+            RSSIlabel += " (" + String(WiFi.RSSI(i)) + "db)";
+
             if (i) json += ",";
             json += "{";
             json += "\"ssid\":\"" + WiFi.SSID(i) + "\"";
-            json += ",\"rssi\":\"" + String(WiFi.RSSI(i)) + "db\"";
+            json += ",\"signal\":\"" + RSSIlabel + "\"";
             json += ",\"mac\":\"" + WiFi.BSSIDstr(i) + "\"";
             json += ",\"channel\":" + String(WiFi.channel(i));
             json += ",\"security\":\"" + encryption + "\"";
