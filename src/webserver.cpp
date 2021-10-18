@@ -490,7 +490,7 @@ void webServerAPIs() {
             if (i) json += ",";
             json += "{";
             json += "\"ssid\":\"" + WiFi.SSID(i) + "\"";
-            json += ",\"signal\":\"" + RSSIlabel + "\"";
+            json += ",\"rssi\":\"" + RSSIlabel + "\"";
             json += ",\"mac\":\"" + WiFi.BSSIDstr(i) + "\"";
             json += ",\"channel\":" + String(WiFi.channel(i));
             json += ",\"security\":\"" + encryption + "\"";
