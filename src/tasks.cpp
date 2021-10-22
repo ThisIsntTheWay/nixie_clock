@@ -8,6 +8,7 @@
 #include <nixies.h>
 #include <rtc.h>
 #include <webserver.h>
+#include <crypto.h> 
 
 #define ONBOARD_LED 16
 
@@ -405,22 +406,26 @@ void taskUpdateNixies(void* parameter) {
                             int n[] = {n1, n2, n3, n4};
                             nixies.changeDisplay(n);
                         }
-
                         break;
 
                     // Manual display
-                    case 2:    
+                    case 2: {
                         int n[] = { config.nixieConfiguration.nNum1,
                                     config.nixieConfiguration.nNum2,
                                     config.nixieConfiguration.nNum3,
                                     config.nixieConfiguration.nNum4};
                         nixies.changeDisplay(n);
                         break;
+                    }
 
                     // Cryptocurrency ticker
-                    case 3: 
-                        // Not yet implemented
+                    case 3: {
+                        String quote = config.nixieConfiguration.cryptoQuote;
+                        String asset = config.nixieConfiguration.cryptoAsset;
+
+                        nixies.changeDisplay(queryPrice(quote, asset));
                         break;
+                    }
                 }
             }
 
