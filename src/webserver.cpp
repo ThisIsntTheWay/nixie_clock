@@ -15,8 +15,6 @@ RTC rtc1;
 
 // Replace placeholders in HTML files
 String processor(const String& var) {
-  // Unfortunately, var can only be handled withlots of if conditions:
-  // A switch..case statement cannot be used with datatype "string".
   if (var == "TUBES_BRIGHTNESS")   { return String((cfg.nixieConfiguration.brightness * 100) / 255);}   // Current Time
 
   return String();
@@ -46,7 +44,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     // Decide what to send based on message
     if      (strcmp((char*)data, "ackError") == 0)            { client->text("System error acknowledged."); }
     else if (strcmp((char*)data, "getTime") == 0)             { client->text("SYS_TIME " + rtc1.getTimeText()); }
-    else if (strcmp((char*)data, "getSysMsg") == 0)           { 
+/*  else if (strcmp((char*)data, "getSysMsg") == 0)           { 
         String msg;
         switch (cfg.sysStatus) {
             case 0:
@@ -58,7 +56,7 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
         }
 
         client->text("SYS_MSG " + msg); 
-    }
+    } */
     else if (strcmp((char*)data, "getRTCMode") == 0)          {
         String msg;
         if (cfg.rtcConfiguration.isNTP == 0)    msg = "Manual";
