@@ -361,8 +361,8 @@ AsyncCallbackJsonWebHandler *nixiehandler = new AsyncCallbackJsonWebHandler("/ap
             const char* crypto_asset = data["crypto_asset"];
             const char* crypto_quote = data["crypto_quote"];
 
-            if (!data["crypto_asset"].isNull()) tmpJSON["crypto_asset"] = crypto_asset; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
-            if (!data["crypto_quote"].isNull()) tmpJSON["crypto_quote"] = crypto_quote; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
+            if (!data["crypto_asset"].isNull()) tmpJSON["cryptoAsset"] = crypto_asset; Serial.print("[i] Webserver: Writing crypto_asset: "); Serial.println(crypto_asset);
+            if (!data["crypto_quote"].isNull()) tmpJSON["cryptoQuote"] = crypto_quote; Serial.print("[i] Webserver: Writing crypto_quote: "); Serial.println(crypto_quote);
         }
 
         // Depoison
@@ -404,7 +404,9 @@ AsyncCallbackJsonWebHandler *nixiehandler = new AsyncCallbackJsonWebHandler("/ap
             Serial.println(F("[X] WebServer: Config write failure."));
             request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
         } else {        
-            if (cfg.nixieConfiguration.crypto) cfg.nixieConfiguration.mode = 3;
+            if (cfg.nixieConfiguration.crypto) {
+                cfg.nixieConfiguration.mode = 3;
+            }
 
             // Only send request if config was actually updated.
             if (configUpdate)
@@ -438,6 +440,9 @@ AsyncCallbackJsonWebHandler *nixiehandler = new AsyncCallbackJsonWebHandler("/ap
         } else if (!manual && !cfg.nixieConfiguration.crypto) {
             cfg.nixieConfiguration.mode = 1;
             request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in autonomous mode.\"}");
+        /*} else if (cfg.nixieConfiguration.crypto)
+            cfg.nixieConfiguration.mode = 3;
+            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Nixies now in crypto mode.\"}");*/
         } else {
             request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unexpected data.\"}");
         } 
