@@ -5,7 +5,7 @@ HTTPClient http;
 String APIbase = "https://api.binance.com/api/v3/";
 
 int * queryPrice(String quote, String asset) {
-    String fullURL = APIbase + "price?symbol=" + quote + asset;
+    String fullURL = APIbase + "ticker/price?symbol=" + asset + quote;
 
     static int price[4];
 
@@ -23,11 +23,15 @@ int * queryPrice(String quote, String asset) {
         price[1] = (p / 100) % 10;
         price[0] = (p / 1000) % 10;
 
-        Serial.printf("Acquired response: %d\n", p);
+        #ifdef DEBUG
+            Serial.print("[T] Crypto: Acquired price: "); Serial.println(p);
+        #endif
         return price;
     } else {
-        Serial.println("Error during API call to: " + fullURL);
-        Serial.printf("Error code: %d\n", httpCode);
+        #ifdef DEBUG
+            Serial.print("Error during API call to: " + fullURL + ", error code: ");
+            Serial.println(httpCode);
+        #endif
 
         return 0;
     }
