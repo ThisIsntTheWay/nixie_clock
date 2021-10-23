@@ -116,6 +116,7 @@ class Configurator {
         static struct NixieConfig nixieConfiguration;
         static struct NetConfig netConfiguration;
         static struct SystemConfig sysConfiguration;
+        
         static String buildInfo;
         static String fwInfo;
 };
