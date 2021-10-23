@@ -54,6 +54,8 @@ void Configurator::prepareFS() {
             cfgNixie["brightness"] = 170;
             cfgNixie["depoisonMode"] = 1;
             cfgNixie["depoisonInterval"] = 60;
+            cfgNixie["cryptoAsset"] = "";
+            cfgNixie["cryptoQuote"] = "";
 
             // Write rtcConfig.cfg
             if (!(serializeJson(cfgNixie, configNixie)))
