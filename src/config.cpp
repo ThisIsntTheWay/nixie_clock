@@ -131,6 +131,8 @@ void Configurator::parseNixieConfig() {
             nixieConfiguration.brightness = cfgNixie["brightness"];
             nixieConfiguration.depoisonMode = cfgNixie["depoisonMode"];
             nixieConfiguration.depoisonInterval = cfgNixie["depoisonInterval"];
+            strcpy(nixieConfiguration.cryptoAsset, cfgNixie["cryptoAsset"]);
+            strcpy(nixieConfiguration.cryptoQuote, cfgNixie["cryptoQuote"]);
             
             nixieConfig.close();   
         }
@@ -149,7 +151,7 @@ void Configurator::parseSysConfig() {
         if (error) {
             String err = error.c_str();
 
-            Serial.print("[X] Nixie parser: Deserialization fault: "); Serial.println(err);
+            Serial.print("[X] Sys parser: Deserialization fault: "); Serial.println(err);
         } else {
             // Populate config struct
             sysConfiguration.keepLEDpostBoot = cfgSys["keepLEDpostBoot"];
