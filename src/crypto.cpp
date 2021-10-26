@@ -18,6 +18,10 @@ int * queryPrice(String quote, String asset) {
         deserializeJson(doc, http.getStream());
 
         int p = doc["price"].as<int>();
+        if (p > 9999) {
+            p = p / 10;
+        }
+        
         price[3] = p % 10;
         price[2] = (p / 10) % 10;
         price[1] = (p / 100) % 10;
