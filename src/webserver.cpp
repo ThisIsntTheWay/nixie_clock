@@ -595,7 +595,7 @@ void webServerStaticContent() {
         });
 
     // Static API
-        // Network config
+        // RTC sync config
         server.on("/api/rtcSync", HTTP_GET, [](AsyncWebServerRequest *request) {
             if (cfg.rtcConfiguration.isNTP) {
                 if (cfg.rtcConfiguration.isDST) {
@@ -619,6 +619,18 @@ void webServerStaticContent() {
             } else {
                 request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"NTP inactive.\"}");
             }
+        });
+        
+        server.on("/api/sysInfo", HTTP_GET, [](AsyncWebServerRequest *request) {
+            String opMode = "Release";
+            #ifdef DEBUG
+                opMode = "Debug";
+            #endif
+            #ifdef DEBUG_VERBOSE
+                opMode = "Advanced debug";
+            #endif
+
+            request->send(200, "application/json", "{\"status\":\"success\",\"system\":{\"firmware\":\"" + cfg.fwInfo + "\",\"build\":\"" + cfg.buildInfo + "\",\"opMode\":\"" + opMode + "\",\"freeHeap\":\"" + ESP.getFreeHeap() + "\"}}");
         });
 
     // Debug        
