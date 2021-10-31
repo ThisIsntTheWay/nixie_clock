@@ -244,10 +244,10 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
 
             // Set DST
             if (data.containsKey("dst")) {
-                if ( String(rDST).equals(String("true")) ) {
-                    tmpJSON["DST"] = 1;
-                } else if ( String(rDST).equals(String("false")) ) {
-                    tmpJSON["DST"] = 0;
+                if ( String(rDST).equals("true") ) {
+                    tmpJSON["isDST"] = 1;
+                } else if ( String(rDST).equals("false") ) {
+                    tmpJSON["isDST"] = 0;
                 } else {
                     InputValid = false; errMsg = errMsg + String(" DST unknown value.");
                 }
