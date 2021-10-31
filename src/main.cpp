@@ -7,7 +7,7 @@ void setup() {
   
   // Create build info
   c.buildInfo = "v" + String(BUILD_VERSION) + " (" + BUILD_REL_TYPE + ") - " + __DATE__ + ", " + __TIME__;
-  c.fwInfo = String(BUILD_VERSION) + "_" + BUILD_REL_TYPE + "-" + __DATE__ + __TIME__;
+  c.fwInfo = String(BUILD_VERSION) + "_" + BUILD_REL_TYPE;
 
   /* // Write build info
   File buildInfoFile = LITTLEFS.open(F("buildinfo"), "w");
@@ -42,13 +42,13 @@ void setup() {
   xTaskCreate(taskSetupWebserver, "Webserver setup", 5500, NULL, 1, NULL);
   
   // Perpetual tasks
-  xTaskCreate(taskShowStatus, "Status visualizer", 3500, NULL, 1, NULL);
-  xTaskCreate(taskUpdateBrightness, "Brightness updater", 2500, NULL, 1, NULL);
+  xTaskCreate(taskShowStatus, "Status visualizer", 6500, NULL, 1, NULL);
+  xTaskCreate(taskUpdateBrightness, "Brightness updater", 6500, NULL, 1, NULL);
   //xTaskCreate(taskMonitorStatus, "Status monitor", 2500, NULL, 1, NULL);            DOES NOT ACT AS EXPECTED YET
-  xTaskCreate(taskUpdateNixies, "Nixie updater", 4500, NULL, 1, c.task_perp_nix);
-  xTaskCreate(taskUpdateDepoisonState, "Depoison updater", 3500, NULL, 1, NULL);
-  xTaskCreate(taskUpdateRTC, "RTC updater", 4500, NULL, 1, c.task_perp_rtc);
-  xTaskCreate(taskUpdateCaches, "Cache updater", 5500, NULL, 1, c.task_perp_cac);
+  xTaskCreate(taskUpdateNixies, "Nixie updater", 6500, NULL, 1, c.task_perp_nix);
+  xTaskCreate(taskUpdateDepoisonState, "Depoison updater", 6500, NULL, 1, NULL);
+  xTaskCreate(taskUpdateRTC, "RTC updater", 6500, NULL, 1, c.task_perp_rtc);
+  xTaskCreate(taskUpdateCaches, "Cache updater", 6500, NULL, 1, c.task_perp_cac);
 }
 
 void loop() {}
