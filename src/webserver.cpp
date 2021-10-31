@@ -205,7 +205,6 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
     else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
 
     // Save JSON response as variables
-    const char* rM = data["mode"];
     const char* rV = data["value"];
     const char* rGMT = data["gmt"];
     const char* rDST = data["dst"];
