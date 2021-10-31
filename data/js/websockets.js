@@ -36,7 +36,6 @@ function onMessage(event) {
     if (evData.startsWith("SYS_MODE")) document.getElementById('rtc_mode').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_NTP")) document.getElementById('rtc_ntp').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_GMT")) document.getElementById('rtc_gmt').innerHTML = evData.replace(regex, '');
-    if (evData.startsWith("SYS_DST")) document.getElementById('rtc_dst').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_RSSI")) document.getElementById('wifi_rssi').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DISPLAY")) document.getElementById('tubes_display').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("NIXIE_DEP_INTERVAL")) document.getElementById('depoison_interval').innerHTML = evData.replace(regex, '');
@@ -46,6 +45,17 @@ function onMessage(event) {
     if (evData.startsWith("NIXIE_BRIGHTNESS")) document.getElementById('tubes_brightness').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_CRYPTO")) document.getElementById('crypto_ticker').innerHTML = evData.replace(regex, '');
     if (evData.startsWith("SYS_MSG")) document.getElementById('sys_msg').innerHTML = evData.replace(regex, '');
+
+    if (evData.startsWith("SYS_DST")) {
+        let DSTvalue = evData.replace(regex, '');
+        document.getElementById('rtc_dst').innerHTML = DSTvalue;
+
+        if (DSTvalue == "Active") {
+            document.getElementById('dst_enable').checked;
+        } else {
+            document.getElementById('dst_disable').checked;
+        }
+    }
 }
 
 function wsQuery() {
