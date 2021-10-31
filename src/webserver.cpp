@@ -593,6 +593,9 @@ void webServerStaticContent() {
         server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
             request->send(LITTLEFS, "/html/favicon.png", "image/png");
         });
+        server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request) {
+            request->send(LITTLEFS, "/html/favicon.png", "image/png");
+        });
 
     // Static API
         // RTC sync config
