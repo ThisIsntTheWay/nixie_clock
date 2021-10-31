@@ -5,6 +5,7 @@
 #include <AsyncElegantOTA.h>
 #include <rtc.h>
 #include <nixies.h>
+#include <NTPClient.h>
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -12,6 +13,8 @@ AsyncWebSocket ws("/ws");
 Configurator cfg;
 Nixies nix;
 RTC rtc1;
+
+WiFiUDP ntpUDPweb;
 
 // Replace placeholders in HTML files
 String processor(const String& var) {
@@ -580,6 +583,33 @@ void webServerStaticContent() {
         // Serve favicon
         server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
             request->send(LITTLEFS, "/html/favicon.png", "image/png");
+        });
+
+    // Static API
+        // Network config
+        server.on("/api/rtcSync", HTTP_GET, [](AsyncWebServerRequest *request) {
+            if (cfg.rtcConfiguration.isNTP) {
+                if (cfg.rtcConfiguration.isDST) {
+                    cfg.rtcConfiguration.tzOffset += 3600;
+                }
+
+                NTPClient timeClientWeb(ntpUDPweb, cfg.rtcConfiguration.ntpSource, cfg.rtcConfiguration.tzOffset);
+
+                timeClientWeb.begin();
+                timeClientWeb.update();
+
+                int ntpHours = timeClientWeb.getHours();
+                int ntpMinutes = timeClientWeb.getMinutes();
+                int ntpSeconds = timeClientWeb.getSeconds();
+
+                rtc1.setTime(0, ntpSeconds);
+                rtc1.setTime(1, ntpMinutes);
+                rtc1.setTime(2, ntpHours);
+
+                request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"RTC updated using NTP source.\"}");
+            } else {
+                request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"NTP inactive.\"}");
+            }
         });
 
     // Debug        
