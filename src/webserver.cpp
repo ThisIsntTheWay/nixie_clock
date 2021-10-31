@@ -82,10 +82,10 @@ void eventHandlerWS(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *
     else if (strcmp((char*)data, "getTubesBrightness") == 0)  { client->text("NIXIE_BRIGHTNESS " + String((cfg.nixieConfiguration.brightness * 100) / 255)); }
     else if (strcmp((char*)data, "getNixieDisplay") == 0)     { client->text("NIXIE_DISPLAY " + String(nix.t1) + String(nix.t2) + " " + String(nix.t3) + String(nix.t4)); }
     else if (strcmp((char*)data, "getNixieMode") == 0)        {
-      if (cfg.nixieConfiguration.crypto) { client->text("NIXIE_MODE Crypto"); }
-      else if (cfg.nixieConfiguration.mode == 1 && !cfg.nixieConfiguration.tumble) { client->text("NIXIE_MODE Clock"); }
-      else if (cfg.nixieConfiguration.mode != 1 && cfg.nixieConfiguration.tumble) { client->text("NIXIE_MODE Cycling..."); }
-      else if (cfg.nixieConfiguration.mode != 1 && !cfg.nixieConfiguration.tumble && !cfg.nixieConfiguration.crypto) { client->text("NIXIE_MODE Manual"); } }
+        if (cfg.nixieConfiguration.crypto) { client->text("NIXIE_MODE Crypto"); }
+        else if (cfg.nixieConfiguration.mode == 1 && !cfg.nixieConfiguration.tumble) { client->text("NIXIE_MODE Clock"); }
+        else if (cfg.nixieConfiguration.mode != 1 && cfg.nixieConfiguration.tumble) { client->text("NIXIE_MODE Cycling..."); }
+        else if (cfg.nixieConfiguration.mode != 1 && !cfg.nixieConfiguration.tumble && !cfg.nixieConfiguration.crypto) { client->text("NIXIE_MODE Manual"); } }
     else if (strcmp((char*)data, "getDepoisonMode") == 0)  {
       String msg;
       
@@ -210,6 +210,8 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
     const char* rGMT = data["gmt"];
     const char* rDST = data["dst"];
 
+    bool rebootPending = false;
+
     // Serialize JSON
     String response;
     serializeJson(data, response);
@@ -229,12 +231,11 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
         String errMsg = String("Failure!");
         bool InputValid = true;
 
-        // Write to file based on request body
-        tmpJSON["isNTP"] = rM;
-
         // NTP mode
         int e = 0;
         if (data["mode"] == "ntp") {
+            tmpJSON["isNTP"] = 1;
+
             if (data.containsKey("value")) {
                 if (String(rV).length() > 5) { tmpJSON["ntpSource"] = rV; }
                 else { InputValid = false; errMsg = errMsg + String(" Server bad length."); }
@@ -249,6 +250,7 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
             if (data.containsKey("dst")) {
                 if ( String(rDST).equals("true") ) {
                     tmpJSON["isDST"] = 1;
+                    rebootPending = true;
                 } else if ( String(rDST).equals("false") ) {
                     tmpJSON["isDST"] = 0;
                 } else {
@@ -259,8 +261,8 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
 
         // Manual mode
         else if (data["mode"] == "manual") {
-            tmpJSON["manEpoch"] = rV;
             tmpJSON["isNTP"] = 0;
+            tmpJSON["manEpoch"] = rV;
             //rtc.adjust(rV);
         } else {
             InputValid = false;
@@ -276,7 +278,14 @@ AsyncCallbackJsonWebHandler *rtchandler = new AsyncCallbackJsonWebHandler("/api/
             Serial.println(F("[X] WebServer: Config write failure."));
             request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
         } else {
-            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
+            if (rebootPending) {
+                request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated, system will reboot...\"}");
+                delay(1000);
+
+                ESP.restart();
+            } else {
+                request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Config was updated.\"}");
+            }
         }
     }
 
