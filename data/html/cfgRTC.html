@@ -34,7 +34,7 @@
 					}
 				}
 
-				xhr.open("GET", "/api/rtc", true);
+				xhr.open("GET", "/api/rtcSync", true);
 				xhr.send();
 			}
 			
@@ -63,8 +63,8 @@
 					// Only include non-empty values
 					if (ntp_source) {obj.value = ntp_source}
 					if (gmt) {obj.gmt = gmt}
-					if (dstR1) {obj.dst = true}
-					if (dstR2) {obj.dst = false}
+					if (dstR1) {obj.dst = "true"}
+					if (dstR2) {obj.dst = "false"}
 				} else if (chMAN = document.getElementById("manual_control").checked) {
 					let tmp = document.getElementById("manual_time").value;
 					
