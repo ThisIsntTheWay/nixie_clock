@@ -582,7 +582,16 @@ void webServerStaticContent() {
             request->send(LITTLEFS, "/html/favicon.png", "image/png");
         });
 
-    // Debug
+    // Debug        
+        #ifdef DEBUG
+            server.on("/very/secret/restart", HTTP_GET, [](AsyncWebServerRequest *request) {
+                request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"The system will reboot...\"}");
+
+                delay(1000);
+                ESP.restart(); 
+            });
+        #endif
+
         #ifdef DEBUG
             server.on("/very/secret/destroy", HTTP_GET, [](AsyncWebServerRequest *request) {
                 cfg.nukeConfig();
