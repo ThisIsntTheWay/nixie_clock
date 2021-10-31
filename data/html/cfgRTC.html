@@ -11,6 +11,7 @@
 			// Global stuff
 			var message = null;
 			var xhr = new XMLHttpRequest();
+
 			// Functions
 			function showHideConfig() {
 				var chkNTP = document.getElementById("ntp_control");
@@ -72,7 +73,7 @@
 				}
 
 				// Form POST request
-				xhr.open("POST", "/api/RTCendpoint", true);
+				xhr.open("POST", "/api/rtc", true);
 				xhr.setRequestHeader('Content-Type', 'application/json');
 				xhr.send(JSON.stringify(obj));
 			}
