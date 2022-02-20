@@ -30,16 +30,11 @@ Nixies::Nixies(int DS, int ST, int SH) {
     this->SR_ST = ST;
     this->SR_SH = SH;
 
-    Serial.begin(115200);
-
-    Serial.println("Setting register pins.");
     pinMode(DS, OUTPUT);
     pinMode(ST, OUTPUT);
     pinMode(SH, OUTPUT);
 
     // Set up ledC, creating a channel for each opto
-    Serial.println(F("[i] Nixie: Setting up LED controller..."));
-
     for (int i = 0; i < 4; i++) {
         int p = optos[i];
         pinMode(p, OUTPUT);
