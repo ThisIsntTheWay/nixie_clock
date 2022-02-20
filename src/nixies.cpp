@@ -63,8 +63,8 @@ bool Nixies::IsReady() {
 /**************************************************************************/
 void Nixies::SetDisplay(int displayVal[4]) {
     digitalWrite(this->SR_ST, 0);
-        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[3] << 4) | displayVal[2]);
-        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[1] << 4) | displayVal[0]);
+        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[3] << 4) | displayVal[1]);
+        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[2] << 4) | displayVal[0]);
     digitalWrite(this->SR_ST, 1);
 }
 
