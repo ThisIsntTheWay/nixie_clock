@@ -30,6 +30,7 @@ void setup() {
 
   DisplayController dController;
   xTaskCreate(taskSetStatusLED, "O_LED daemon", 4000, NULL, 4, &taskOLed);
+  xTaskCreate(taskSetDisplay, "Display daemon", 6500, NULL, 5, &taskDisplay);
   dController.OnboardLEDmode = 3;
 
   // EEPROM must be initialized before LittleFS, otherwise it will fail.
@@ -45,7 +46,6 @@ void setup() {
   webServerInit();
   
   // Remaining tasks
-  xTaskCreate(taskSetDisplay, "Display daemon", 6500, NULL, 5, &taskDisplay);
   xTaskCreate(taskTimekeeper, "Time daemon", 4000, NULL, 3, &taskTime);
   dController.OnboardLEDmode = 0;
 
