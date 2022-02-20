@@ -15,7 +15,7 @@ int DisplayController::TubeVals[4][2] = {{9, 255}, {9, 255}, {9, 255}, {9, 255}}
 bool DisplayController::AllowRESTcontrol = true;
 bool DisplayController::Clock = false;
 
-uint8_t DisplayController::OnboardLedPWM = 75;
+uint8_t DisplayController::OnboardLedPWM = 20;
 uint8_t DisplayController::OnboardLEDmode = 0;
 uint8_t DisplayController::OnboardLEDblinkAmount = 0;
 
@@ -33,18 +33,16 @@ void taskVisIndicator(void* paramter) {
     for (;;) {
         // Pulsate PWM
         while (netConfig.InInit) {
-            for (int i = 0; i < MAX_PWM; i++) {
+            for (int i = 0; i <= MAX_PWM; i++) {
                 if (!netConfig.InInit) break;
-
                 for (int a = 0; a < 4; a++) {
                     DisplayController::TubeVals[a][1] = i;
                 }
 
                 vTaskDelay(PULSATE_INTERVAL);
             }
-            for (int i = MAX_PWM; i > 1; i--) {
+            for (int i = MAX_PWM; i >= 1; i--) {
                 if (!netConfig.InInit) break;
-
                 for (int a = 0; a < 4; a++) {
                     DisplayController::TubeVals[a][1] = i;
                 }
@@ -70,6 +68,7 @@ void taskVisIndicator(void* paramter) {
         
         // Set default values
         DisplayController::Clock = true;
+
         for (int i = 0; i < 4; i++) {
             DisplayController::TubeVals[i][0] = 9;
             DisplayController::TubeVals[i][1] = 150;
