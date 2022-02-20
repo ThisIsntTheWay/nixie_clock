@@ -31,6 +31,7 @@ void setup() {
   DisplayController dController;
   xTaskCreate(taskSetStatusLED, "O_LED daemon", 4000, NULL, 4, &taskOLed);
   xTaskCreate(taskSetDisplay, "Display daemon", 6500, NULL, 5, &taskDisplay);
+  xTaskCreate(taskVisIndicator, "TEMP", 3000, NULL, 1, NULL);
   dController.OnboardLEDmode = 3;
 
   // EEPROM must be initialized before LittleFS, otherwise it will fail.

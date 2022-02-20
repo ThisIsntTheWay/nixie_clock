@@ -2,6 +2,8 @@
 #include <timekeeper.h>
 
 #define SOCKET_FOOTPRINT_INVERTED
+#define PULSATE_INTERVAL 20
+#define MAX_PWM 150
 
 /* -------------------
     Vars
@@ -21,6 +23,61 @@ uint8_t DisplayController::OnboardLEDblinkAmount = 0;
 /* -------------------
     Main
    ------------------- */
+
+void taskVisIndicator(void* paramter) {
+    while (!nixies.IsReady()) {
+        vTaskDelay(200);
+    }
+    
+    NetworkConfig netConfig;
+
+    for (;;) {
+        // Pulsate PWM
+        while (netConfig.InInit) {
+            for (int i = 0; i < MAX_PWM; i++) {
+                if (!netConfig.InInit) break;
+
+                for (int a = 0; a < 4; a++) {
+                    DisplayController::TubeVals[a][1] = i;
+                }
+
+                vTaskDelay(PULSATE_INTERVAL);
+            }
+            for (int i = MAX_PWM; i > 1; i--) {
+                if (!netConfig.InInit) break;
+
+                for (int a = 0; a < 4; a++) {
+                    DisplayController::TubeVals[a][1] = i;
+                }
+
+                vTaskDelay(PULSATE_INTERVAL);
+            }
+        }
+
+        // Set initial num based on netConfig state
+        for (int a = 0; a < 4; a++) {
+            DisplayController::TubeVals[a][0] = !netConfig.IsAP;
+        }
+
+        // Blink tubes
+        uint8_t blinkAmount = 6;
+        for (int l = 0; l < blinkAmount; l++) {
+            for (int i = 0; i < 4; i++) {
+                DisplayController::TubeVals[i][1] = (l % 2) ? 150 : 20;
+            }
+
+            vTaskDelay(150);
+        }
+        
+        // Set default values
+        for (int i = 0; i < 4; i++) {
+            DisplayController::TubeVals[i][0] = 9;
+            DisplayController::TubeVals[i][1] = 150;
+        }
+
+        vTaskDelete(NULL);
+    }
+}
 
 void taskSetDisplay(void* parameter) {
     while (!nixies.IsReady()) {
@@ -121,14 +178,13 @@ void taskSetStatusLED(void* parameter) {
             case 3: {
                 // Pulsate
                 // Duty cycles above 150 are hardly perceived as brighter, so this value serves as the ceiling.
-                uint8_t maxPWM = 150;
-                for (int i = 0; i < maxPWM; i++) {
+                for (int i = 0; i < MAX_PWM; i++) {
                     if (DisplayController::OnboardLEDmode != 3) break;
 
                     ledcWrite(ONBOARD_LEDC_CHANNEL, i);
                     vTaskDelay(ONBOARD_LED_PULSE_INTERVAL);
                 }
-                for (int i = 170; i > 0; i--) {
+                for (int i = MAX_PWM; i > 0; i--) {
                     if (DisplayController::OnboardLEDmode != 3) break;
 
                     ledcWrite(ONBOARD_LEDC_CHANNEL, i);

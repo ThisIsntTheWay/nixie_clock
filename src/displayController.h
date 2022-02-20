@@ -6,7 +6,7 @@
 #define SH_PIN  26   // Clock
 #define ST_PIN  25   // Latch
 
-#define TASK_TICK_DELAY 100
+#define TASK_TICK_DELAY 10
 #define LEDC_PWM_FREQUENCY 100
 #define ONBOARD_LEDC_CHANNEL 15
 
@@ -29,5 +29,6 @@ class DisplayController {
 void taskSetDisplay(void* parameter);
 void taskSetStatusLED(void* parameter);
 void taskSetLeds(void* parameter);
+void taskVisIndicator(void* paramter);
 
 #endif
