@@ -36,8 +36,8 @@ class NetworkConfig {
         void initSoftAP();
         bool splitIPaddress(char*, int*);
         
-        const char *softAPssid = "Nixie rack display";
-        const char *softAPpsk = "NixieRackDisplay";
+        const char *softAPssid = "Nixie Clock";
+        const char *softAPpsk = "NixieClock123";
 };
 
 #endif

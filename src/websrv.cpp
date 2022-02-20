@@ -203,16 +203,18 @@ AsyncCallbackJsonWebHandler *systemHandler = new AsyncCallbackJsonWebHandler("/a
 });
 
 AsyncCallbackJsonWebHandler *networkHandler = new AsyncCallbackJsonWebHandler("/api/network", [](AsyncWebServerRequest *request, JsonVariant &json) {
-    AsyncWebHeader* h = request->getHeader("Authorization");
-    if (!h) {
-        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Authorization header is missing.\"}");
-        return;
-    } else {
-        if (authenticator.GetAuthCode() != h->value()) {
-            request->send(403, "application/json", "{\"status\": \"error\", \"message\": \"Invalid authentication code.\"}");
+    /*
+        AsyncWebHeader* h = request->getHeader("Authorization");
+        if (!h) {
+            request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Authorization header is missing.\"}");
             return;
+        } else {
+            if (authenticator.GetAuthCode() != h->value()) {
+                request->send(403, "application/json", "{\"status\": \"error\", \"message\": \"Invalid authentication code.\"}");
+                return;
+            }
         }
-    }
+    */
 
     StaticJsonDocument<385> data;
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
