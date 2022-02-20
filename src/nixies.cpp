@@ -1,96 +1,74 @@
-#include <Arduino.h>
 #include <nixies.h>
-#include <config.h>
 
-//#define DEBUG_VERBOSE
 #define SOCKET_FOOTPRINT_INVERTED
 
-//int oPins[] = {5, 4, 2, 15};        // Board REV4 and lower
-int oPins[] = {19, 18, 4, 15};      // Board v2 (REV5) (July 2021)
+/*  -------------------------------------
+                VARS
+    ------------------------------------- */
+int optos[] = {4, 15, 18, 19};
 
-// Instantiate statics
-int Nixies::t1 = 0;
-int Nixies::t2 = 0;
-int Nixies::t3 = 0;
-int Nixies::t4 = 0;
-
-int Nixies::currHour = 0;
-int Nixies::lastHour = 0;
+/*  -------------------------------------
+                MAIN
+    ------------------------------------- */
 
 /**************************************************************************/
 /*!
-    @brief      Converts a number of datatype 'byte' into a BCD code.
-    @param val  Number to convert.
+    @brief Default constructor.
 */
 /**************************************************************************/
-byte Nixies::decToBcd(byte val) {
-    if (val == 0)   { return 0; }
-    else            { return((val/10*16) + (val%10)); }
+Nixies::Nixies() {
 }
 
 /**************************************************************************/
 /*!
-    @brief  Initialize nixies by setting up the shift registers and LEDC.
-    @param DS Data-In pin of shift registers
-    @param ST Shift register clock pin
-    @param SH Shift register latch pin
-    @param pwmFreq PWM frequency for LEDC
+    @brief Prepares shift registers and opto isolators.
+    @param DS DS pin of shift registers.
+    @param ST ST pin of shift registers.
+    @param SH SH pin of shift registers.
 */
 /**************************************************************************/
-void Nixies::initialize(int DS, int ST, int SH, int pwmFreq) {
+Nixies::Nixies(int DS, int ST, int SH) {
+    this->SR_DS = DS;
+    this->SR_ST = ST;
+    this->SR_SH = SH;
+
     pinMode(DS, OUTPUT);
     pinMode(ST, OUTPUT);
     pinMode(SH, OUTPUT);
 
     // Set up ledC, creating a channel for each opto
-    Serial.println(F("[i] Nixie: Setting up LED controller..."));
-
     for (int i = 0; i < 4; i++) {
-        int p = oPins[i];
-
+        int p = optos[i];
         pinMode(p, OUTPUT);
         
-        ledcSetup(i, pwmFreq, 8);
+        ledcSetup(i, 100, 8);
         ledcAttachPin(p, i);
-        
-        #ifdef DEBUG
-            Serial.printf("[i] Nixie: LEDC channel #%d on pin '%d' ready.\n", i, p);
-        #endif
     }
+
+    this->ready = true;
 }
 
 /**************************************************************************/
 /*!
-    @brief          Change tube display.
-    @param numArr   Array of size 4 containing the new display.
-    @warning        Only the first two numbers will be pushed if 'FULL_TUBESET' is undefined.
+    @brief Returns true if nixies have been set up properly.
 */
 /**************************************************************************/
-void Nixies::changeDisplay(int numArr[]) {
-    // Update number cache
-    t1 = numArr[0];
-    t2 = numArr[1];
-    t3 = numArr[2];
-    t4 = numArr[3];
-    
+bool Nixies::IsReady() {
+    return this->ready;
+}
+
+/**************************************************************************/
+/*!
+    @brief Set display.
+    @param displayVal Array of all tube values.
+*/
+/**************************************************************************/
+void Nixies::SetDisplay(int displayVal[4]) {
     #ifdef SOCKET_FOOTPRINT_INVERTED
-        /*
-            IN	|	GET
-            0	-	1
-            1	-	0
-            2	-	9
-            3	-	8
-            4	-	7
-            5	-	6
-            6	-	5
-            7	-	4
-            8	-	3
-            9	-	2
-        */
         for (int i = 0; i < 4; i++) {  // This assumes that numArr is !> 4
             int a;
 
-            switch (numArr[i]) {
+            switch (displayVal[i]) {
                 case 0:
                     a = 1;
                     break;
@@ -98,115 +76,49 @@ void Nixies::changeDisplay(int numArr[]) {
                     a = 0;
                     break;
                 default:
-                    a = 11 - numArr[i];
+                    a = 11 - displayVal[i];
             }
 
-            numArr[i] = a;
+            displayVal[i] = a;
         }
     #endif
 
-    // The numArr index placements aren't logical to the eye, but that's how the shift registers are arranged
-    digitalWrite(ST_PIN, 0);
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[3] << 4) | numArr[1]);
-    #ifdef FULL_TUBESET
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, (numArr[2] << 4) | numArr[0]);
-    #endif
-    digitalWrite(ST_PIN, 1);
-
-    /*
-    #ifdef DEBUG_VERBOSE
-        Serial.printf("[T] Nixie: Setting tubes: %d%d %d%d\n", n1, n2, n3, n4);
-    #endif  */
-
-    #ifdef DEBUG_VERBOSE
-        Serial.printf("[i] Nixies: Display cache: %d%d %d%d\n", t1, t2, t3, t4);
-    #endif
+    digitalWrite(this->SR_ST, 0);
+        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[3] << 4) | displayVal[1]);
+        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[2] << 4) | displayVal[0]);
+    digitalWrite(this->SR_ST, 1);
 }
 
 /**************************************************************************/
 /*!
-    @brief  Returns the nixie tube display cache as single number. (examples: 1234, 8888, 1637)
+    @brief Blank all tubes by writing invalid b1111 to all BCD decoders and turning anodes off.
 */
 /**************************************************************************/
-int Nixies::returnCache() {
-    Serial.printf("vals are: %d%d%d%d\n", t1, t2, t3, t4);
-
-    int tmp = (t1 * 1000) + (t2 * 100) + (t3 * 10) + t4;
-    Serial.printf("[i] returning nixe cache: %d\n", tmp);
-    return tmp;
-}
-
-/**************************************************************************/
-/*!
-    @brief  "Tumble" the display, essentially achieving cathode depoisoning
-*/
-/**************************************************************************/
-void Nixies::tumbleDisplay() {
-    Nixies::isTumbling = true;
-
-    #ifdef DEBUG
-        Serial.println("[T] Nixie: FUNC: Tumbling display.");
-    #endif
-
-    for (int i = 0; i < 10; i++) {
-        byte a = Nixies::decToBcd(i);
-        int n[] = {a, a, a, a};
-
-        Nixies::changeDisplay(n);
-        vTaskDelay(DEPOISON_DELAY);
-    }
-    
-    for (int i = 9; i > -1; i--) {
-        byte a = Nixies::decToBcd(i);
-        int n[] = {a, a, a, a};
-
-        Nixies::changeDisplay(n);
-        vTaskDelay(DEPOISON_DELAY);
-    }
-
-    Nixies::isTumbling = false;
-}
-
-/**************************************************************************/
-/*!
-    @brief  Turn off the display.
-*/
-/**************************************************************************/
-void Nixies::blankDisplay() {
+void Nixies::BlankDisplay() {
     // Push 0xFF to BCD decoders, disabling all outputs
-    digitalWrite(ST_PIN, 0);
-        shiftOut(DS_PIN, SH_PIN, MSBFIRST, 0b1111111);
-        #ifdef FULL_TUBESET
-            shiftOut(DS_PIN, SH_PIN, MSBFIRST, 0b1111111);
-        #endif
-    digitalWrite(ST_PIN, 1);
+    digitalWrite(this->SR_ST, 0);
+        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, 0b1111111);
+        shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, 0b1111111);
+    digitalWrite(this->SR_ST, 1);
 
     // Turn anode(s) off to prevent floating cathodes
-    int aSize = sizeof(oPins)/sizeof(oPins[0]);
-    for (int i = 1; i < aSize; i++) {
+    int aSize = sizeof(optos)/sizeof(optos[0]);
+    for (int i = 0; i < aSize; i++) {
         ledcWrite(i, 0);
     }
 }
 
 /**************************************************************************/
 /*!
-    @brief  Set the brightness of a tube
-    @param ch LEDC channel (ignored if param 'all' is true)
-    @param pwm Duty cycle length
-    @param all Change all channels if true
+    @brief Blanks a specific tube by turning its anode off.
+    @param which LEDC channel of target tube, zero-indexed.
 */
 /**************************************************************************/
-void Nixies::setBrightness(int ch, int pwm, bool all) {
-    #ifdef DEBUG_VERBOSE
-        Serial.printf("[T] Nixie: Setting PWM of '%d' on LEDC channel #%d\n", pwm, ch);
-    #endif
-
-    if (all) {
-        for (int i = 0; i <= 3; i++) {
-            ledcWrite(i, pwm);
-        }
-    } else {
-        ledcWrite(ch, pwm);
+void Nixies::blankTube(int which) {
+    if (which > sizeof(optos)/sizeof(optos)) {
+        Serial.printf("[X] BlankDisplay invalid 'which': %d.\n", which);
+        throw;
     }
-        
+
+    ledcWrite(which, 0);
 }

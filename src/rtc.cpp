@@ -188,7 +188,7 @@ byte RTC::writeRegister(byte reg, byte payload) {
 /*!
     @brief  Reads from a timekeeping register. Returns a DEC number.
     @param unit 0: Seconds, 1: Minutes, 2: Hours.
-    @warning If a register higher than 0x02 is accessed, the number '99' will be rerturned.
+    @warning If a register higher than 0x02 is accessed, the number '99' will be returned.
 */
 /**************************************************************************/
 int RTC::getTime(int unit) {
