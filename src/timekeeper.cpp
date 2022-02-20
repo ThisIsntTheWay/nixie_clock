@@ -1,6 +1,9 @@
 #include <timekeeper.h>
+#include <rtc.h>
 
 WiFiUDP ntpUDP;
+RTC rtc;
+Timekeeper _timekeeper;
 
 //  Statics
 bool Timekeeper::MountStatus = true;
@@ -13,8 +16,6 @@ Timekeeper::Time Timekeeper::time;
 int Timekeeper::DstOffset = 3600;
 int Timekeeper::UtcOffset = 3600;
 char Timekeeper::NtpSource[32];
-
-Timekeeper _timekeeper;
 
 void Timekeeper::ParseNTPconfig(String ntpFile) {
     if (!LITTLEFS.exists(ntpFile)) {
@@ -74,18 +75,55 @@ void taskTimekeeper(void *parameter) {
     timeClient.begin();
     timeClient.update();
 
-    Timekeeper::BootEpoch = timeClient.getEpochTime(); 
+    Timekeeper::BootEpoch = timeClient.getEpochTime();
+    
+    bool rtcState = rtc.initialize();
+    Serial.printf("[i] RTC state: %d\n", rtcState);
+    
+    uint8_t rtcStartupSate = rtc.checkStartup();
+    Serial.printf("[i] RTC startup state: %d\n", rtcStartupSate);
 
     for (;;) {
         if (!netConfig.IsAP) {
             timeClient.update();
             Timekeeper::NowEpoch = timeClient.getEpochTime();
+
+            Timekeeper::time.seconds = timeClient.getSeconds();
+            Timekeeper::time.minutes = timeClient.getMinutes();
+            Timekeeper::time.hours = timeClient.getHours();
+
+            // Update RTC if applicable
+            if (rtcState) {
+                uint8_t rtcMinutes = rtc.getTime(1);
+                uint8_t rtcHours = rtc.getTime(2);
+
+                if (rtcMinutes != Timekeeper::time.minutes) {
+                    Serial.println("Updating RTC minutes...");
+                    rtc.setTime(1, Timekeeper::time.minutes);
+                }
+                if (rtcHours != Timekeeper::time.hours) {
+                    Serial.println("Updating RTC hours...");
+                    rtc.setTime(2, Timekeeper::time.hours);
+                }
+            }
+        } else {
+            Serial.println("Time source: RTC");
+            if (rtcState) {
+                Timekeeper::time.minutes = rtc.getTime(1);
+                Timekeeper::time.hours = rtc.getTime(2);
+            }
         }
 
-        Timekeeper::time.seconds = timeClient.getSeconds();
-        Timekeeper::time.minutes = timeClient.getMinutes();
-        Timekeeper::time.hours = timeClient.getHours();
-        
+        if (rtcState) {
+            int timeArr[] = {
+                rtc.getTime(2),
+                rtc.getTime(1),
+                rtc.getTime(0)
+            };
+
+            Serial.printf("[i] RTC time: %d:%d:%d\n", timeArr[0], timeArr[1], timeArr[2]);
+        }
+
         vTaskDelay(1000);
     }
 }
