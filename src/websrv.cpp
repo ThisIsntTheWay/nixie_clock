@@ -15,7 +15,7 @@ NetworkConfig netConfig;
 Timekeeper timekeeper;
 
 // Landing page
-const char index_html[] PROGMEM = "<html><head><title>Nixie rack display</title></head><body><center><h1>Nixie rack display</h1></p>For documentation, please see the <a href='https://github.com/ThisIsntTheWay/rack_nixie_display/wiki'>GitHub wiki</a>.</center></body></html>";
+const char index_html[] PROGMEM = "<html><head><title>Nixie Clock</title></head><body><center><h1>Nixie clock</h1></p>For documentation, please see the <a href='https://github.com/ThisIsntTheWay/rack_nixie_display/wiki'>GitHub wiki</a>.</center></body></html>";
 
 AsyncCallbackJsonWebHandler *displayHandler = new AsyncCallbackJsonWebHandler("/api/display", [](AsyncWebServerRequest *request, JsonVariant &json) {
     bool errorEncountered = false;
