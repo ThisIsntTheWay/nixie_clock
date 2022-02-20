@@ -1,5 +1,7 @@
 #include <nixies.h>
 
+#define SOCKET_FOOTPRINT_INVERTED
+
 /*  -------------------------------------
                 VARS
     ------------------------------------- */
@@ -62,6 +64,25 @@ bool Nixies::IsReady() {
 */
 /**************************************************************************/
 void Nixies::SetDisplay(int displayVal[4]) {
+    #ifdef SOCKET_FOOTPRINT_INVERTED
+        for (int i = 0; i < 4; i++) {  // This assumes that numArr is !> 4
+            int a;
+
+            switch (displayVal[i]) {
+                case 0:
+                    a = 1;
+                    break;
+                case 1:
+                    a = 0;
+                    break;
+                default:
+                    a = 11 - displayVal[i];
+            }
+
+            displayVal[i] = a;
+        }
+    #endif
+
     digitalWrite(this->SR_ST, 0);
         shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[3] << 4) | displayVal[1]);
         shiftOut(this->SR_DS, this->SR_SH, MSBFIRST, (displayVal[2] << 4) | displayVal[0]);

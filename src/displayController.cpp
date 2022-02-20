@@ -1,7 +1,6 @@
 #include <displayController.h>
 #include <timekeeper.h>
 
-#define SOCKET_FOOTPRINT_INVERTED
 #define PULSATE_INTERVAL 5
 #define MAX_PWM 150
 
@@ -96,23 +95,7 @@ void taskSetDisplay(void* parameter) {
                 int8_t tubeVal = DisplayController::TubeVals[i][0];
                 int8_t tubePWM = DisplayController::TubeVals[i][1];
 
-                #ifdef SOCKET_FOOTPRINT_INVERTED
-                    uint8_t a;
-                    switch (tubeVal) {
-                        case 0:
-                            a = 1;
-                            break;
-                        case 1:
-                            a = 0;
-                            break;
-                        default:
-                            a = 11 - tubeVal;
-                    }
-
-                    t[i] = a;
-                #else
-                    t[i] = tubeVal;
-                #endif
+                t[i] = tubeVal;
 
                 // Fully turn off tube instead of leaving cathodes floating.
                 if (tubeVal > 9)    { ledcWrite(i, 0); }
