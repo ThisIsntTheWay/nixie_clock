@@ -88,35 +88,27 @@ void taskSetDisplay(void* parameter) {
     for (;;) {
         int t[4] = {11, 11, 11, 11};
 
-        if (!DisplayController::Clock) {
-            // Normal operation
-            for (int i = 0; i < 4; i++) {
-                int8_t tubeVal = DisplayController::TubeVals[i][0];
-                int8_t tubePWM = DisplayController::TubeVals[i][1];
+        if (!timekeeper.RtcHealthy) {
+            DisplayController::OnboardLEDmode = 2;
+            DisplayController::OnboardLEDblinkAmount = 4;
+        }
 
-                t[i] = tubeVal;
-
-                // Fully turn off tube instead of leaving cathodes floating.
-                if (tubeVal > 9)    { ledcWrite(i, 0); }
-                else                { ledcWrite(i, tubePWM); }
-            }
-        } else {
-            t[0] = timekeeper.time.hours / 10;
-            t[1] = timekeeper.time.hours % 10;
-            t[2] = timekeeper.time.minutes / 10;
-            t[3] = timekeeper.time.minutes % 10;
-
-            for (int i = 0; i < 4; i++) {
-                int8_t tubePWM = DisplayController::TubeVals[i][1];
-                ledcWrite(i, tubePWM);
-            }
+        if (DisplayController::Clock) {
+            DisplayController::TubeVals[0][0] = timekeeper.time.hours / 10;
+            DisplayController::TubeVals[1][0] = timekeeper.time.hours % 10;
+            DisplayController::TubeVals[2][0] = timekeeper.time.minutes / 10;
+            DisplayController::TubeVals[3][0] = timekeeper.time.minutes % 10;
         }
         
-        // Blank all tubes that were not considered. (Their index is missing in TubeVals)
         for (int i = 0; i < 4; i++) {
-            if (t[i] == 11) {
-                ledcWrite(i, 0);
-            }
+            int8_t tubeVal = DisplayController::TubeVals[i][0];
+            int8_t tubePWM = DisplayController::TubeVals[i][1];
+
+            t[i] = tubeVal;
+
+            // Fully turn off tube instead of leaving cathodes floating.
+            if (tubeVal > 9)    { ledcWrite(i, 0); }
+            else                { ledcWrite(i, tubePWM); }
         }
 
         nixies.SetDisplay(t);
