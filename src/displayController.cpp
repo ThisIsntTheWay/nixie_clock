@@ -70,6 +70,7 @@ void taskVisIndicator(void* paramter) {
         }
         
         // Set default values
+        DisplayController::Clock = true;
         for (int i = 0; i < 4; i++) {
             DisplayController::TubeVals[i][0] = 9;
             DisplayController::TubeVals[i][1] = 150;
