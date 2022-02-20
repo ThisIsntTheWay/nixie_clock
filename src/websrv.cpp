@@ -327,6 +327,16 @@ void webServerStaticContent() {
             default: responseBody["wifi"] = "unknownState"; break;
         }
         
+        JsonArray time = responseBody.createNestedArray("time");
+            time.add(timekeeper.time.hours);
+            time.add(timekeeper.time.minutes);
+            time.add(timekeeper.time.seconds);
+            
+        JsonArray status = responseBody.createNestedArray("status");
+            if (displayController.Clock)    status.add("isClock");
+            if (authCode > 0)               status.add("authRequired");
+            if (!timekeeper.RtcHealthy)     status.add("rtcBad");
+        
         serializeJsonPretty(responseBody, *response);
         request->send(response);
     });
@@ -421,10 +431,6 @@ void webServerStaticContent() {
             objOled["pwm"] = displayController.OnboardLedPWM;
             objOled["mode"] = displayController.OnboardLEDmode;
             objOled["blinkAmount"] = displayController.OnboardLEDblinkAmount;
-            
-        JsonArray status = responseBody.createNestedArray("status");
-            if (displayController.Clock)    status.add("isClock");
-            if (authCode > 0)               status.add("authRequired");
 
         serializeJsonPretty(responseBody, *response);
         request->send(response);
