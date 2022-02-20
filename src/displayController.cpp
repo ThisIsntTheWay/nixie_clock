@@ -2,7 +2,7 @@
 #include <timekeeper.h>
 
 #define SOCKET_FOOTPRINT_INVERTED
-#define PULSATE_INTERVAL 20
+#define PULSATE_INTERVAL 5
 #define MAX_PWM 150
 
 /* -------------------
