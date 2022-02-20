@@ -17,6 +17,7 @@ class Timekeeper {
         static int UpdateInterval;
         static char NtpSource[32];
         static bool MountStatus;
+        static bool RtcHealthy;
         
         void ParseNTPconfig(String);
 
