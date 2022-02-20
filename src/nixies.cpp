@@ -42,15 +42,10 @@ Nixies::Nixies(int DS, int ST, int SH) {
 
     for (int i = 0; i < 4; i++) {
         int p = optos[i];
-        Serial.printf("it %d: opto: %d\n", i, p);
-
         pinMode(p, OUTPUT);
         
-        Serial.println("> ledcSetup");
         ledcSetup(i, 100, 8);
-        Serial.println("> ledcAttach");
         ledcAttachPin(p, i);
-        Serial.println("> Done");
     }
 
     this->ready = true;
