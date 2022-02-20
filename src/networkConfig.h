@@ -12,6 +12,7 @@ class NetworkConfig {
         static String PSK;
         static bool IsAP;
         static bool IsStatic;
+        static bool InInit;
 
         void InitConnection();
         bool WriteWiFiConfig(bool);

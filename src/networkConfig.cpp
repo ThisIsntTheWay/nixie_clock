@@ -3,6 +3,7 @@
 String NetworkConfig::SSID = "";
 String NetworkConfig::PSK = "";
 bool NetworkConfig::IsAP = false;
+bool NetworkConfig::InInit = true;
 bool NetworkConfig::IsStatic = false;
 
 /**************************************************************************/
@@ -416,6 +417,8 @@ void NetworkConfig::InitConnection() {
             this->initSoftAP();
         }
     }
+
+    this->InInit = false;
 }
 
 /**************************************************************************/
