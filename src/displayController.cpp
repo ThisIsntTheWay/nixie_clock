@@ -10,7 +10,7 @@
 
 Nixies nixies(DS_PIN, ST_PIN, SH_PIN);
 
-int DisplayController::TubeVals[4][2] = {{9, 255}, {9, 255}, {9, 255}, {9, 255}};
+int DisplayController::TubeVals[4][2] = {{9, 170}, {9, 170}, {9, 170}, {9, 170}};
 
 bool DisplayController::AllowRESTcontrol = true;
 bool DisplayController::DoDetox = false;
@@ -118,7 +118,7 @@ void taskSetDisplay(void* parameter) {
             nixies.SetDisplay(t);
         } else {
             if (DisplayController::DetoxCycle != 10) {
-                msMultiplier = 1000;
+                msMultiplier = 75;
                 for (int i = 0; i < 4; i++) {
                     t[i] = DisplayController::DetoxCycle;
                 }
