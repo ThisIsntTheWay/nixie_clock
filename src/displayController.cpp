@@ -13,11 +13,13 @@ Nixies nixies(DS_PIN, ST_PIN, SH_PIN);
 int DisplayController::TubeVals[4][2] = {{9, 255}, {9, 255}, {9, 255}, {9, 255}};
 
 bool DisplayController::AllowRESTcontrol = true;
+bool DisplayController::DoDetox = false;
 bool DisplayController::Clock = false;
 
 uint8_t DisplayController::OnboardLedPWM = 20;
 uint8_t DisplayController::OnboardLEDmode = 0;
 uint8_t DisplayController::OnboardLEDblinkAmount = 0;
+uint8_t DisplayController::DetoxCycle = 0;
 
 /* -------------------
     Main
@@ -86,6 +88,7 @@ void taskSetDisplay(void* parameter) {
     Timekeeper timekeeper;
 
     for (;;) {
+        int msMultiplier = 1;
         int t[4] = {11, 11, 11, 11};
 
         if (!timekeeper.RtcHealthy) {
@@ -100,19 +103,35 @@ void taskSetDisplay(void* parameter) {
             DisplayController::TubeVals[3][0] = timekeeper.time.minutes % 10;
         }
         
-        for (int i = 0; i < 4; i++) {
-            int8_t tubeVal = DisplayController::TubeVals[i][0];
-            int8_t tubePWM = DisplayController::TubeVals[i][1];
+        if (!DisplayController::DoDetox) {
+            for (int i = 0; i < 4; i++) {
+                int8_t tubeVal = DisplayController::TubeVals[i][0];
+                int8_t tubePWM = DisplayController::TubeVals[i][1];
 
-            t[i] = tubeVal;
+                t[i] = tubeVal;
 
-            // Fully turn off tube instead of leaving cathodes floating.
-            if (tubeVal > 9)    { ledcWrite(i, 0); }
-            else                { ledcWrite(i, tubePWM); }
+                // Fully turn off tube instead of leaving cathodes floating.
+                if (tubeVal > 9)    { ledcWrite(i, 0); }
+                else                { ledcWrite(i, tubePWM); }
+            }
+
+            nixies.SetDisplay(t);
+        } else {
+            if (DisplayController::DetoxCycle != 10) {
+                msMultiplier = 1000;
+                for (int i = 0; i < 4; i++) {
+                    t[i] = DisplayController::DetoxCycle;
+                }
+
+                DisplayController::DetoxCycle++;
+                nixies.SetDisplay(t);
+            } else {
+                DisplayController::DetoxCycle = 0;
+                DisplayController::DoDetox = false;
+            }
         }
-
-        nixies.SetDisplay(t);
-        vTaskDelay(TASK_TICK_DELAY);
+        
+        vTaskDelay(TASK_TICK_DELAY * msMultiplier);
     }
 }
 

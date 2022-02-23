@@ -15,6 +15,7 @@ class Timekeeper {
         static int DstOffset;
         static int UtcOffset;
         static int UpdateInterval;
+        static int8_t LastHour;
         static char NtpSource[32];
         static bool MountStatus;
         static bool RtcHealthy;

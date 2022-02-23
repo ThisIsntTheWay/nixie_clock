@@ -26,9 +26,9 @@ AsyncCallbackJsonWebHandler *displayHandler = new AsyncCallbackJsonWebHandler("/
     int args = request->args(); 
     bool authPresent = false;
 
-    #ifdef DEBUG
-        Serial.printf("[!] Authcode set: %d\n", authCode);
-    #endif DEBUG
+#ifdef DEBUG
+    Serial.printf("[!] Authcode set: %d\n", authCode);
+#endif DEBUG
 
     for (int i = 0 ; i < args ; i++) {
         if (strcmp(request->argName(i).c_str(), "auth") == 0) {
@@ -436,9 +436,15 @@ void webServerStaticContent() {
         request->send(response);
     });
     
+    // Special endpoints
     server.on("/api/clock", HTTP_GET, [](AsyncWebServerRequest *request) {
         displayController.Clock = !displayController.Clock;
         request->send(200, "text/plain", displayController.Clock ? "Now active" : "Now inactive");
+    });
+    
+    server.on("/api/forceDetox", HTTP_GET, [](AsyncWebServerRequest *request) {
+        displayController.DoDetox = true;
+        request->send(200, "text/plain", "Detox scheduled.");
     });
 }
 

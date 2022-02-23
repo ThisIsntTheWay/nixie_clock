@@ -1,13 +1,16 @@
 #include <timekeeper.h>
 #include <rtc.h>
+#include <displayController.h>
 
 WiFiUDP ntpUDP;
 RTC rtc;
 Timekeeper _timekeeper;
+DisplayController _displayController;
 
 bool Timekeeper::MountStatus = true;
 bool Timekeeper::RtcHealthy = true;
 int Timekeeper::UpdateInterval = 60000;
+int8_t Timekeeper::LastHour = 99;
 long Timekeeper::BootEpoch;
 long Timekeeper::NowEpoch;
 
@@ -93,6 +96,12 @@ void taskTimekeeper(void *parameter) {
             Timekeeper::time.seconds = timeClient.getSeconds();
             Timekeeper::time.minutes = timeClient.getMinutes();
             Timekeeper::time.hours = timeClient.getHours();
+
+            // Schedule detox
+            if (Timekeeper::time.hours != Timekeeper::LastHour) {
+                Timekeeper::LastHour = Timekeeper::time.hours;
+                _displayController.DoDetox = true;
+            }
 
             // Update RTC if applicable
             if (Timekeeper::RtcHealthy && checkRtcTime) {
