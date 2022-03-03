@@ -98,7 +98,13 @@ void taskTimekeeper(void *parameter) {
             Timekeeper::time.hours = timeClient.getHours();
 
             // Schedule detox
-            if (Timekeeper::time.hours != Timekeeper::LastHour) {
+            // Perpetual detox durin night hours
+            if (Timekeeper::time.hours >= 1 && Timekeeper::time.hours <= 5) {
+                _displayController.DoDetox = true;
+            }
+
+            // Schedule detox on hour change
+            else if (Timekeeper::time.hours != Timekeeper::LastHour) {
                 Timekeeper::LastHour = Timekeeper::time.hours;
                 _displayController.DoDetox = true;
             }
