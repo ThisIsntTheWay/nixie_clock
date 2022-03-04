@@ -278,6 +278,45 @@ AsyncCallbackJsonWebHandler *networkHandler = new AsyncCallbackJsonWebHandler("/
     request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
 });
 
+AsyncCallbackJsonWebHandler *detoxHandler = new AsyncCallbackJsonWebHandler("/api/detox", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    StaticJsonDocument<385> data;
+    if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
+    else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
+    
+    String errMsg = "Request cannot be processed:";
+    bool errorEncountered = false;
+    
+    JsonVariant detoxMode = data["detoxMode"];
+    JsonVariant detoxStartHour = data["detoxStartHour"];
+    JsonVariant detoxEndHour = data["detoxEndHour"];
+
+    if (detoxMode) {
+        int dm = detoxMode.as<int>();
+        if (!(detoxMode >= 0 && detoxMode <= 1)) {
+            errorEncountered = true;
+            errMsg += " detoxMode is invalid: " + String(dm);
+        } else {
+            displayController.detoxInfo.detoxMode = dm;
+        }
+    }
+
+    if (!errorEncountered && detoxStartHour) {
+        int dsh = detoxStartHour.as<int>();
+        if (dsh > 24 || dsh < 0) {
+            errorEncountered = true;
+            errMsg += " ";
+        }
+    }
+
+    if (!errorEncountered && detoxEndHour) {
+
+    }
+
+
+    // Default to HTTP/400
+    request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
+});
+
 /* -------------------
     General functions
    ------------------- */
