@@ -10,14 +10,16 @@
 
 Nixies nixies(DS_PIN, ST_PIN, SH_PIN);
 
-int DisplayController::TubeVals[4][2] = {{9, 255}, {9, 255}, {9, 255}, {9, 255}};
+int DisplayController::TubeVals[4][2] = {{9, 170}, {9, 170}, {9, 170}, {9, 170}};
 
 bool DisplayController::AllowRESTcontrol = true;
+bool DisplayController::DoDetox = false;
 bool DisplayController::Clock = false;
 
 uint8_t DisplayController::OnboardLedPWM = 20;
 uint8_t DisplayController::OnboardLEDmode = 0;
 uint8_t DisplayController::OnboardLEDblinkAmount = 0;
+uint8_t DisplayController::DetoxCycle = 0;
 
 /* -------------------
     Main
@@ -86,10 +88,22 @@ void taskSetDisplay(void* parameter) {
     Timekeeper timekeeper;
 
     for (;;) {
+        int msMultiplier = 1;
         int t[4] = {11, 11, 11, 11};
 
-        if (!DisplayController::Clock) {
-            // Normal operation
+        if (!timekeeper.RtcHealthy) {
+            DisplayController::OnboardLEDmode = 2;
+            DisplayController::OnboardLEDblinkAmount = 4;
+        }
+
+        if (DisplayController::Clock) {
+            DisplayController::TubeVals[0][0] = timekeeper.time.hours / 10;
+            DisplayController::TubeVals[1][0] = timekeeper.time.hours % 10;
+            DisplayController::TubeVals[2][0] = timekeeper.time.minutes / 10;
+            DisplayController::TubeVals[3][0] = timekeeper.time.minutes % 10;
+        }
+        
+        if (!DisplayController::DoDetox) {
             for (int i = 0; i < 4; i++) {
                 int8_t tubeVal = DisplayController::TubeVals[i][0];
                 int8_t tubePWM = DisplayController::TubeVals[i][1];
@@ -100,27 +114,24 @@ void taskSetDisplay(void* parameter) {
                 if (tubeVal > 9)    { ledcWrite(i, 0); }
                 else                { ledcWrite(i, tubePWM); }
             }
-        } else {
-            t[0] = timekeeper.time.hours / 10;
-            t[1] = timekeeper.time.hours % 10;
-            t[2] = timekeeper.time.minutes / 10;
-            t[3] = timekeeper.time.minutes % 10;
 
-            for (int i = 0; i < 4; i++) {
-                int8_t tubePWM = DisplayController::TubeVals[i][1];
-                ledcWrite(i, tubePWM);
+            nixies.SetDisplay(t);
+        } else {
+            if (DisplayController::DetoxCycle != 10) {
+                msMultiplier = 75;
+                for (int i = 0; i < 4; i++) {
+                    t[i] = DisplayController::DetoxCycle;
+                }
+
+                DisplayController::DetoxCycle++;
+                nixies.SetDisplay(t);
+            } else {
+                DisplayController::DetoxCycle = 0;
+                DisplayController::DoDetox = false;
             }
         }
         
-        // Blank all tubes that were not considered. (Their index is missing in TubeVals)
-        for (int i = 0; i < 4; i++) {
-            if (t[i] == 11) {
-                ledcWrite(i, 0);
-            }
-        }
-
-        nixies.SetDisplay(t);
-        vTaskDelay(TASK_TICK_DELAY);
+        vTaskDelay(TASK_TICK_DELAY * msMultiplier);
     }
 }
 

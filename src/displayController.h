@@ -28,10 +28,12 @@ class DisplayController {
         static uint8_t OnboardLedPWM;
         static uint8_t OnboardLEDmode;
         static uint8_t OnboardLEDblinkAmount;
+        static uint8_t DetoxCycle;
         static bool AllowRESTcontrol;
         static bool Clock;
 
         static DetoxInfo detoxInfo;
+        static bool DoDetox;
 };
 
 void taskSetDisplay(void* parameter);
