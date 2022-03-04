@@ -16,6 +16,12 @@
 #include <Arduino.h>
 #include <nixies.h>
 
+struct DetoxInfo {
+    uint8_t detoxMode;
+    uint8_t detoxStartHour;
+    uint8_t detoxEndHour;
+};
+
 class DisplayController {
     public:
         static int TubeVals[4][2];
@@ -24,6 +30,8 @@ class DisplayController {
         static uint8_t OnboardLEDblinkAmount;
         static bool AllowRESTcontrol;
         static bool Clock;
+
+        static DetoxInfo detoxInfo;
 };
 
 void taskSetDisplay(void* parameter);
