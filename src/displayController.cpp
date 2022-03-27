@@ -21,6 +21,8 @@ uint8_t DisplayController::OnboardLEDmode = 0;
 uint8_t DisplayController::OnboardLEDblinkAmount = 0;
 uint8_t DisplayController::DetoxCycle = 0;
 
+DetoxInfo DisplayController::detoxInfo;
+
 /* -------------------
     Main
    ------------------- */
