@@ -62,12 +62,12 @@ void Timekeeper::ParseNTPconfig(String ntpFile) {
 }
 
 // Overload 1: Only write DST
-bool Timekeeper::WriteNTPconfig(int DstOffset) {
+bool Timekeeper::WriteNTPconfig(bool DstOffset) {
     File ntpConfig = LITTLEFS.open("/ntpConfig.json", "w");
 
     StaticJsonDocument<200> cfgNTP;
 
-    cfgNTP["DstOffset"] = DstOffset;
+    cfgNTP["DstOffset"] = DstOffset ? 3600: 0;
 
     // Write rtcConfig.cfg
     if (!(serializeJson(cfgNTP, ntpConfig))) {
@@ -81,12 +81,12 @@ bool Timekeeper::WriteNTPconfig(int DstOffset) {
 }
 
 // Overload 2: Write both DST and UTC
-bool Timekeeper::WriteNTPconfig(int DstOffset, int UtcOffset) {
+bool Timekeeper::WriteNTPconfig(bool DstOffset, int UtcOffset) {
     File ntpConfig = LITTLEFS.open("/ntpConfig.json", "w");
 
     StaticJsonDocument<200> cfgNTP;
 
-    cfgNTP["DstOffset"] = DstOffset;
+    cfgNTP["DstOffset"] = DstOffset ? 3600: 0;;
     cfgNTP["UtcOffset"] = UtcOffset;
 
     // Write rtcConfig.cfg
