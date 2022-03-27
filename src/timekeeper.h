@@ -21,6 +21,8 @@ class Timekeeper {
         static bool RtcHealthy;
         
         void ParseNTPconfig(String);
+        bool WriteNTPconfig(int);
+        bool WriteNTPconfig(int, int);
 
         struct Time {
             uint8_t seconds;
