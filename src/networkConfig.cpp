@@ -376,7 +376,7 @@ void NetworkConfig::InitConnection() {
         WiFi.begin(this->SSID.c_str(), this->PSK.c_str());
 
         // Attempt connection        
-        uint8_t retryLimit = 20;
+        uint8_t retryLimit = 40;
         bool isSuccess = false;
         wl_status_t state;
 

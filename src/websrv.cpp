@@ -317,6 +317,39 @@ AsyncCallbackJsonWebHandler *detoxHandler = new AsyncCallbackJsonWebHandler("/ap
     request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"" + errMsg + "\"}");
 });
 
+AsyncCallbackJsonWebHandler *timeHandler = new AsyncCallbackJsonWebHandler("/api/time", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    StaticJsonDocument<385> data;
+    if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
+    else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
+
+    JsonVariant dstOffset = data["DstOffset"];
+    JsonVariant utcOffset = data["IsDST"];
+
+    // Write stuff
+    if (!dstOffset.isNull() && utcOffset) {
+        int DstOffset = dstOffset.as<bool>();
+        int UtcOffset = utcOffset.as<int>();
+
+        if (timekeeper.WriteNTPconfig(DstOffset, UtcOffset)) {
+            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Configuration was updated, changes effective on next boot.\"}");
+        } else {
+            request->send(500, "application/json", "{\"status\": \"error\", \"message\": \"Could not write config file.\"}");
+        }
+    } else if (!dstOffset.isNull()) {
+        int DstOffset = dstOffset.as<bool>();
+
+        if (timekeeper.WriteNTPconfig(DstOffset)) {
+            request->send(200, "application/json", "{\"status\": \"success\", \"message\": \"Configuration was updated, changes effective on next boot.\"}");
+        } else {
+            request->send(500, "application/json", "{\"status\": \"error\", \"message\": \"Could not write config file.\"}");
+        }
+    } else {
+        request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Neither 'DstOffset' nor 'UtcOffset' were specified.\"}");
+    }
+    
+    request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Unhandled outcome.\"}");
+});
+
 /* -------------------
     General functions
    ------------------- */
@@ -329,6 +362,8 @@ void webServerAPIs() {
     server.addHandler(displayHandler);
     server.addHandler(systemHandler);
     server.addHandler(networkHandler);
+    server.addHandler(detoxHandler);
+    server.addHandler(timeHandler);
 }
 
 void webServerStaticContent() {
@@ -357,6 +392,7 @@ void webServerStaticContent() {
         responseBody["uptime"] = String(timekeeper.NowEpoch - timekeeper.BootEpoch);
         responseBody["ntpSource"] = timekeeper.NtpSource;
         responseBody["utcOffset"] = timekeeper.UtcOffset;
+        responseBody["dstOffset"] = timekeeper.DstOffset;
 
         switch (WiFi.status()) {
             case WL_CONNECTED: responseBody["wifi"] = WiFi.RSSI(); break;

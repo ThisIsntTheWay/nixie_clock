@@ -49,16 +49,55 @@ void Timekeeper::ParseNTPconfig(String ntpFile) {
 
             Serial.print("[X] RTC parser: Deserialization fault: "); Serial.println(err);
         } else {
+            strlcpy(this->NtpSource, cfgNTP["NtpSource"], sizeof(this->NtpSource));
+
             JsonVariant b = cfgNTP["DstOffset"];
             JsonVariant c = cfgNTP["UtcOffset"];
-
-            strlcpy(this->NtpSource, cfgNTP["NtpSource"], sizeof(this->NtpSource));
             this->DstOffset = b.as<int>();
             this->UtcOffset = c.as<int>();
         }
 
         ntpConfig.close();
     }
+}
+
+// Overload 1: Only write DST
+bool Timekeeper::WriteNTPconfig(bool DstOffset) {
+    File ntpConfig = LITTLEFS.open("/ntpConfig.json", "w");
+
+    StaticJsonDocument<200> cfgNTP;
+
+    cfgNTP["DstOffset"] = DstOffset ? 3600: 0;
+
+    // Write rtcConfig.cfg
+    if (!(serializeJson(cfgNTP, ntpConfig))) {
+        Serial.println(F("[X] NTP: Config write failure."));
+        ntpConfig.close();
+        return false;
+    }
+
+    ntpConfig.close();
+    return true;
+}
+
+// Overload 2: Write both DST and UTC
+bool Timekeeper::WriteNTPconfig(bool DstOffset, int UtcOffset) {
+    File ntpConfig = LITTLEFS.open("/ntpConfig.json", "w");
+
+    StaticJsonDocument<200> cfgNTP;
+
+    cfgNTP["DstOffset"] = DstOffset ? 3600: 0;;
+    cfgNTP["UtcOffset"] = UtcOffset;
+
+    // Write rtcConfig.cfg
+    if (!(serializeJson(cfgNTP, ntpConfig))) {
+        Serial.println(F("[X] NTP: Config write failure."));
+        ntpConfig.close();
+        return false;
+    }
+
+    ntpConfig.close();
+    return true;
 }
 
 void taskTimekeeper(void *parameter) {
