@@ -168,25 +168,14 @@ void taskTimekeeper(void *parameter) {
                 checkRtcTime = false;
             }
         } else {
-            Serial.println("Time source: RTC");
+            //Serial.println("Time source: RTC");
             if (Timekeeper::RtcHealthy) {
                 Timekeeper::time.minutes = rtc.getTime(1);
                 Timekeeper::time.hours = rtc.getTime(2);
+
+                //Serial.print("RTC: "); Serial.print(Timekeeper::time.hours); Serial.print(":"); Serial.println(Timekeeper::time.minutes);
             }
         }
-
-        /*
-        if (Timekeeper::RtcHealthy) {
-            int timeArr[] = {
-                rtc.getTime(2),
-                rtc.getTime(1),
-                rtc.getTime(0)
-            };
-
-            Serial.printf("[i] RTC time: %d:%d:%d\n", timeArr[0], timeArr[1], timeArr[2]);
-            Serial.printf("[i] Timekeeper time: %d:%d:%d\n", Timekeeper::time.hours, Timekeeper::time.minutes, Timekeeper::time.seconds);
-        }
-        */
 
         vTaskDelay(1000);
     }
