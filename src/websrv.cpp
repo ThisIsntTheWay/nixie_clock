@@ -322,8 +322,8 @@ AsyncCallbackJsonWebHandler *timeHandler = new AsyncCallbackJsonWebHandler("/api
     if (json.is<JsonArray>()) { data = json.as<JsonArray>(); }
     else if (json.is<JsonObject>()) { data = json.as<JsonObject>(); }
 
-    JsonVariant dstOffset = data["DstOffset"];
-    JsonVariant utcOffset = data["IsDST"];
+    JsonVariant dstOffset = data["IsDST"];
+    JsonVariant utcOffset = data["UtcOffset"];
 
     // Write stuff
     if (!dstOffset.isNull() && utcOffset) {
