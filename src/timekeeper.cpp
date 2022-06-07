@@ -18,7 +18,7 @@ Timekeeper::Time Timekeeper::time;
 
 int Timekeeper::DstOffset = 3600;
 int Timekeeper::UtcOffset = 3600;
-char Timekeeper::NtpSource[32];
+char Timekeeper::NtpSource[32] = "ch.pool.ntp.org";
 
 void Timekeeper::ParseNTPconfig(String ntpFile) {
     if (!LITTLEFS.exists(ntpFile)) {
@@ -26,10 +26,6 @@ void Timekeeper::ParseNTPconfig(String ntpFile) {
         File ntpConfig = LITTLEFS.open(ntpFile, "w");
 
         StaticJsonDocument<200> cfgNTP;
-
-        const char* NtpSource = "ch.pool.ntp.org";
-
-        cfgNTP["NtpSource"] = NtpSource;
         cfgNTP["DstOffset"] = 3600;
         cfgNTP["UtcOffset"] = 3600;
 
@@ -42,17 +38,16 @@ void Timekeeper::ParseNTPconfig(String ntpFile) {
         // Parse existing config
         File ntpConfig = LITTLEFS.open(ntpFile, "r");
         
-        StaticJsonDocument<250> cfgNTP;
+        StaticJsonDocument<300> cfgNTP;
         DeserializationError error = deserializeJson(cfgNTP, ntpConfig);
         if (error) {
             String err = error.c_str();
 
             Serial.print("[X] RTC parser: Deserialization fault: "); Serial.println(err);
         } else {
-            strlcpy(this->NtpSource, cfgNTP["NtpSource"], sizeof(this->NtpSource));
-
             JsonVariant b = cfgNTP["DstOffset"];
             JsonVariant c = cfgNTP["UtcOffset"];
+            
             this->DstOffset = b.as<int>();
             this->UtcOffset = c.as<int>();
         }
@@ -65,7 +60,7 @@ void Timekeeper::ParseNTPconfig(String ntpFile) {
 bool Timekeeper::WriteNTPconfig(bool DstOffset) {
     File ntpConfig = LITTLEFS.open("/ntpConfig.json", "w");
 
-    StaticJsonDocument<200> cfgNTP;
+    StaticJsonDocument<300> cfgNTP;
 
     cfgNTP["DstOffset"] = DstOffset ? 3600: 0;
 
@@ -84,7 +79,7 @@ bool Timekeeper::WriteNTPconfig(bool DstOffset) {
 bool Timekeeper::WriteNTPconfig(bool DstOffset, int UtcOffset) {
     File ntpConfig = LITTLEFS.open("/ntpConfig.json", "w");
 
-    StaticJsonDocument<200> cfgNTP;
+    StaticJsonDocument<250> cfgNTP;
 
     cfgNTP["DstOffset"] = DstOffset ? 3600: 0;;
     cfgNTP["UtcOffset"] = UtcOffset;
@@ -113,6 +108,8 @@ void taskTimekeeper(void *parameter) {
     // Start updaing time
     NetworkConfig netConfig;
 
+    Serial.print("DST: "), Serial.println(Timekeeper::DstOffset);
+    Serial.print("UTC: "), Serial.println(Timekeeper::UtcOffset);
     NTPClient timeClient(ntpUDP, Timekeeper::NtpSource, Timekeeper::DstOffset, Timekeeper::UpdateInterval);
     timeClient.begin();
     timeClient.update();
