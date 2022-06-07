@@ -47,7 +47,7 @@ void setup() {
   
   // Remaining tasks
   xTaskCreate(taskTimekeeper, "Time daemon", 4000, NULL, 3, &taskTime);
-  dController.OnboardLEDmode = 0;
+  dController.OnboardLEDmode = nConfig.IsAP ? 1 : 0;
 
   // Interact button
   pinMode(INTERACT_BUTTON_PIN, INPUT_PULLUP);
