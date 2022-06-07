@@ -27,61 +27,6 @@ DetoxInfo DisplayController::detoxInfo;
     Main
    ------------------- */
 
-void taskVisIndicator(void* paramter) {
-    while (!nixies.IsReady()) {
-        vTaskDelay(200);
-    }
-    
-    NetworkConfig netConfig;
-
-    for (;;) {
-        // Pulsate PWM
-        while (netConfig.InInit) {
-            for (int i = 0; i <= MAX_PWM; i++) {
-                if (!netConfig.InInit) break;
-                for (int a = 0; a < 4; a++) {
-                    DisplayController::TubeVals[a][1] = i;
-                }
-
-                vTaskDelay(PULSATE_INTERVAL);
-            }
-            for (int i = MAX_PWM; i >= 1; i--) {
-                if (!netConfig.InInit) break;
-                for (int a = 0; a < 4; a++) {
-                    DisplayController::TubeVals[a][1] = i;
-                }
-
-                vTaskDelay(PULSATE_INTERVAL);
-            }
-        }
-
-        // Set initial num based on netConfig state
-        for (int a = 0; a < 4; a++) {
-            DisplayController::TubeVals[a][0] = !netConfig.IsAP;
-        }
-
-        // Blink tubes
-        uint8_t blinkAmount = 6;
-        for (int l = 0; l < blinkAmount; l++) {
-            for (int i = 0; i < 4; i++) {
-                DisplayController::TubeVals[i][1] = (l % 2) ? 150 : 20;
-            }
-
-            vTaskDelay(150);
-        }
-        
-        // Set default values
-        DisplayController::Clock = true;
-
-        for (int i = 0; i < 4; i++) {
-            DisplayController::TubeVals[i][0] = 9;
-            DisplayController::TubeVals[i][1] = 150;
-        }
-
-        vTaskDelete(NULL);
-    }
-}
-
 void taskSetDisplay(void* parameter) {
     while (!nixies.IsReady()) {
         vTaskDelay(200);
@@ -106,6 +51,7 @@ void taskSetDisplay(void* parameter) {
         }
         
         if (!DisplayController::DoDetox) {
+            // Normal routine
             for (int i = 0; i < 4; i++) {
                 int8_t tubeVal = DisplayController::TubeVals[i][0];
                 int8_t tubePWM = DisplayController::TubeVals[i][1];
@@ -119,6 +65,7 @@ void taskSetDisplay(void* parameter) {
 
             nixies.SetDisplay(t);
         } else {
+            // Detox cycle
             if (DisplayController::DetoxCycle != 10) {
                 msMultiplier = 75;
                 for (int i = 0; i < 4; i++) {
